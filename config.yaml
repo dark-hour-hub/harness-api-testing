@@ -1,0 +1,66 @@
+# ============================================================
+# 源码配置
+# ============================================================
+source:
+  backend:
+    - name: "mall-tiny"
+      path: 'D:/java/project/mall-tiny'
+      enabled: true
+      git:
+        repo: ""
+        branch: "main"
+
+  frontend:
+    - name: "mall-admin-web"
+      path: 'D:/java/project/mall-admin-web'
+      enabled: true
+      git:
+        repo: ""
+        branch: "main"
+
+# ============================================================
+# 环境配置
+# ============================================================
+current_environment: "dev"
+environments:
+  dev:
+    frontend:
+      - name: "mall-admin-web"
+        url: "http://localhost:5173/"
+        accounts:
+          - role: "admin"
+            description: "超级管理员，拥有所有权限"
+            username: "macro"
+            password: "macro123"
+
+          - role: "visitor"
+            description: "普通用户"
+            username: "test1"
+            password: "123456"
+    backend:
+      - name: "mall-tiny"
+        url: "http://localhost:8080"
+
+  test:
+    frontend:
+      - name: "mall-admin-web"
+        url: ""
+    backend:
+      - name: "mall-tiny"
+        url: ""
+
+  staging:
+    frontend:
+      - name: "mall-admin-web"
+        url: ""
+    backend:
+      - name: "mall-tiny"
+        url: ""
+
+# ============================================================
+# 测试工具配置
+# ============================================================
+tools:
+  python: "D:/python/Python314/bin"
+  jmeter: "D:/java/apache-jmeter-5.6.3/bin"
+  git: "D:/tools/git/Git"

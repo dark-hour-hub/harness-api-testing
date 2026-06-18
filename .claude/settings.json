@@ -1,0 +1,9 @@
+{
+  "skills": {
+    "codegraph": {
+      "command": "python",
+      "script": ".claude/skills/codegraph_skill.py",
+      "description": "Generate code structure visualization and dependency graph"
+    }
+  }
+}

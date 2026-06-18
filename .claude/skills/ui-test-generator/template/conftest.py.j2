@@ -1,0 +1,255 @@
+"""
+Playwright配置和共享fixture
+"""
+import pytest
+import yaml
+from pathlib import Path
+from playwright.sync_api import sync_playwright, Page
+
+
+# 配置 - 从config.yaml加载
+BASE_URL = "{{ base_url }}"
+TEST_ACCOUNTS = {{ test_accounts | tojson }}
+PROJECT_ROOT = Path("{{ project_root }}")
+
+
+@pytest.fixture(scope="session")
+def base_url():
+    """前端服务地址"""
+    return BASE_URL
+
+
+@pytest.fixture(scope="session")
+def config_data():
+    """从config.yaml加载配置"""
+    config_path = PROJECT_ROOT / "config.yaml"
+    if not config_path.exists():
+        pytest.fail(f"config.yaml not found at {config_path}")
+    with open(config_path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+@pytest.fixture(scope="session")
+def browser():
+    """Playwright浏览器实例 - session级别复用"""
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        yield browser
+        browser.close()
+
+
+@pytest.fixture
+def page(browser):
+    """Playwright页面实例 - 每个测试函数创建新的context和page
+
+    注意：scope只能是 function/class/module/session，不支持 page
+    """
+    context = browser.new_context()
+    page = context.new_page()
+    try:
+        yield page
+    finally:
+        context.close()
+
+
+def _try_navigate_and_find_login(page: Page, base_url: str) -> bool:
+    """尝试多种方式导航到登录页"""
+    login_urls = [
+        f"{base_url}/#/login",
+        f"{base_url}/#/login/",
+        f"{base_url}/login",
+        f"{base_url}/login/",
+        f"{base_url}/#/",
+        f"{base_url}/",
+        base_url.rstrip("/"),
+    ]
+
+    for url in login_urls:
+        try:
+            page.goto(url, timeout=5000)
+            page.wait_for_load_state("domcontentloaded", timeout=5000)
+            page.wait_for_timeout(500)
+
+            username_selectors = [
+                "#username", "input[name='username']",
+                "input[placeholder*='用户名']", "input[placeholder*='用户']",
+                "input[placeholder*='username']", "input[placeholder*='user']",
+                ".el-input__inner", "input[type='text']"
+            ]
+
+            for selector in username_selectors:
+                if page.query_selector(selector):
+                    return True
+
+        except Exception:
+            continue
+
+    return False
+
+
+def _do_login(page: Page, base_url: str, username: str, password: str) -> bool:
+    """
+    执行登录的辅助函数
+
+    Returns:
+        True if login succeeded, False otherwise
+    """
+    if not _try_navigate_and_find_login(page, base_url):
+        return False
+
+    # 查找用户名输入框 - 多选择器回退
+    username_selectors = [
+        "#username", "input[name='username']",
+        "input[placeholder*='用户名']", "input[placeholder*='用户']",
+        "input[placeholder*='username']", "input[placeholder*='user']",
+        ".el-input__inner", "input[type='text']"
+    ]
+    password_selectors = [
+        "#password", "input[name='password']",
+        "input[placeholder*='密码']", "input[placeholder*='password']",
+        "input[type='password']"
+    ]
+    login_button_selectors = [
+        "button[type='submit']",
+        "button:has-text('登录')", "button:has-text('登入')",
+        "button:has-text('Login')", "button:has-text('login')",
+        ".el-button--primary",
+        "[class*='login'] button",
+        "button"
+    ]
+
+    username_input = None
+    password_input = None
+    login_button = None
+
+    for selector in username_selectors:
+        if page.query_selector(selector):
+            username_input = selector
+            break
+
+    for selector in password_selectors:
+        if page.query_selector(selector):
+            password_input = selector
+            break
+
+    for selector in login_button_selectors:
+        if page.query_selector(selector):
+            login_button = selector
+            break
+
+    if not username_input or not password_input or not login_button:
+        return False
+
+    # 填写登录表单
+    page.fill(username_input, username)
+    page.fill(password_input, password)
+    page.click(login_button)
+
+    # 等待登录完成 - 检查URL是否离开登录页
+    page.wait_for_timeout(2000)
+
+    current_url = page.url
+    if "/login" not in current_url and "#/login" not in current_url:
+        return True
+
+    # 检查是否有错误提示
+    error_selectors = [".el-message--error", ".alert-danger", "[class*='error']"]
+    for selector in error_selectors:
+        if page.is_visible(selector):
+            return False
+
+    return True
+
+
+@pytest.fixture
+def logged_in_page(page, base_url):
+    """已登录的页面实例 - 管理员用户"""
+    success = _do_login(page, base_url,
+                          TEST_ACCOUNTS["admin"]["username"],
+                          TEST_ACCOUNTS["admin"]["password"])
+
+    if not success:
+        page.screenshot(path="login_result.png")
+        pytest.fail("Admin login failed - frontend may not be running or credentials invalid")
+
+    yield page
+
+
+@pytest.fixture
+def visitor_logged_in_page(page, base_url):
+    """已登录的页面实例 - 普通用户"""
+    success = _do_login(page, base_url,
+                          TEST_ACCOUNTS["user"]["username"],
+                          TEST_ACCOUNTS["user"]["password"])
+
+    if not success:
+        page.screenshot(path="visitor_login_result.png")
+        pytest.fail("Visitor login failed - frontend may not be running or credentials invalid")
+
+    yield page
+
+
+# ===========================
+# 辅助函数
+# ===========================
+
+def find_first_selector(page: Page, selectors: list) -> str:
+    """查找第一个匹配的选择器"""
+    for selector in selectors:
+        if page.query_selector(selector):
+            return selector
+    return None
+
+
+def make_spa_url(base_url: str, path: str) -> str:
+    """将路径转换为Vue SPA hash模式URL
+
+    Args:
+        base_url: 前端服务地址，如 http://localhost:5173
+        path: 路由路径，如 /admin/list 或 admin/list
+
+    Returns:
+        Vue SPA格式的完整URL，如 http://localhost:5173/#/admin/list
+    """
+    if not path:
+        return base_url
+    if path.startswith("/#/"):
+        return f"{base_url}{path}"
+    if path.startswith("/"):
+        return f"{base_url}/#{path}"
+    return f"{base_url}/#{path}"
+
+
+def assert_element_visible(page: Page, selector: str, timeout: int = 5000):
+    """断言元素可见并等待"""
+    page.wait_for_selector(selector, state="visible", timeout=timeout)
+
+
+def assert_text_visible(page: Page, text: str, timeout: int = 5000):
+    """断言文本可见"""
+    page.wait_for_selector(f"text={text}", state="visible", timeout=timeout)
+
+
+def assert_url_contains(page: Page, path: str):
+    """断言URL包含指定路径"""
+    assert path in page.url
+
+
+def assert_login_success(page: Page, base_url: str):
+    """断言登录成功"""
+    assert "/login" not in page.url or page.is_visible("text=登录成功")
+
+
+def assert_login_failed(page: Page):
+    """断言登录失败"""
+    assert "/login" in page.url
+
+
+# 暴露辅助函数到pytest
+pytest.find_first_selector = find_first_selector
+pytest.make_spa_url = make_spa_url
+pytest.assert_element_visible = assert_element_visible
+pytest.assert_text_visible = assert_text_visible
+pytest.assert_url_contains = assert_url_contains
+pytest.assert_login_success = assert_login_success
+pytest.assert_login_failed = assert_login_failed

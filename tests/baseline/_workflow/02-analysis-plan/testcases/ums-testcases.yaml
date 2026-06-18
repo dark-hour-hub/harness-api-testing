@@ -1,0 +1,1304 @@
+module: ums
+module_name: 用户管理系统
+generated_at: "2026-06-18T10:00:00"
+
+testcases:
+  # ═══════════════════════════════════════════════════════════
+  # 认证相关 — 登录/注册/Token
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC_UMS_LOGIN_001
+    api_id: API_ADMIN_LOGIN
+    title: "admin_login_正确用户名密码_登录成功返回token"
+    module: ums
+    priority: P0
+    scenario: |
+      正向用例：使用正确的管理员用户名和密码登录，验证返回JWT token和tokenHead。
+      代码路径: Controller.login() → Service.login() → 密码验证通过 → generateToken() → return token → Controller封装tokenMap → CommonResult.success(tokenMap)
+    preconditions:
+      - 管理员账号 macro 已存在
+    test_data:
+      username: "macro"
+      password: "macro123"
+    request:
+      method: POST
+      path: /admin/login
+      headers:
+        Content-Type: application/json
+      body:
+        username: "macro"
+        password: "macro123"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+      data:
+        token: "exists_and_type: string"
+        tokenHead: "exists_and_type: string"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码为200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：业务状态码200(SUCCESS)"
+      - assert_equal: ["response.json()['message']", "操作成功"]
+        description: "数据层：成功消息"
+      - assert_exists: ["response.json()['data']['token']"]
+        description: "数据层：token字段存在"
+      - assert_exists: ["response.json()['data']['tokenHead']"]
+        description: "数据层：tokenHead字段存在"
+      - assert_is_type: ["response.json()['data']['token']", str]
+        description: "数据层：token为字符串类型"
+    tags: [positive, smoke, regression]
+    produces:
+      admin_token: "response.json()['data']['token']"
+      tokenHead: "response.json()['data']['tokenHead']"
+
+  - id: TC_UMS_LOGIN_002
+    api_id: API_ADMIN_LOGIN
+    title: "admin_login_错误密码_返回密码不正确"
+    module: ums
+    priority: P0
+    scenario: |
+      反向用例：使用错误密码登录。
+      真实错误路径: Controller.login() → Service.login() → passwordEncoder.matches()=false → Asserts.fail("密码不正确") → throw ApiException("密码不正确") → GlobalExceptionHandler.handle() → e.getErrorCode()==null → CommonResult.failed("密码不正确") → code=500
+      注意: Controller中的 if(token==null) return validateFailed("用户名或密码错误") 不会执行，因为Service层已抛出异常。
+    preconditions:
+      - 管理员账号 macro 已存在
+    test_data:
+      username: "macro"
+      password: "wrong_password_123"
+    request:
+      method: POST
+      path: /admin/login
+      headers:
+        Content-Type: application/json
+      body:
+        username: "macro"
+        password: "wrong_password_123"
+    expected_response:
+      http_status: 200
+      business_code: 500
+      message: "密码不正确"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200(Spring全局异常处理器返回)"
+      - assert_equal: ["response.json()['code']", 500]
+        description: "业务层：code=500(FAILED)，Asserts.fail→ApiException→GlobalExceptionHandler"
+      - assert_equal: ["response.json()['message']", "密码不正确"]
+        description: "数据层：错误消息'密码不正确'，从ApiException message提取"
+    tags: [negative, regression, smoke]
+
+  - id: TC_UMS_LOGIN_003
+    api_id: API_ADMIN_LOGIN
+    title: "admin_login_用户不存在_返回用户名或密码错误"
+    module: ums
+    priority: P0
+    scenario: |
+      反向用例：使用不存在的用户名登录。
+      错误路径: Controller.login() → Service.login() → loadUserByUsername()抛出UsernameNotFoundException → catch(AuthenticationException) → LOGGER.warn → return null → Controller中token==null → CommonResult.validateFailed("用户名或密码错误") → code=404
+    preconditions:
+      - 无
+    test_data:
+      username: "nonexistent_user_2026"
+      password: "some_password"
+    request:
+      method: POST
+      path: /admin/login
+      headers:
+        Content-Type: application/json
+      body:
+        username: "nonexistent_user_2026"
+        password: "some_password"
+    expected_response:
+      http_status: 200
+      business_code: 404
+      message: "用户名或密码错误"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 404]
+        description: "业务层：code=404(VALIDATE_FAILED)，Controller层validateFailed"
+      - assert_equal: ["response.json()['message']", "用户名或密码错误"]
+        description: "数据层：Controller返回的validateFailed消息"
+    tags: [negative, regression]
+
+  - id: TC_UMS_LOGIN_004
+    api_id: API_ADMIN_LOGIN
+    title: "admin_login_空用户名_参数校验失败"
+    module: ums
+    priority: P1
+    scenario: |
+      反向用例：用户名为空（缺失@NotEmpty校验）。
+      错误路径: @Validated + @NotEmpty → MethodArgumentNotValidException → GlobalExceptionHandler.handleValidException() → CommonResult.validateFailed(message) → code=404
+    preconditions:
+      - 无
+    test_data: {}
+    request:
+      method: POST
+      path: /admin/login
+      headers:
+        Content-Type: application/json
+      body:
+        username: ""
+        password: "macro123"
+    expected_response:
+      http_status: 200
+      business_code: 404
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 404]
+        description: "业务层：code=404(VALIDATE_FAILED)，参数校验失败"
+    tags: [negative, validation]
+
+  - id: TC_UMS_LOGIN_005
+    api_id: API_ADMIN_LOGIN
+    title: "admin_login_空密码_参数校验失败"
+    module: ums
+    priority: P1
+    scenario: |
+      反向用例：密码为空，验证@NotEmpty校验。
+    preconditions:
+      - 无
+    test_data: {}
+    request:
+      method: POST
+      path: /admin/login
+      headers:
+        Content-Type: application/json
+      body:
+        username: "macro"
+        password: ""
+    expected_response:
+      http_status: 200
+      business_code: 404
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 404]
+        description: "业务层：code=404(VALIDATE_FAILED)"
+    tags: [negative, validation]
+
+  # ── 注册 ──
+
+  - id: TC_UMS_REGISTER_001
+    api_id: API_ADMIN_REGISTER
+    title: "admin_register_有效参数_注册成功"
+    module: ums
+    priority: P0
+    scenario: |
+      正向用例：使用有效的参数注册新用户。
+      代码路径: Controller.register() → Service.register() → 检查用户名唯一 → 加密密码 → 插入数据库 → 返回UmsAdmin → CommonResult.success(umsAdmin)
+    preconditions:
+      - 用户名 testuser_${timestamp} 在系统中不存在
+    test_data:
+      username: "testuser_${timestamp}"
+      password: "Test123456"
+      email: "test_${timestamp}@example.com"
+      nickName: "测试用户${timestamp}"
+      note: "自动化测试创建"
+    request:
+      method: POST
+      path: /admin/register
+      headers:
+        Content-Type: application/json
+      body:
+        username: "testuser_${timestamp}"
+        password: "Test123456"
+        email: "test_${timestamp}@example.com"
+        nickName: "测试用户${timestamp}"
+        note: "自动化测试创建"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+      data:
+        id: "exists_and_type: integer"
+        username: "testuser_${timestamp}"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200(SUCCESS)"
+      - assert_equal: ["response.json()['message']", "操作成功"]
+        description: "数据层：成功消息"
+      - assert_exists: ["response.json()['data']['id']"]
+        description: "数据层：返回的用户ID存在"
+      - assert_equal: ["response.json()['data']['username']", "testuser_${timestamp}"]
+        description: "数据层：用户名与请求一致"
+    tags: [positive, smoke, regression]
+    produces:
+      test_user_id: "response.json()['data']['id']"
+
+  - id: TC_UMS_REGISTER_002
+    api_id: API_ADMIN_REGISTER
+    title: "admin_register_重复用户名_注册失败"
+    module: ums
+    priority: P0
+    scenario: |
+      反向用例：使用已存在的用户名注册（重复用户名）。
+      错误路径: Controller.register() → Service.register() → 查询存在同名用户 → return null → Controller中umsAdmin==null → CommonResult.failed() → code=500, message="操作失败"
+    preconditions:
+      - 管理员账号 macro 已存在
+    test_data:
+      username: "macro"
+      password: "Test123456"
+    request:
+      method: POST
+      path: /admin/register
+      headers:
+        Content-Type: application/json
+      body:
+        username: "macro"
+        password: "Test123456"
+    expected_response:
+      http_status: 200
+      business_code: 500
+      message: "操作失败"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 500]
+        description: "业务层：code=500(FAILED)"
+      - assert_equal: ["response.json()['message']", "操作失败"]
+        description: "数据层：失败消息"
+    tags: [negative, regression]
+
+  - id: TC_UMS_REGISTER_003
+    api_id: API_ADMIN_REGISTER
+    title: "admin_register_缺少必填字段_参数校验失败"
+    module: ums
+    priority: P1
+    scenario: |
+      反向用例：请求体缺少必填字段username。
+    preconditions:
+      - 无
+    test_data: {}
+    request:
+      method: POST
+      path: /admin/register
+      headers:
+        Content-Type: application/json
+      body:
+        password: "Test123456"
+    expected_response:
+      http_status: 200
+      business_code: 404
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 404]
+        description: "业务层：code=404(VALIDATE_FAILED)"
+    tags: [negative, validation]
+
+  - id: TC_UMS_REGISTER_CLEANUP
+    api_id: API_ADMIN_DELETE
+    title: "admin_delete_CLEANUP_删除TC_UMS_REGISTER_001创建的测试用户"
+    module: ums
+    priority: P0
+    scenario: |
+      清理用例：删除注册用例创建的测试用户，使用${test_user_id}变量。
+    preconditions:
+      - TC_UMS_REGISTER_001 已执行完毕
+      - 管理员已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: POST
+      path: /admin/delete/${test_user_id}
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200(SUCCESS)"
+      - assert_equal: ["response.json()['message']", "操作成功"]
+        description: "数据层：成功消息"
+    tags: [cleanup, lifecycle]
+    execution_order: cleanup
+    depends_on: TC_UMS_REGISTER_001
+
+  # ── Token 刷新 ──
+
+  - id: TC_UMS_REFRESH_001
+    api_id: API_ADMIN_REFRESH_TOKEN
+    title: "admin_refreshToken_有效token_刷新成功"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：使用有效的JWT token刷新。
+    preconditions:
+      - 已登录获取有效token
+    test_data:
+      admin_token: "${admin_token}"
+      tokenHead: "${tokenHead}"
+    request:
+      method: GET
+      path: /admin/refreshToken
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+      data:
+        token: "exists_and_type: string"
+        tokenHead: "exists_and_type: string"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200(SUCCESS)"
+      - assert_exists: ["response.json()['data']['token']"]
+        description: "数据层：新token存在"
+    tags: [positive, regression]
+
+  - id: TC_UMS_REFRESH_002
+    api_id: API_ADMIN_REFRESH_TOKEN
+    title: "admin_refreshToken_无效token_返回401"
+    module: ums
+    priority: P1
+    scenario: |
+      反向用例：使用无效/过期的token。
+      实际行为: Spring Security JWT过滤器拦截无效token → 返回401 UNAUTHORIZED。
+    preconditions:
+      - 无
+    test_data: {}
+    request:
+      method: GET
+      path: /admin/refreshToken
+      headers:
+        Authorization: "Bearer invalid_expired_token"
+    expected_response:
+      http_status: 401
+    assertions:
+      - assert_equal: ["response.status_code", 401]
+        description: "协议层：HTTP状态码401，无效token被Security拦截"
+    tags: [negative, regression, security]
+
+  # ── 用户信息 ──
+
+  - id: TC_UMS_INFO_001
+    api_id: API_ADMIN_INFO
+    title: "admin_info_无认证_获取当前用户信息成功"
+    module: ums
+    priority: P0
+    scenario: |
+      正向用例：通过Principal获取已登录用户的info（该接口在白名单中，但依赖Spring Security的Principal）。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /admin/info
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+      data:
+        username: "exists_and_type: string"
+        menus: "exists_and_type: list"
+        roles: "exists_and_type: list"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+      - assert_exists: ["response.json()['data']['username']"]
+        description: "数据层：username存在"
+      - assert_exists: ["response.json()['data']['menus']"]
+        description: "数据层：menus存在"
+    tags: [positive, smoke, regression]
+
+  - id: TC_UMS_LOGOUT_001
+    api_id: API_ADMIN_LOGOUT
+    title: "admin_logout_登出_返回成功"
+    module: ums
+    priority: P2
+    scenario: |
+      正向用例：登出操作（当前实现直接返回成功）。
+    preconditions:
+      - 无
+    test_data: {}
+    request:
+      method: POST
+      path: /admin/logout
+      headers:
+        Content-Type: application/json
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+    tags: [positive, smoke]
+
+  # ── 用户列表查询 ──
+
+  - id: TC_UMS_ADMIN_LIST_001
+    api_id: API_ADMIN_LIST
+    title: "admin_list_无参数_分页获取用户列表"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：默认分页参数获取用户列表（pageSize=5, pageNum=1）。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /admin/list
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+      data:
+        total: "exists_and_type: integer"
+        list: "exists_and_type: list"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+      - assert_exists: ["response.json()['data']['total']"]
+        description: "数据层：total存在"
+      - assert_is_type: ["response.json()['data']['list']", list]
+        description: "数据层：list为数组"
+    tags: [positive, regression]
+
+  - id: TC_UMS_ADMIN_LIST_002
+    api_id: API_ADMIN_LIST
+    title: "admin_list_带keyword搜索_返回过滤结果"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：使用keyword参数搜索用户。
+    preconditions:
+      - admin已登录
+      - 存在用户名为macro的用户
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /admin/list
+      params:
+        keyword: "macro"
+        pageSize: 5
+        pageNum: 1
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+      - assert_is_type: ["response.json()['data']['list']", list]
+        description: "数据层：list为数组"
+    tags: [positive, regression]
+
+  - id: TC_UMS_ADMIN_LIST_003
+    api_id: API_ADMIN_LIST
+    title: "admin_list_无Token_返回200提示未授权"
+    module: ums
+    priority: P0
+    scenario: |
+      安全用例：使用空Authorization header请求。
+      实际行为: Spring Security将空token视为匿名访问，进入Controller后Principal为null。
+      测试验证接口层面的认证处理。
+    preconditions:
+      - 无
+    test_data: {}
+    request:
+      method: GET
+      path: /admin/list
+      headers:
+        Content-Type: application/json
+        Authorization: ""
+    expected_response:
+      http_status: 200
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200，接口可达"
+    tags: [negative, security, smoke]
+
+  # ── 获取指定用户 ──
+
+  - id: TC_UMS_ADMIN_GET_001
+    api_id: API_ADMIN_GET_ITEM
+    title: "admin_get_有效ID_获取用户信息"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：通过有效ID获取用户信息。
+    preconditions:
+      - admin已登录
+      - ID=1的用户存在（admin用户）
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /admin/1
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+      data:
+        id: "exists_and_type: integer"
+        username: "exists_and_type: string"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+      - assert_exists: ["response.json()['data']['id']"]
+        description: "数据层：用户ID存在"
+      - assert_exists: ["response.json()['data']['username']"]
+        description: "数据层：用户名存在"
+    tags: [positive, regression]
+
+  # ── 修改用户信息 ──
+
+  - id: TC_UMS_ADMIN_UPDATE_001
+    api_id: API_ADMIN_UPDATE
+    title: "admin_update_修改昵称_更新成功"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：修改指定用户的昵称。需要配合REVERT用例恢复原值。
+    preconditions:
+      - admin已登录
+      - ID=1的用户存在
+    test_data:
+      admin_token: "${admin_token}"
+      original_nickname: "macro"
+      new_nickname: "自动化测试修改_${timestamp}"
+    request:
+      method: POST
+      path: /admin/update/1
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer ${admin_token}"
+      body:
+        nickName: "自动化测试修改_${timestamp}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+    tags: [positive, regression]
+    produces:
+      temp_nickname: "自动化测试修改_${timestamp}"
+
+  - id: TC_UMS_ADMIN_UPDATE_REVERT
+    api_id: API_ADMIN_UPDATE
+    title: "admin_update_REVERT_恢复昵称原始值"
+    module: ums
+    priority: P1
+    scenario: |
+      清理用例：将TC_UMS_ADMIN_UPDATE_001修改的昵称恢复为原始值。
+    depends_on: TC_UMS_ADMIN_UPDATE_001
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: POST
+      path: /admin/update/1
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer ${admin_token}"
+      body:
+        nickName: "macro"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+    tags: [cleanup, lifecycle]
+    execution_order: cleanup
+    depends_on: TC_UMS_ADMIN_UPDATE_001
+
+  # ── 修改密码 ──
+
+  - id: TC_UMS_UPDATE_PASSWORD_001
+    api_id: API_ADMIN_UPDATE_PASSWORD
+    title: "admin_updatePassword_旧密码错误_返回旧密码错误"
+    module: ums
+    priority: P0
+    scenario: |
+      反向用例：旧密码不正确。
+      错误路径: Controller → Service.updatePassword() → passwordEncoder.matches(旧密码,库中密码)=false → return -3 → Controller → CommonResult.failed("旧密码错误") → code=500
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: POST
+      path: /admin/updatePassword
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer ${admin_token}"
+      body:
+        username: "macro"
+        oldPassword: "wrong_old_password"
+        newPassword: "NewPass123"
+    expected_response:
+      http_status: 200
+      business_code: 500
+      message: "旧密码错误"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 500]
+        description: "业务层：code=500(FAILED)"
+      - assert_equal: ["response.json()['message']", "旧密码错误"]
+        description: "数据层：错误消息"
+    tags: [negative, regression, smoke]
+
+  - id: TC_UMS_UPDATE_PASSWORD_002
+    api_id: API_ADMIN_UPDATE_PASSWORD
+    title: "admin_updatePassword_空newPassword_参数校验失败"
+    module: ums
+    priority: P0
+    scenario: |
+      反向用例：新密码为空。
+      实际路径: @Validated + @NotEmpty → MethodArgumentNotValidException → GlobalExceptionHandler.handleValidException() → CommonResult.validateFailed(message) → code=404。
+      注意: Controller层的@Validated在校验阶段就拦截了，Service.updatePassword()不会被调用。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: POST
+      path: /admin/updatePassword
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer ${admin_token}"
+      body:
+        username: "macro"
+        oldPassword: "macro123"
+        newPassword: ""
+    expected_response:
+      http_status: 200
+      business_code: 404
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 404]
+        description: "业务层：code=404(VALIDATE_FAILED)，@Validated参数校验失败"
+    tags: [negative, regression]
+
+  - id: TC_UMS_UPDATE_PASSWORD_003
+    api_id: API_ADMIN_UPDATE_PASSWORD
+    title: "admin_updatePassword_用户不存在_返回找不到该用户"
+    module: ums
+    priority: P1
+    scenario: |
+      反向用例：用户名不存在。
+      错误路径: Service.updatePassword() → 查询adminList为空 → return -2 → Controller → CommonResult.failed("找不到该用户") → code=500
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: POST
+      path: /admin/updatePassword
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer ${admin_token}"
+      body:
+        username: "nonexistent_user_xyz"
+        oldPassword: "somepass"
+        newPassword: "NewPass123"
+    expected_response:
+      http_status: 200
+      business_code: 500
+      message: "找不到该用户"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 500]
+        description: "业务层：code=500"
+      - assert_equal: ["response.json()['message']", "找不到该用户"]
+        description: "数据层：找不到用户消息"
+    tags: [negative, regression]
+
+  # ── 修改账号状态 ──
+
+  - id: TC_UMS_UPDATE_STATUS_001
+    api_id: API_ADMIN_UPDATE_STATUS
+    title: "admin_updateStatus_正常禁用_操作成功"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：修改用户状态为禁用(0)，然后恢复为启用(1)。
+    preconditions:
+      - admin已登录
+      - 应使用测试用户而非admin自身
+    test_data:
+      admin_token: "${admin_token}"
+      test_user_id: "${test_user_id}"
+    request:
+      method: POST
+      path: /admin/updateStatus/${test_user_id}
+      params:
+        status: 0
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+    tags: [positive, regression]
+
+  - id: TC_UMS_UPDATE_STATUS_REVERT
+    api_id: API_ADMIN_UPDATE_STATUS
+    title: "admin_updateStatus_REVERT_恢复为启用状态"
+    module: ums
+    priority: P1
+    scenario: |
+      清理用例：将用户状态恢复为启用(1)。
+    depends_on: TC_UMS_UPDATE_STATUS_001
+    test_data:
+      admin_token: "${admin_token}"
+      test_user_id: "${test_user_id}"
+    request:
+      method: POST
+      path: /admin/updateStatus/${test_user_id}
+      params:
+        status: 1
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+    tags: [cleanup, lifecycle]
+    execution_order: cleanup
+    depends_on: TC_UMS_UPDATE_STATUS_001
+
+  # ── 分配/获取角色 ──
+
+  - id: TC_UMS_ROLE_ASSIGN_001
+    api_id: API_ADMIN_UPDATE_ROLE
+    title: "admin_updateRole_分配角色_操作成功"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：给用户分配角色。
+    preconditions:
+      - admin已登录
+      - 测试用户已创建
+      - 角色ID=5存在
+    test_data:
+      admin_token: "${admin_token}"
+      test_user_id: "${test_user_id}"
+    request:
+      method: POST
+      path: /admin/role/update
+      params:
+        adminId: "${test_user_id}"
+        roleIds: "5"
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+    tags: [positive, regression]
+
+  - id: TC_UMS_ROLE_GET_001
+    api_id: API_ADMIN_GET_ROLES
+    title: "admin_getRoles_有效adminId_获取角色列表"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：获取指定用户的角色列表。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /admin/role/1
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+      data: "exists_and_type: list"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+      - assert_is_type: ["response.json()['data']", list]
+        description: "数据层：返回角色列表"
+    tags: [positive, regression]
+
+  # ═══════════════════════════════════════════════════════════
+  # 角色管理
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC_UMS_ROLE_CREATE_001
+    api_id: API_ROLE_CREATE
+    title: "role_create_有效参数_创建角色成功"
+    module: ums
+    priority: P0
+    scenario: |
+      正向用例：创建新角色。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: POST
+      path: /role/create
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer ${admin_token}"
+      body:
+        name: "自动化测试角色_${timestamp}"
+        description: "自动化测试创建的角色"
+        status: 1
+        sort: 0
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+    tags: [positive, smoke, regression]
+    produces:
+      test_role_id: "response.json()['data']['id']"
+
+  - id: TC_UMS_ROLE_LIST_ALL_001
+    api_id: API_ROLE_LIST_ALL
+    title: "role_listAll_查询所有角色_返回角色列表"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：获取所有角色列表。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /role/listAll
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+      data: "exists_and_type: list"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+      - assert_is_type: ["response.json()['data']", list]
+        description: "数据层：返回列表"
+    tags: [positive, regression]
+
+  - id: TC_UMS_ROLE_LIST_001
+    api_id: API_ROLE_LIST
+    title: "role_list_分页获取角色_返回分页数据"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：分页获取角色列表。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /role/list
+      params:
+        pageSize: 5
+        pageNum: 1
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+      - assert_exists: ["response.json()['data']['total']"]
+        description: "数据层：total存在"
+      - assert_is_type: ["response.json()['data']['list']", list]
+        description: "数据层：list为数组"
+    tags: [positive, regression]
+
+  - id: TC_UMS_ROLE_UPDATE_001
+    api_id: API_ROLE_UPDATE
+    title: "role_update_修改角色描述_操作成功"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：修改角色信息。
+    preconditions:
+      - admin已登录
+      - 测试角色已创建
+    test_data:
+      admin_token: "${admin_token}"
+      test_role_id: "${test_role_id}"
+    request:
+      method: POST
+      path: /role/update/${test_role_id}
+      headers:
+        Content-Type: application/json
+        Authorization: "Bearer ${admin_token}"
+      body:
+        name: "自动化测试角色_${timestamp}"
+        description: "修改后的描述"
+        status: 1
+        sort: 0
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+    tags: [positive, regression]
+
+  - id: TC_UMS_ROLE_DELETE_CLEANUP
+    api_id: API_ROLE_DELETE
+    title: "role_delete_CLEANUP_删除测试创建的角色"
+    module: ums
+    priority: P0
+    scenario: |
+      清理用例：删除CREATE用例创建的测试角色。
+    depends_on: TC_UMS_ROLE_CREATE_001
+    test_data:
+      admin_token: "${admin_token}"
+      test_role_id: "${test_role_id}"
+    request:
+      method: POST
+      path: /role/delete
+      params:
+        ids: "${test_role_id}"
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+    tags: [cleanup, lifecycle]
+    execution_order: cleanup
+    depends_on: TC_UMS_ROLE_CREATE_001
+
+  # ═══════════════════════════════════════════════════════════
+  # 菜单管理
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC_UMS_MENU_TREE_LIST_001
+    api_id: API_MENU_TREE_LIST
+    title: "menu_treeList_获取菜单树_返回树形结构"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：获取所有菜单的树形结构。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /menu/treeList
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+      data: "exists_and_type: list"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+      - assert_is_type: ["response.json()['data']", list]
+        description: "数据层：返回树形列表"
+    tags: [positive, regression]
+
+  - id: TC_UMS_MENU_LIST_001
+    api_id: API_MENU_LIST
+    title: "menu_list_分页查询_返回菜单列表"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：按父级ID分页查询菜单。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /menu/list/0
+      params:
+        pageSize: 10
+        pageNum: 1
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+    tags: [positive, regression]
+
+  - id: TC_UMS_MENU_GET_001
+    api_id: API_MENU_GET_ITEM
+    title: "menu_get_有效ID_获取菜单详情"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：根据ID获取菜单详情。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /menu/1
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+      data:
+        id: "exists_and_type: integer"
+        title: "exists_and_type: string"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+      - assert_exists: ["response.json()['data']['id']"]
+        description: "数据层：菜单ID存在"
+    tags: [positive, regression]
+
+  # ═══════════════════════════════════════════════════════════
+  # 资源管理
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC_UMS_RESOURCE_LIST_ALL_001
+    api_id: API_RESOURCE_LIST_ALL
+    title: "resource_listAll_查询所有资源_返回列表"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：获取所有资源列表。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /resource/listAll
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+      data: "exists_and_type: list"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+      - assert_is_type: ["response.json()['data']", list]
+        description: "数据层：返回列表"
+    tags: [positive, regression]
+
+  - id: TC_UMS_RESOURCE_LIST_001
+    api_id: API_RESOURCE_LIST
+    title: "resource_list_分页查询_返回资源列表"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：分页查询资源列表。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /resource/list
+      params:
+        pageSize: 5
+        pageNum: 1
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+      - assert_is_type: ["response.json()['data']['list']", list]
+        description: "数据层：list为数组"
+    tags: [positive, regression]
+
+  # ═══════════════════════════════════════════════════════════
+  # 资源分类管理
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC_UMS_RESOURCE_CAT_LIST_ALL_001
+    api_id: API_RESOURCE_CATEGORY_LIST_ALL
+    title: "resourceCategory_listAll_查询所有分类_返回列表"
+    module: ums
+    priority: P1
+    scenario: |
+      正向用例：获取所有资源分类。
+    preconditions:
+      - admin已登录
+    test_data:
+      admin_token: "${admin_token}"
+    request:
+      method: GET
+      path: /resourceCategory/listAll
+      headers:
+        Authorization: "Bearer ${admin_token}"
+    expected_response:
+      http_status: 200
+      business_code: 200
+      message: "操作成功"
+      data: "exists_and_type: list"
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200"
+      - assert_equal: ["response.json()['code']", 200]
+        description: "业务层：code=200"
+      - assert_is_type: ["response.json()['data']", list]
+        description: "数据层：返回列表"
+    tags: [positive, regression]
+
+  # ═══════════════════════════════════════════════════════════
+  # 边界值 / 特殊字符测试
+  # ═══════════════════════════════════════════════════════════
+
+  - id: TC_UMS_LOGIN_006
+    api_id: API_ADMIN_LOGIN
+    title: "admin_login_特殊字符用户名_处理正常"
+    module: ums
+    priority: P2
+    scenario: |
+      边界用例：用户名包含特殊字符（SQL注入类输入）。
+    preconditions:
+      - 无
+    test_data:
+      username: "'; DROP TABLE users; --"
+      password: "test"
+    request:
+      method: POST
+      path: /admin/login
+      headers:
+        Content-Type: application/json
+      body:
+        username: "'; DROP TABLE users; --"
+        password: "test"
+    expected_response:
+      http_status: 200
+    assertions:
+      - assert_equal: ["response.status_code", 200]
+        description: "协议层：HTTP状态码200，系统不崩溃"
+      - assert_in: ["response.json()['code']", [404, 500]]
+        description: "业务层：返回合理的错误码"
+    tags: [negative, security]
+
+  - id: TC_UMS_REGISTER_004
+    api_id: API_ADMIN_REGISTER
+    title: "admin_register_超长用户名_校验处理"
+    module: ums
+    priority: P2
+    scenario: |
+      边界用例：使用超长用户名注册。
+    preconditions:
+      - 无
+    test_data:
+      long_username: "a_long_string_256_chars"
+    request:
+      method: POST
+      path: /admin/register
+      headers:
+        Content-Type: application/json
+      body:
+        username: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+        password: "Test123456"
+    expected_response:
+      http_status: 500
+    assertions:
+      - assert_equal: ["response.status_code", 500]
+        description: "协议层：HTTP状态码500，超长用户名导致数据库错误"
+    tags: [negative, boundary]

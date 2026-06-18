@@ -1,0 +1,783 @@
+module: ums
+version: "1.0"
+analyzed_at: "2026-06-18T10:00:00"
+
+apis:
+  # ── UmsAdminController ──
+  - id: API_ADMIN_REGISTER
+    method: POST
+    path: /admin/register
+    description: 用户注册
+    requires_auth: false
+    request:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          required: true
+          description: 用户名
+        password:
+          type: string
+          required: true
+          description: 密码
+        icon:
+          type: string
+          required: false
+          description: 用户头像
+        email:
+          type: string
+          required: false
+          description: 邮箱
+        nickName:
+          type: string
+          required: false
+          description: 用户昵称
+        note:
+          type: string
+          required: false
+          description: 备注
+    response:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        icon:
+          type: string
+        email:
+          type: string
+        nickName:
+          type: string
+        createTime:
+          type: string
+        status:
+          type: integer
+
+  - id: API_ADMIN_LOGIN
+    method: POST
+    path: /admin/login
+    description: 登录获取Token
+    requires_auth: false
+    request:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          required: true
+          description: 用户名
+        password:
+          type: string
+          required: true
+          description: 密码
+    response:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT Token
+        tokenHead:
+          type: string
+          description: Token 前缀
+
+  - id: API_ADMIN_REFRESH_TOKEN
+    method: GET
+    path: /admin/refreshToken
+    description: 刷新Token
+    requires_auth: true
+    request: {}
+    response:
+      type: object
+      properties:
+        token:
+          type: string
+        tokenHead:
+          type: string
+
+  - id: API_ADMIN_INFO
+    method: GET
+    path: /admin/info
+    description: 获取当前登录用户信息
+    requires_auth: false
+    request: {}
+    response:
+      type: object
+      properties:
+        username:
+          type: string
+        menus:
+          type: array
+        icon:
+          type: string
+        roles:
+          type: array
+
+  - id: API_ADMIN_LOGOUT
+    method: POST
+    path: /admin/logout
+    description: 登出
+    requires_auth: false
+    request: {}
+    response:
+      type: object
+
+  - id: API_ADMIN_LIST
+    method: GET
+    path: /admin/list
+    description: 分页获取用户列表
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        keyword:
+          type: string
+          required: false
+          description: 搜索关键词
+        pageSize:
+          type: integer
+          required: false
+          default: 5
+        pageNum:
+          type: integer
+          required: false
+          default: 1
+    response:
+      type: object
+      properties:
+        total:
+          type: integer
+        list:
+          type: array
+
+  - id: API_ADMIN_GET_ITEM
+    method: GET
+    path: /admin/{id}
+    description: 获取指定用户信息
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+    response:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        icon:
+          type: string
+        email:
+          type: string
+        nickName:
+          type: string
+        status:
+          type: integer
+
+  - id: API_ADMIN_UPDATE
+    method: POST
+    path: /admin/update/{id}
+    description: 修改指定用户信息
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+        username:
+          type: string
+        icon:
+          type: string
+        email:
+          type: string
+        nickName:
+          type: string
+        note:
+          type: string
+    response:
+      type: object
+
+  - id: API_ADMIN_UPDATE_PASSWORD
+    method: POST
+    path: /admin/updatePassword
+    description: 修改用户密码
+    requires_auth: true
+    request:
+      type: object
+      required: [username, oldPassword, newPassword]
+      properties:
+        username:
+          type: string
+          required: true
+          description: 用户名
+        oldPassword:
+          type: string
+          required: true
+          description: 旧密码
+        newPassword:
+          type: string
+          required: true
+          description: 新密码
+    response:
+      type: object
+
+  - id: API_ADMIN_DELETE
+    method: POST
+    path: /admin/delete/{id}
+    description: 删除指定用户
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+    response:
+      type: object
+
+  - id: API_ADMIN_UPDATE_STATUS
+    method: POST
+    path: /admin/updateStatus/{id}
+    description: 修改帐号状态
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+        status:
+          type: integer
+          required: true
+          description: "0:禁用 1:启用"
+    response:
+      type: object
+
+  - id: API_ADMIN_UPDATE_ROLE
+    method: POST
+    path: /admin/role/update
+    description: 给用户分配角色
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        adminId:
+          type: integer
+          required: true
+        roleIds:
+          type: array
+          required: true
+          items:
+            type: integer
+    response:
+      type: object
+
+  - id: API_ADMIN_GET_ROLES
+    method: GET
+    path: /admin/role/{adminId}
+    description: 获取用户角色列表
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        adminId:
+          type: integer
+          required: true
+    response:
+      type: array
+
+  # ── UmsRoleController ──
+  - id: API_ROLE_CREATE
+    method: POST
+    path: /role/create
+    description: 添加角色
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        sort:
+          type: integer
+        status:
+          type: integer
+    response:
+      type: object
+
+  - id: API_ROLE_UPDATE
+    method: POST
+    path: /role/update/{id}
+    description: 修改角色
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+        name:
+          type: string
+        description:
+          type: string
+        sort:
+          type: integer
+        status:
+          type: integer
+    response:
+      type: object
+
+  - id: API_ROLE_DELETE
+    method: POST
+    path: /role/delete
+    description: 批量删除角色
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        ids:
+          type: array
+          required: true
+          items:
+            type: integer
+    response:
+      type: object
+
+  - id: API_ROLE_LIST_ALL
+    method: GET
+    path: /role/listAll
+    description: 获取所有角色
+    requires_auth: true
+    request: {}
+    response:
+      type: array
+      items:
+        type: object
+
+  - id: API_ROLE_LIST
+    method: GET
+    path: /role/list
+    description: 分页获取角色列表
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        keyword:
+          type: string
+          required: false
+        pageSize:
+          type: integer
+          required: false
+          default: 5
+        pageNum:
+          type: integer
+          required: false
+          default: 1
+    response:
+      type: object
+      properties:
+        total:
+          type: integer
+        list:
+          type: array
+
+  - id: API_ROLE_UPDATE_STATUS
+    method: POST
+    path: /role/updateStatus/{id}
+    description: 修改角色状态
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+        status:
+          type: integer
+          required: true
+    response:
+      type: object
+
+  - id: API_ROLE_LIST_MENU
+    method: GET
+    path: /role/listMenu/{roleId}
+    description: 获取角色相关菜单
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        roleId:
+          type: integer
+          required: true
+    response:
+      type: array
+
+  - id: API_ROLE_LIST_RESOURCE
+    method: GET
+    path: /role/listResource/{roleId}
+    description: 获取角色相关资源
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        roleId:
+          type: integer
+          required: true
+    response:
+      type: array
+
+  - id: API_ROLE_ALLOC_MENU
+    method: POST
+    path: /role/allocMenu
+    description: 给角色分配菜单
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        roleId:
+          type: integer
+          required: true
+        menuIds:
+          type: array
+          required: true
+          items:
+            type: integer
+    response:
+      type: object
+
+  - id: API_ROLE_ALLOC_RESOURCE
+    method: POST
+    path: /role/allocResource
+    description: 给角色分配资源
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        roleId:
+          type: integer
+          required: true
+        resourceIds:
+          type: array
+          required: true
+          items:
+            type: integer
+    response:
+      type: object
+
+  # ── UmsMenuController ──
+  - id: API_MENU_CREATE
+    method: POST
+    path: /menu/create
+    description: 添加后台菜单
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        parentId:
+          type: integer
+        title:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string
+        hidden:
+          type: integer
+        sort:
+          type: integer
+        level:
+          type: integer
+    response:
+      type: object
+
+  - id: API_MENU_UPDATE
+    method: POST
+    path: /menu/update/{id}
+    description: 修改后台菜单
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+        parentId:
+          type: integer
+        title:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string
+        hidden:
+          type: integer
+        sort:
+          type: integer
+    response:
+      type: object
+
+  - id: API_MENU_GET_ITEM
+    method: GET
+    path: /menu/{id}
+    description: 获取菜单详情
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+    response:
+      type: object
+
+  - id: API_MENU_DELETE
+    method: POST
+    path: /menu/delete/{id}
+    description: 删除后台菜单
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+    response:
+      type: object
+
+  - id: API_MENU_LIST
+    method: GET
+    path: /menu/list/{parentId}
+    description: 分页查询后台菜单
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        parentId:
+          type: integer
+          required: true
+        pageSize:
+          type: integer
+          required: false
+          default: 5
+        pageNum:
+          type: integer
+          required: false
+          default: 1
+    response:
+      type: object
+      properties:
+        total:
+          type: integer
+        list:
+          type: array
+
+  - id: API_MENU_TREE_LIST
+    method: GET
+    path: /menu/treeList
+    description: 树形结构返回所有菜单
+    requires_auth: true
+    request: {}
+    response:
+      type: array
+      items:
+        type: object
+        properties:
+          children:
+            type: array
+
+  - id: API_MENU_UPDATE_HIDDEN
+    method: POST
+    path: /menu/updateHidden/{id}
+    description: 修改菜单显示状态
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+        hidden:
+          type: integer
+          required: true
+    response:
+      type: object
+
+  # ── UmsResourceController ──
+  - id: API_RESOURCE_CREATE
+    method: POST
+    path: /resource/create
+    description: 添加后台资源
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        name:
+          type: string
+        url:
+          type: string
+        description:
+          type: string
+        categoryId:
+          type: integer
+    response:
+      type: object
+
+  - id: API_RESOURCE_UPDATE
+    method: POST
+    path: /resource/update/{id}
+    description: 修改后台资源
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+        name:
+          type: string
+        url:
+          type: string
+        description:
+          type: string
+        categoryId:
+          type: integer
+    response:
+      type: object
+
+  - id: API_RESOURCE_GET_ITEM
+    method: GET
+    path: /resource/{id}
+    description: 获取资源详情
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+    response:
+      type: object
+
+  - id: API_RESOURCE_DELETE
+    method: POST
+    path: /resource/delete/{id}
+    description: 删除后台资源
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+    response:
+      type: object
+
+  - id: API_RESOURCE_LIST
+    method: GET
+    path: /resource/list
+    description: 分页模糊查询后台资源
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        categoryId:
+          type: integer
+          required: false
+        nameKeyword:
+          type: string
+          required: false
+        urlKeyword:
+          type: string
+          required: false
+        pageSize:
+          type: integer
+          required: false
+          default: 5
+        pageNum:
+          type: integer
+          required: false
+          default: 1
+    response:
+      type: object
+
+  - id: API_RESOURCE_LIST_ALL
+    method: GET
+    path: /resource/listAll
+    description: 查询所有后台资源
+    requires_auth: true
+    request: {}
+    response:
+      type: array
+
+  # ── UmsResourceCategoryController ──
+  - id: API_RESOURCE_CATEGORY_LIST_ALL
+    method: GET
+    path: /resourceCategory/listAll
+    description: 查询所有资源分类
+    requires_auth: true
+    request: {}
+    response:
+      type: array
+      items:
+        type: object
+
+  - id: API_RESOURCE_CATEGORY_CREATE
+    method: POST
+    path: /resourceCategory/create
+    description: 添加资源分类
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        name:
+          type: string
+        sort:
+          type: integer
+    response:
+      type: object
+
+  - id: API_RESOURCE_CATEGORY_UPDATE
+    method: POST
+    path: /resourceCategory/update/{id}
+    description: 修改资源分类
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+        name:
+          type: string
+        sort:
+          type: integer
+    response:
+      type: object
+
+  - id: API_RESOURCE_CATEGORY_DELETE
+    method: POST
+    path: /resourceCategory/delete/{id}
+    description: 删除资源分类
+    requires_auth: true
+    request:
+      type: object
+      properties:
+        id:
+          type: integer
+          required: true
+    response:
+      type: object
+
+auth:
+  auth_type: JWT
+  login_endpoint: /admin/login
+  token_header: Authorization
+  token_prefix: Bearer
+  token_field: token
+  refresh_endpoint: /admin/refreshToken
