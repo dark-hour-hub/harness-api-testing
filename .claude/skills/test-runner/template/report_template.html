@@ -397,6 +397,67 @@
     .summary-grid { grid-template-columns: repeat(2, 1fr); }
     .container { padding: 16px 10px; }
   }
+
+  /* ── Failure Analysis ── */
+  .failure-section {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 36px;
+  }
+  .section-heading {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .failure-total {
+    font-size: .82rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    font-family: 'DM Mono', monospace;
+  }
+  .failure-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .failure-cat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .failure-cat-name {
+    font-weight: 600;
+    font-size: .9rem;
+  }
+  .failure-cat-count {
+    font-family: 'DM Mono', monospace;
+    font-size: .85rem;
+    color: var(--text-secondary);
+  }
+  .failure-bar-wrap {
+    height: 8px;
+    background: rgba(255,255,255,.05);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .failure-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width .6s ease;
+  }
+  .failure-cases {
+    font-size: .78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'DM Mono', monospace;
+  }
 </style>
 </head>
 <body>
@@ -411,6 +472,9 @@
 
   <!-- Summary Cards -->
   {{SUMMARY_CARDS}}
+
+  <!-- Failure Analysis -->
+  {{FAILURE_ANALYSIS}}
 
   <!-- Charts -->
   <div class="charts-row">

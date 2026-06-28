@@ -1,0 +1,231 @@
+# ============================================================
+# 共享分析上下文 — Phase A 产出工件
+# ============================================================
+# 此文件由 Phase A（主会话单线程）产出，写入磁盘后作为进入 Phase B 的硬性前提。
+# Phase B 的每个模块 Agent 将此文件内容内联在 prompt 中，直接使用，禁止重新分析。
+# 所有 <...> 占位符在 Phase A 执行时替换为实际值。
+
+# --------------------------------------------------
+# 1. 响应包装器（Phase A3 填充）
+# --------------------------------------------------
+response_wrappers:
+
+  R:
+    description: "<R 包装类的全限定名，如 org.xxx.common.core.domain.R<T>>"
+    success_code: <R.ok() 的 code 值，通常是 200>
+    success_message: "<R.ok() 的 message 值，如 '操作成功'>"
+    fail_code: <R.fail(msg) 的默认 code 值，通常是 500>
+    fail_message: "<R.fail() 的默认 message 值，如 '操作失败'>"
+    code_field: <响应 JSON 中 code 字段名，如 code>
+    msg_field: <响应 JSON 中 message 字段名，如 msg>
+    data_field: <响应 JSON 中 data 字段名，如 data>
+    note: "<从 Controller return → 工厂方法 → 构造器 追踪得出的正向 code/message 总结>"
+
+  TableDataInfo:
+    description: "<分页包装类的全限定名，如 org.xxx.common.core.page.TableDataInfo<T>>"
+    success_code: <构建时的 code 值，通常是 200>
+    success_message: "<构建时的 message 值，如 '查询成功'>"
+    fail_code: <失败 code 值，通常是 500>
+    fail_message: "<失败 message 值，如 '查询失败'>"
+    code_field: <响应 JSON 中 code 字段名>
+    msg_field: <响应 JSON 中 message 字段名>
+    structure: "<响应 JSON 结构，如 { code, msg, total, rows }>"
+    note: "<BaseController 中哪些方法使用此包装器，Phase B Agent 据此决定 business_message>"
+
+# --------------------------------------------------
+# 2. 认证配置（Phase A4 填充）
+# --------------------------------------------------
+auth:
+  type: <安全框架类型，如 sa-token / spring-security / shiro / 自定义>
+  login_endpoint: <登录接口路径（仅路径，如 /auth/login），禁止带 HTTP 方法前缀>
+  token_header: <认证 header 名，如 Authorization / X-Auth-Token>
+  token_prefix: "<token 前缀，如 Bearer，无前缀则空字符串 ''>"
+  token_response_path: <token 在登录响应 JSON 中的路径。⚠️ 字段名必须 Read 登录响应 VO 源码，按 @JsonProperty 注解确定，不是 Java 字段名。如 LoginVo.java 中 @JsonProperty("access_token") String accessToken → $.data.access_token>
+  response_msg_field: <响应包装类消息字段的 Java 字段名，与 §1 中 R.msg_field 一致>
+  note: "<框架特性说明：如何读取 token、免认证路径的注解或配置方式>"
+
+# --------------------------------------------------
+# 3. 全局请求头（Phase A4 填充）
+#    列表包含所有 API 请求必须携带的 header
+# --------------------------------------------------
+global_headers:
+  # 主认证头（必有）
+  - name: <认证 header 名，与 §2 token_header 一致>
+    value: "<token_prefix>${token}"          # value 必须拼接 token_prefix
+    required: true
+    description: "<认证说明，如 '认证Token'>"
+
+  # 跨字段校验头（若 Phase A4 发现则追加，无则删除此条及以下注释）
+  # - name: <跨字段校验的 header 名>
+  #   value: "${<fixture_extracts 变量名>}"
+  #   required: true
+  #   description: "<校验说明>"
+
+# --------------------------------------------------
+# 4. fixture_extracts（Phase A4 填充）
+#    从登录响应中提取的变量，供 global_headers 通过 ${变量名} 引用
+# --------------------------------------------------
+fixture_extracts: {}
+  # <变量名>: "<JSONPath>"
+  # 每个条目对应一个需要在登录时提取的动态值（如跨字段校验需要与 token extra 比较的值）
+  # ⚠️ JSONPath 必须以 $.data. 开头。字段名必须 Read 登录响应 VO 源码，按 @JsonProperty 注解确定——codegraph_node 结构摘要只显示 Java 字段名，不显示注解
+  # 示例：若 VO 中 @JsonProperty("extra_field") private String extraField，则写 extraField: "$.data.extra_field"
+
+# --------------------------------------------------
+# 5. 测试账号（Phase A1 从 config.yaml 原样复制）
+#    accounts 下的 key 是 role 名称，value 是该 role 的全部字段
+#    不同项目的字段不同——有的只有 username/password，有的还含额外的认证参数（如 clientKey/tenantId 等）
+# --------------------------------------------------
+accounts: {}
+  # <role>:
+  #   <key1>: <value1>
+  #   <key2>: <value2>
+  # 所有字段从 config.yaml environments.<env>.backend[].accounts[] 原样复制
+  # 不修改字段名，不添加或删除字段
+
+# --------------------------------------------------
+# 6. 错误码速查表（Phase A3 + A5 填充）
+#    所有条目均从源码追踪得出，不是假设
+# --------------------------------------------------
+error_codes:
+
+  auth_fail:
+    description: "<异常处理器类名.方法名，处理认证失败异常>"
+    status_code: <HTTP 状态码，检查 @ResponseStatus 注解，无则默认 200>
+    business_code: <R.fail(code, msg) 的 code 参数值>
+    business_message: "<R.fail(code, msg) 的 msg 参数值>"
+
+  permission_fail:
+    description: "<异常处理器类名.方法名，处理权限不足异常>"
+    status_code: <HTTP 状态码>
+    business_code: <code>
+    business_message: "<message>"
+
+  validation_fail:
+    description: "<异常处理器类名.方法名，处理 @Validated 校验失败异常>"
+    status_code: <HTTP 状态码>
+    business_code: <code>
+    # business_message: 来自 DTO 校验注解的 message 属性（经 i18n 解析），见下方 i18n_map
+    # 校验异常处理器通常从异常对象中提取 defaultMessage 或 constraintViolation.message 作为 business_message
+
+  business_fail:
+    description: "<异常处理器类名.方法名，处理业务异常>"
+    status_code: <HTTP 状态码>
+    business_code: <code，若从异常对象中动态获取则标注 'dynamic'>
+    # business_message: 从 Service 层 throw 语句或异常对象的 message 追踪
+
+  # 以下为常见的额外错误场景，按需保留或删除
+  missing_path_variable:
+    description: "<异常处理器，处理缺少路径变量>"
+    status_code: <HTTP 状态码>
+    business_code: <code>
+    business_message_pattern: "<message 模板，{name} 为占位符>"
+
+  type_mismatch:
+    description: "<异常处理器，处理参数类型不匹配>"
+    status_code: <HTTP 状态码>
+    business_code: <code>
+    business_message_pattern: "<message 模板>"
+
+  not_found:
+    description: "<异常处理器，处理 404>"
+    status_code: <HTTP 状态码>
+    business_code: <code>
+    business_message: "<message>"
+
+  # 以下为可选场景（若项目中检测到则保留，无则删除）
+  repeat_submit:
+    status_code: <HTTP 状态码>
+    business_code: <code>
+    business_message: "<防重提交提示消息>"
+
+  rate_limiter:
+    status_code: <HTTP 状态码>
+    business_code: <code>
+    business_message: "<限流提示消息>"
+
+# --------------------------------------------------
+# 7. i18n 消息映射（Phase A5 从 properties 文件解析）
+#    格式："<i18n_key>": "<翻译文本>"
+#    至少覆盖 DTO 校验注解 message 属性和业务异常中出现的所有 key
+# --------------------------------------------------
+i18n_map: {}
+  # "<i18n_key_1>": "<翻译文本>"
+  # "<i18n_key_2>": "<带参数模板文本，{0}/{min}/{max} 等>"
+
+# --------------------------------------------------
+# 8. 模块路由清单（Phase A2 产出，Phase B Agent 逐模块处理）
+# --------------------------------------------------
+# 每条路由的字段：
+#   method:       HTTP 方法 (GET/POST/PUT/DELETE/PATCH)
+#   path:         完整路径（类级 @RequestMapping + 方法级 @XxxMapping）
+#   controller:   Controller 文件名
+#   return_type:  R（通用包装）| TableDataInfo（分页）| void（无响应体）| 其他
+#   auth_required: true（需认证）| false（免认证）
+#   request_body_dto: @RequestBody 参数的 DTO 全限定名，无则 null
+#   note: 补充说明
+
+modules: {}
+  # <module_key>:
+  #   name: "<模块中文名>"
+  #   base_url: "<当前环境 base_url>"
+  #   routes:
+  #     - { method: GET,  path: /xxx/list, controller: XxxController.java, return_type: TableDataInfo, auth_required: true,  request_body_dto: XxxBo, note: "分页查询" }
+  #     - { method: POST, path: /xxx,      controller: XxxController.java, return_type: R,            auth_required: true,  request_body_dto: XxxBo, note: "新增" }
+  #     - { method: GET,  path: /xxx/{id}, controller: XxxController.java, return_type: R,            auth_required: true,  request_body_dto: null,  note: "详情" }
+
+# --------------------------------------------------
+# 8b. DTO/VO 字段索引（Phase A3b 预计算，Phase B Agent 直接使用）
+#     按模块组织，每个 DTO/VO 列出全部字段及 JSON 键名
+#     Phase B Agent 优先从此处获取字段信息，避免重复读取源码
+# --------------------------------------------------
+dto_index: {}
+  # <module_key>:
+  #   dtos:
+  #     <DTO简名>:
+  #       full_name: "<全限定名>"
+  #       fields:
+  #         - { java: "userName", json: "userName", required: true,  constraints: "@NotBlank @Length(min=2,max=30)" }
+  #         - { java: "email",    json: "email",    required: false, constraints: "@Email" }
+  #   vos:
+  #     <VO简名>:
+  #       fields:
+  #         - { java: "id",       json: "id",       type: "Long" }
+  #         - { java: "userName", json: "userName", type: "String" }
+  #         - { java: "createTime", json: "createTime", type: "Date" }
+
+# --------------------------------------------------
+# 9. 变量使用规则（Phase B Agent 必须遵守）
+#    以下规则是通用的，不需要修改
+# --------------------------------------------------
+variable_rules:
+  allowed_dynamic_vars:
+    - "${token}"         # 认证令牌，写入 global_headers 认证头
+    - "${<提取变量>}"    # fixture_extracts 或测试用例 extract 的变量，运行时动态解析
+    - "${timestamp}"     # 运行时毫秒时间戳，用于构造唯一值
+  inline_values:
+    - "账号字段（accounts 中 role 下的全部 key）必须从 §5 取具体值直接写入，禁止使用 ${account.xxx} 引用"
+    - "固定参数值（pageNum, pageSize 等）直接写入数字或字符串"
+    - "非动态的 header 值（常量）直接写入，不过变量引用"
+
+# --------------------------------------------------
+# 10. 数据安全规则（Phase B Agent 必须遵守）
+#     ⛔ 以下为强制约束，违反即无效
+# --------------------------------------------------
+data_safety:
+  # ⛔ 强制约束
+  mandatory:
+    - "禁止修改 config.yaml accounts 中任何测试账号的密码或属性"
+    - "PUT/DELETE/POST 修改操作的目标资源 ID 必须来自 extract 链引用（${变量}），禁止硬编码系统 ID（1、2 等）"
+    - "updatePassword 等修改当前用户自身的接口 → 禁止用 accounts 中的账号测试正向流程，应跳过或用 register 创建的临时用户"
+    - "返回 R<Void> 的 POST 接口 → 禁止生成依赖其 extract 的 PUT/DELETE 正向成功用例"
+  system_data_forbidden:
+    - "已有的系统账号"
+    - "菜单、权限、角色等系统元数据"
+    - "系统配置项"
+    - "字典数据"
+  strategy:
+    - "POST 返回 R<XxxVo>（data 含 ID） → extract ID → PUT/DELETE 使用 ${extractedId}"
+    - "POST 返回 R<Void> 或 void → 不 extract → 跳过 PUT/DELETE 成功用例，仅测参数校验"
+    - "GET 查询已有数据 → 可硬编码已知 ID（如 1 为默认管理员）"
+    - "唯一标识字段 → 使用 ${timestamp} 后缀避免重复"
