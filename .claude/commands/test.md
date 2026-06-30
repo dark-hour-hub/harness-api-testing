@@ -43,7 +43,7 @@ python scripts/check_env_deps.py
 
 ### 04 · 脚本生成（AI 介入）
 
-调用 `api-test-generator` skill，读取 03 阶段的 YAML 测试用例定义，生成可执行的 pytest 测试脚本。
+调用 `pytest-generator` skill，读取 03 阶段的 YAML 测试用例定义，生成可执行的 pytest 测试脚本。
 
 **输入**：`tests/baseline/_workflow/03-testcases/*.yaml`
 
@@ -57,10 +57,21 @@ python scripts/check_env_deps.py
 
 ### 05 · 用例执行（自动）
 
-调用 `yaml-to-pytest` skill，执行 04 阶段生成的 pytest 测试脚本并生成 HTML 报告。**此阶段只执行不修复：禁止分析失败原因、修改用例、重新执行。**
+调用 `test-runner` skill，执行 04 阶段生成的 pytest 测试脚本并生成 HTML 报告。**此阶段只执行不修复：禁止分析失败原因、修改用例、重新执行。**
 
 **输入**：`tests/baseline/generated/api-test/`
 
 **产物**：`tests/baseline/report/api-test/*.html`
+
+**产物即证据**：阶段完成后自动验证报告文件存在，缺失则流程中止。
+
+
+### 05 · 用例执行结果分析（自动）
+
+调用 `error-analyzer` skill，分析用例执行结果
+
+**输入**：`tests/baseline/report/api-test/*`、`tests/baseline/generated/api-test/test_*.py`、
+
+**产物**：`tests/baseline/_workflow/04-results/error-analysis.md`、`tests/baseline/_workflow/04-results/repair.md`
 
 **产物即证据**：阶段完成后自动验证报告文件存在，缺失则流程中止。

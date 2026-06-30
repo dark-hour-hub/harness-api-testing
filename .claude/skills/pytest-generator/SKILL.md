@@ -58,6 +58,30 @@ def test_tc_auth_001(api_case):
 
 `api_case` fixture 自动完成：查找用例 → 解析变量 → 认证登录 → 发送请求 → 断言 → 提取变量。
 
+### 用例依赖（depends_on）
+
+对于需要前置数据创建的连续操作场景（POST 创建 → PUT 修改 → DELETE 删除），YAML 中通过 `depends_on` 声明依赖关系。运行时引擎自动解析：
+
+```yaml
+# POST 创建 — 提取 ID
+- id: TC_WF_008
+  extract:
+    categoryId: "$.data.categoryId"
+
+# PUT 修改 — 声明依赖，引用提取的 ID
+- id: TC_WF_010
+  depends_on: ["TC_WF_008"]
+  request:
+    body:
+      categoryId: "${categoryId}"
+```
+
+`api_case.run("TC_WF_010")` 执行时，自动先执行 `TC_WF_008`，提取的变量存入模块级变量池，再执行 `TC_WF_010` 时 `${categoryId}` 被正确解析。
+
+**注意**：
+- `pytest -k test_tc_wf_010` 单独执行时，依赖也会自动执行
+- 同一依赖不会重复执行（已执行的用例自动跳过）
+
 ## 断言分层
 
 每个用例自动执行三层断言（符合接口案例编写标准）：
@@ -65,6 +89,18 @@ def test_tc_auth_001(api_case):
 1. **协议层**：HTTP 状态码（`expected.status_code`）
 2. **业务层**：业务状态码（`expected.business_code`）和业务消息（`expected.business_message`）
 3. **数据层**：响应数据字段存在性（`expected.data_exists`）
+
+### 业务消息匹配模式
+
+通过 `expected.business_message_mode` 控制业务消息的断言方式：
+
+| 模式 | 行为 | 适用场景 |
+|------|------|---------|
+| `exact`（默认） | 完全匹配 | 成功消息、单一校验失败 |
+| `contains` | 包含匹配 | 复合校验拼接消息（如"用户名不能为空, 认证客户端id不能为空"） |
+| `skip` | 跳过消息校验 | 消息内容不确定的场景 |
+
+YAML 中未设置 `business_message_mode` 时默认使用 `exact`。
 
 ## 认证处理
 

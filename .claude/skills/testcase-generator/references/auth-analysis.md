@@ -135,7 +135,37 @@ global_headers:
 
 原因：账号配置是生成时的已知常量，不需要运行时解析。只有 `fixture_extracts`（从登录响应动态提取）的值才使用 `${变量名}` 引用。
 
-## 步骤六：global_headers 验证清单（强制步骤，全部通过后方可进入下一阶段）
+## 步骤六：认证有效性探测
+
+在完成以上分析后，对每个模块实际发一次无 token 请求，验证认证是否生效。
+
+### 探测方法
+
+对 Phase A2 产出的每个模块，选取 1-2 条标记为 `auth_required: true` 的路由，用 curl 或 Python 发送无 token 请求：
+
+```python
+import requests
+resp = requests.get("http://localhost:8080/{module}/xxx")
+probe_code = resp.json().get("code")
+```
+
+### 结果判定与记录
+
+| 探测结果 | 含义 | 写入 auth_probe_code |
+|---------|------|---------------------|
+| probe_code === auth_fail.business_code | 认证生效 | 写入实际值 |
+| probe_code === 200 | 接口不校验认证 | 写入 200 |
+| probe_code 为其他值 | 认证行为与预期不符 | 写入实际值 |
+
+将探测结果写入 shared-context.yaml §7 每条路由的 `auth_probe_code` 字段。
+
+### 影响
+
+- `auth_probe_code === 401`（或 auth_fail.code）→ Phase B 按正常无认证用例生成
+- `auth_probe_code === 200` → Phase B 在标题注明"无认证但未拦截"，预期改为 200
+- 其他值 → Phase B 按探测结果调整预期
+
+## 步骤七：global_headers 验证清单（强制步骤，全部通过后方可进入下一阶段）
 
 - [ ] Grep 结果中**每个** `getHeader("X")` / `getParameter("X")` 调用点都已审查（不限子目录）
 - [ ] 跨模块搜索已完成——不仅搜索了安全框架模块，还搜索了 common-security、common-websocket 等通用模块

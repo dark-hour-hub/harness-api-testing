@@ -6,8 +6,10 @@ auth:
   login_endpoint: <登录接口完整路径>
   token_header: <认证 header 名>
   token_prefix: "<token 前缀，无则空字符串>"
+  # [REQUIRED] 从 shared-context.yaml §2 auth.token_response_path 原样复制。禁止跳过或使用默认值——每个模块 YAML 必须显式配置此字段
   token_response_path: <token 在登录响应中的 JSONPath>
-  response_msg_field: <响应包装类消息字段的 Java 字段名>
+  response_msg_field: <响应包装类消息字段名>
+  # [REQUIRED] fixture_extracts 必须在 auth 段内（非 YAML 顶层）。从 shared-context.yaml §2 原样复制
   fixture_extracts: {}
   accounts: {}
 

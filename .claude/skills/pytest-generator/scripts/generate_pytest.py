@@ -278,7 +278,7 @@ def assert_response(response, expected, msg_field="msg"):
     """对 HTTP 响应执行三层断言。
 
     1. 协议层: HTTP 状态码
-    2. 业务层: 业务状态码 + 业务消息
+    2. 业务层: 业务状态码 + 业务消息（支持 exact/contains/skip 模式）
     3. 数据层: 响应字段存在性
 
     Args:
@@ -315,12 +315,21 @@ def assert_response(response, expected, msg_field="msg"):
             )
 
     exp_msg = expected.get("business_message")
+    msg_mode = expected.get("business_message_mode", "exact")
     if exp_msg is not None:
         actual_msg = body.get(msg_field, body.get("msg", ""))
-        if actual_msg and actual_msg != exp_msg:
-            raise ApiAssertionError(
-                f"业务消息不匹配: 期望 '{exp_msg}', 实际 '{actual_msg}'"
-            )
+        if msg_mode == "skip":
+            pass
+        elif msg_mode == "contains":
+            if actual_msg and exp_msg not in actual_msg:
+                raise ApiAssertionError(
+                    f"业务消息不匹配: 期望包含 '{exp_msg}', 实际 '{actual_msg}'"
+                )
+        else:  # "exact"（默认）
+            if actual_msg and actual_msg != exp_msg:
+                raise ApiAssertionError(
+                    f"业务消息不匹配: 期望 '{exp_msg}', 实际 '{actual_msg}'"
+                )
 
     # ── 数据层 ──
     data_exists = expected.get("data_exists")
@@ -484,7 +493,7 @@ class ApiCaseContext:
     """每个测试用例的执行上下文。
 
     提供 run(case_id) 方法，自动完成:
-    查找用例 → 解析变量 → 登录认证 → 构建请求 → 发送 → 断言 → 提取变量
+    查找用例 → 解析 depends_on 依赖 → 解析变量 → 登录认证 → 构建请求 → 发送 → 断言 → 提取变量
     """
 
     def __init__(self, yaml_data, var_store, auth_manager):
@@ -493,6 +502,7 @@ class ApiCaseContext:
         self.auth = auth_manager
         self.base_url = yaml_data.get("base_url", "http://localhost:8080")
         self.global_headers = yaml_data.get("global_headers", [])
+        self._executed = set()  # 记录已执行的用例 ID，防止 depends_on 重复执行
 
     def run(self, case_id):
         """执行指定 ID 的测试用例"""
@@ -500,6 +510,12 @@ class ApiCaseContext:
         case = self._find_case(case_id)
         if not case:
             pytest.fail(f"未找到测试用例: {case_id}")
+
+        # ── 自动解析 depends_on 依赖 ──
+        depends_on = case.get("depends_on", [])
+        for dep_id in depends_on:
+            if dep_id not in self._executed:
+                self.run(dep_id)
 
         # 认证
         account_name = case.get("account", "admin")
@@ -541,6 +557,8 @@ class ApiCaseContext:
         if "extract" in case:
             extract_from_response(response, case["extract"], self.var_store)
 
+        # 标记已执行（用于 depends_on 防重复）
+        self._executed.add(case_id)
         return response
 
     def _find_case(self, case_id):
