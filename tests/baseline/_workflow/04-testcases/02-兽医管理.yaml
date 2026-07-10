@@ -1,0 +1,60 @@
+module: vet
+module_name: "兽医管理"
+base_url: "http://localhost:8080"
+
+global_variables:
+  env_version: "v1.0"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers: []
+
+auth_setup:
+  type: none
+  login_endpoint: "/none"
+  token_prefix: "none"
+  params: {}
+  accounts:
+    anonymous:
+      username: "N/A"
+      password: "N/A"
+  extracts:
+    token: "$.none"
+
+testcases:
+  - id: TC_VET_001
+    title: "GET /vets_查询兽医列表_返回JSON数据"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: GET
+    path: "/vets"
+    description: "验证获取所有兽医及其专业领域列表，以 JSON 格式返回"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 200
+      data_exists:
+        - "vetList"
+
+  - id: TC_VET_002
+    title: "GET /vets_服务器内部错误_返回错误"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/vets"
+    description: "验证服务器内部错误（如数据库连接异常）时返回 500 错误，需服务端模拟异常"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 500
+      data_exists: []

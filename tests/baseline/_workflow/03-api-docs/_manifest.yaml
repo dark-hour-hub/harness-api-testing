@@ -1,0 +1,296 @@
+system:
+  name: "Spring PetClinic"
+  base_url: "http://localhost:8080"
+  framework: "Spring Boot 4.1.0 / Java 17 / Spring MVC (WebMVC)"
+  database: "H2 (默认) / MySQL / PostgreSQL + Spring Data JPA"
+  cache: "Caffeine 本地缓存 + Spring Cache"
+  api_doc: "无（无 Swagger/Knife4j 依赖）"
+  auth_type: "无认证（none）"
+  auth_header: "无"
+  encryption: "无"
+
+response_wrapper:
+  class: null
+  code_field: null
+  msg_field: null
+  success_code: null
+  page_class: null
+  page_rows_field: null
+  page_total_field: null
+  note: "该项目无统一响应包装类。大部分接口返回 Thymeleaf 视图（HTML），仅 GET /vets 返回 JSON（@ResponseBody）。成功通过 HTTP 2xx + 视图渲染或 JSON 数据表示，错误通过 HTTP 错误状态 + 错误视图或 redirect flash attribute 表示。"
+
+test_accounts:
+  - role: "无认证机制，无需测试账号"
+    username: "N/A"
+    password: "N/A"
+    description: "所有接口无需登录即可访问"
+
+auth:
+  white_list: []
+  public_headers:
+    - name: Content-Type
+      type: String
+      required: true
+      example: "application/x-www-form-urlencoded (表单提交) / application/json (GET /vets)"
+  auth_headers: []
+
+permission_model:
+  type: "无权限控制"
+  super_admin: "N/A"
+  format: "N/A"
+  data_permission: "N/A"
+
+modules:
+  - name: 首页
+    prefix: /
+    file: "01-首页.md"
+    interface_count: 1
+    controllers:
+      - class: WelcomeController
+        package: org.springframework.samples.petclinic.system
+    services: []
+    dtos: []
+    vos: []
+    routes:
+      - method: GET
+        path: /
+        summary: 欢迎页
+        request_body: null
+        response_type: "String (视图名: welcome)"
+        response_structure: html
+        auth: false
+        permission: null
+        special: []
+    split_plan: null
+
+  - name: 兽医管理
+    prefix: /vets
+    file: "02-兽医管理.md"
+    interface_count: 1
+    controllers:
+      - class: VetController
+        package: org.springframework.samples.petclinic.vet
+    services: []
+    dtos: []
+    vos:
+      - org.springframework.samples.petclinic.vet.Vets
+      - org.springframework.samples.petclinic.vet.Vet
+    routes:
+      - method: GET
+        path: /vets
+        summary: 获取兽医列表（JSON API）
+        request_body: null
+        response_type: "Vets (JSON: { vetList: [...] })"
+        response_structure: list
+        auth: false
+        permission: null
+        special: ["@ResponseBody"]
+    split_plan: null
+
+  - name: 客户管理
+    prefix: /owners
+    file: "03-客户管理.md"
+    interface_count: 13
+    controllers:
+      - class: OwnerController
+        package: org.springframework.samples.petclinic.owner
+      - class: PetController
+        package: org.springframework.samples.petclinic.owner
+      - class: VisitController
+        package: org.springframework.samples.petclinic.owner
+    services: []
+    dtos: []
+    vos:
+      - org.springframework.samples.petclinic.owner.Owner
+      - org.springframework.samples.petclinic.owner.Pet
+      - org.springframework.samples.petclinic.owner.Visit
+      - org.springframework.samples.petclinic.owner.PetType
+    routes:
+      - method: GET
+        path: /owners
+        summary: 查询客户列表（按姓氏分页搜索）
+        request_body: null
+        query_params:
+          - name: page
+            type: int
+            required: false
+            default: "1"
+            description: 页码
+        response_type: "String (视图名: owners/ownersList 或 owners/findOwners)"
+        response_structure: html
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /owners/find
+        summary: 查找客户表单
+        request_body: null
+        response_type: "String (视图名: owners/findOwners)"
+        response_structure: html
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /owners/new
+        summary: 新增客户表单
+        request_body: null
+        response_type: "String (视图名: owners/createOrUpdateOwnerForm)"
+        response_structure: html
+        auth: false
+        permission: null
+        special: []
+      - method: POST
+        path: /owners/new
+        summary: 新增客户
+        request_body: "Owner (表单绑定: firstName, lastName, address, city, telephone)"
+        response_type: "String (redirect: /owners/{id})"
+        response_structure: html
+        auth: false
+        permission: null
+        special: ["@Valid 校验", "flash attribute: message / error"]
+      - method: GET
+        path: /owners/{ownerId}
+        summary: 查看客户详情（含宠物和就诊记录）
+        request_body: null
+        path_params:
+          - name: ownerId
+            type: int
+            required: true
+            description: 客户ID
+        response_type: "ModelAndView (视图名: owners/ownerDetails)"
+        response_structure: html
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /owners/{ownerId}/edit
+        summary: 编辑客户表单
+        request_body: null
+        path_params:
+          - name: ownerId
+            type: int
+            required: true
+            description: 客户ID
+        response_type: "String (视图名: owners/createOrUpdateOwnerForm)"
+        response_structure: html
+        auth: false
+        permission: null
+        special: ["@ModelAttribute findOwner 预加载"]
+      - method: POST
+        path: /owners/{ownerId}/edit
+        summary: 更新客户信息
+        request_body: "Owner (表单绑定: firstName, lastName, address, city, telephone)"
+        path_params:
+          - name: ownerId
+            type: int
+            required: true
+            description: 客户ID
+        response_type: "String (redirect: /owners/{ownerId})"
+        response_structure: html
+        auth: false
+        permission: null
+        special: ["@Valid 校验", "flash attribute: message / error"]
+      - method: GET
+        path: /owners/{ownerId}/pets/new
+        summary: 新增宠物表单
+        request_body: null
+        path_params:
+          - name: ownerId
+            type: int
+            required: true
+            description: 客户ID
+        response_type: "String (视图名: pets/createOrUpdatePetForm)"
+        response_structure: html
+        auth: false
+        permission: null
+        special: ["@ModelAttribute 预加载 petTypes"]
+      - method: POST
+        path: /owners/{ownerId}/pets/new
+        summary: 新增宠物
+        request_body: "Pet (表单绑定: name, birthDate, type)"
+        path_params:
+          - name: ownerId
+            type: int
+            required: true
+            description: 客户ID
+        response_type: "String (redirect: /owners/{ownerId})"
+        response_structure: html
+        auth: false
+        permission: null
+        special: ["@Valid 校验 + PetValidator", "flash attribute: message"]
+      - method: GET
+        path: /owners/{ownerId}/pets/{petId}/edit
+        summary: 编辑宠物表单
+        request_body: null
+        path_params:
+          - name: ownerId
+            type: int
+            required: true
+            description: 客户ID
+          - name: petId
+            type: int
+            required: true
+            description: 宠物ID
+        response_type: "String (视图名: pets/createOrUpdatePetForm)"
+        response_structure: html
+        auth: false
+        permission: null
+        special: ["@ModelAttribute 预加载 pet + petTypes"]
+      - method: POST
+        path: /owners/{ownerId}/pets/{petId}/edit
+        summary: 更新宠物信息
+        request_body: "Pet (表单绑定: name, birthDate, type)"
+        path_params:
+          - name: ownerId
+            type: int
+            required: true
+            description: 客户ID
+          - name: petId
+            type: int
+            required: true
+            description: 宠物ID
+        response_type: "String (redirect: /owners/{ownerId})"
+        response_structure: html
+        auth: false
+        permission: null
+        special: ["@Valid 校验 + PetValidator", "flash attribute: message"]
+      - method: GET
+        path: /owners/{ownerId}/pets/{petId}/visits/new
+        summary: 新增就诊记录表单
+        request_body: null
+        path_params:
+          - name: ownerId
+            type: int
+            required: true
+            description: 客户ID
+          - name: petId
+            type: int
+            required: true
+            description: 宠物ID
+        response_type: "String (视图名: pets/createOrUpdateVisitForm)"
+        response_structure: html
+        auth: false
+        permission: null
+        special: ["@ModelAttribute 预加载 pet + owner + minVisitDate"]
+      - method: POST
+        path: /owners/{ownerId}/pets/{petId}/visits/new
+        summary: 新增就诊记录
+        request_body: "Visit (表单绑定: date, description)"
+        path_params:
+          - name: ownerId
+            type: int
+            required: true
+            description: 客户ID
+          - name: petId
+            type: int
+            required: true
+            description: 宠物ID
+        response_type: "String (redirect: /owners/{ownerId})"
+        response_structure: html
+        auth: false
+        permission: null
+        special: ["@Valid 校验", "flash attribute: message"]
+
+  # 排除的路由（不在任何模块中）
+  # GET /vets.html — 静态 HTML 页面
+  # GET /oups — 崩溃测试页

@@ -1,0 +1,33 @@
+# 实体索引 — 由 api-doc-entities 生成
+# 生成日期: 2026-07-10
+entities:
+  Vets:
+    file: Vets.md
+    module: 兽医管理
+    type: VO
+    fields: [vetList]
+  Vet:
+    file: Vet.md
+    module: 兽医管理
+    type: VO
+    fields: [id, firstName, lastName, specialties, nrOfSpecialties]
+  Owner:
+    file: Owner.md
+    module: 客户管理
+    type: VO
+    fields: [id, firstName, lastName, address, city, telephone, pets]
+  Pet:
+    file: Pet.md
+    module: 客户管理
+    type: VO
+    fields: [id, name, birthDate, type, visits]
+  Visit:
+    file: Visit.md
+    module: 客户管理
+    type: VO
+    fields: [id, date, description]
+  PetType:
+    file: PetType.md
+    module: 客户管理
+    type: VO
+    fields: [id, name]

@@ -80,8 +80,12 @@ def run_pytest_file(test_file: str, junit_output: str, markers: str = None, keyw
     return result.returncode, elapsed, result.stdout, result.stderr
 
 
-def parse_junit_xml(xml_path: str) -> dict:
+def parse_junit_xml(xml_path: str, module_name: str = "") -> dict:
     """解析 JUnit XML 为结构化数据
+
+    Args:
+        xml_path: JUnit XML 文件路径
+        module_name: 模块名（从测试文件名提取，如 "owner"）
 
     Returns:
         {
@@ -119,7 +123,8 @@ def parse_junit_xml(xml_path: str) -> dict:
 
     for ts in root.findall("testsuite"):
         suite = {
-            "name": ts.attrib.get("name", "Unknown"),
+            "name": module_name or ts.attrib.get("name", "Unknown"),
+            "module": module_name,
             "tests": int(ts.attrib.get("tests", 0)),
             "failures": int(ts.attrib.get("failures", 0)),
             "errors": int(ts.attrib.get("errors", 0)),
@@ -130,7 +135,7 @@ def parse_junit_xml(xml_path: str) -> dict:
 
         for tc in ts.findall("testcase"):
             case = {
-                "classname": tc.attrib.get("classname", ""),
+                "classname": module_name or tc.attrib.get("classname", ""),
                 "name": tc.attrib.get("name", ""),
                 "time": round(float(tc.attrib.get("time", 0)), 3),
                 "status": "passed",
@@ -145,13 +150,13 @@ def parse_junit_xml(xml_path: str) -> dict:
             if failure is not None:
                 case["status"] = "failed"
                 msg = failure.attrib.get("message", "")
-                case["message"] = msg[:200]
-                case["trace"] = (failure.text or "")[:2000]
+                case["message"] = msg[:500]
+                case["trace"] = (failure.text or "")[:5000]
             elif error is not None:
                 case["status"] = "error"
                 msg = error.attrib.get("message", "")
-                case["message"] = msg[:200]
-                case["trace"] = (error.text or "")[:2000]
+                case["message"] = msg[:500]
+                case["trace"] = (error.text or "")[:5000]
             elif skipped is not None:
                 case["status"] = "skipped"
                 case["message"] = skipped.attrib.get("message", "")
@@ -280,13 +285,12 @@ def build_detail_rows(cases: list[dict]) -> str:
         status_cn = {"passed": "通过", "failed": "失败", "error": "错误", "skipped": "跳过"}
         status = case["status"]
         status_text = status_cn.get(status, status)
-        module_name = case["classname"].split(".")[-1] if case["classname"] else "-"
 
         trace_html = ""
         if case["trace"]:
             trace_html = f"""
-            <tr class="trace-row" id="trace-{i}" style="display:none;">
-                <td colspan="5">
+            <tr class="trace-row" style="display:{'table-row' if i == 0 and status in ('failed', 'error') else 'none'};">
+                <td colspan="4">
                     <div class="trace-box">
                         <strong>{case['message']}</strong>
                         <pre>{case['trace']}</pre>
@@ -295,10 +299,9 @@ def build_detail_rows(cases: list[dict]) -> str:
             </tr>"""
 
         rows.append(f"""
-            <tr class="case-row status-{status}" onclick="toggleTrace({i})">
+            <tr class="case-row status-{status}" onclick="toggleTrace(this)">
                 <td class="col-status"><span class="badge badge-{status}">{status_text}</span></td>
                 <td class="col-name" title="{case['name']}">{case['name'][:80]}</td>
-                <td class="col-module">{module_name}</td>
                 <td class="col-time">{case['time']:.2f}s</td>
                 <td class="col-action">{"&#9660; 详情" if case['trace'] else ""}</td>
             </tr>
@@ -307,19 +310,41 @@ def build_detail_rows(cases: list[dict]) -> str:
     return "\n".join(rows)
 
 
+# 模块中文名映射（从 YAML module 名推断）
+_MODULE_CN_MAP = {
+    "system": "系统", "vet": "兽医", "owner": "主人", "pet": "宠物", "visit": "就诊",
+    "auth": "认证", "user": "用户", "role": "角色", "menu": "菜单", "dept": "部门",
+    "post": "岗位", "dict": "字典", "config": "配置", "notice": "公告",
+    "workflow": "工作流", "oss": "文件存储", "sms": "短信", "email": "邮件",
+}
+
+def _module_display_name(module: str) -> str:
+    """根据模块标识返回中文名 + 原标识"""
+    cn = _MODULE_CN_MAP.get(module, "")
+    return f"{cn} ({module})" if cn else module
+
+
 def build_module_sections(suites: list[dict]) -> str:
     """按测试套件（模块）分组生成 sections"""
     sections = []
     for suite in suites:
         cases_html = build_detail_rows(suite["cases"])
+        module = suite.get("module", suite.get("name", ""))
+        display_name = _module_display_name(module)
+        passed = suite["tests"] - suite["failures"] - suite["errors"] - suite["skipped"]
+        rate = round(passed / suite["tests"] * 100, 1) if suite["tests"] > 0 else 0
+        if rate >= 90: badge_css = "badge-passed"
+        elif rate >= 70: badge_css = "badge-failed"
+        else: badge_css = "badge-error"
         status_icon = "&#10003;" if suite["failures"] == 0 and suite["errors"] == 0 else "&#10007;"
         section_class = "section-passed" if suite["failures"] == 0 and suite["errors"] == 0 else "section-failed"
 
         sections.append(f"""
-        <div class="module-section {section_class}">
-            <div class="section-header" onclick="toggleSection(this)">
+        <div class="module-section {section_class}" data-module="{module}">
+            <div class="section-header collapsed" onclick="toggleSection(this)">
                 <span class="section-icon">{status_icon}</span>
-                <span class="section-title">{suite['name']}</span>
+                <span class="section-title">{display_name}</span>
+                <span class="section-badge"><span class="badge {badge_css}">{rate}%</span></span>
                 <span class="section-stats">
                     {suite['tests']} tests | {suite['time']}s
                     {f"| {suite['failures']} failed" if suite['failures'] > 0 else ""}
@@ -327,13 +352,12 @@ def build_module_sections(suites: list[dict]) -> str:
                 </span>
                 <span class="section-arrow">&#9660;</span>
             </div>
-            <div class="section-body">
+            <div class="section-body hidden" style="max-height:0;">
                 <table class="detail-table">
                     <thead>
                         <tr>
                             <th class="col-status">状态</th>
                             <th class="col-name">用例名称</th>
-                            <th class="col-module">模块</th>
                             <th class="col-time">耗时</th>
                             <th class="col-action">详情</th>
                         </tr>
@@ -467,6 +491,46 @@ def build_failure_html(analysis: dict) -> str:
     </div>"""
 
 
+def build_module_summary(suites: list[dict]) -> str:
+    """生成模块级汇总表 HTML"""
+    rows = []
+    for suite in suites:
+        module = suite.get("module", suite.get("name", ""))
+        display = _module_display_name(module)
+        passed = suite["tests"] - suite["failures"] - suite["errors"] - suite["skipped"]
+        rate = round(passed / suite["tests"] * 100, 1) if suite["tests"] > 0 else 0
+        if rate >= 90: badge_css = "badge-passed"
+        elif rate >= 70: badge_css = "badge-failed"
+        else: badge_css = "badge-error"
+        rows.append(f"""
+        <tr class="mod-summary-row" onclick="document.querySelector('.module-section[data-module=\\'{module}\\']')?.scrollIntoView({{behavior:'smooth',block:'center'}})" style="cursor:pointer;">
+            <td class="ms-name">{display}</td>
+            <td class="ms-num">{suite['tests']}</td>
+            <td class="ms-num" style="color:var(--accent-green);">{passed}</td>
+            <td class="ms-num" style="color:{'var(--accent-red)' if suite['failures'] > 0 else 'var(--text-muted)'};">{suite['failures']}</td>
+            <td><span class="badge {badge_css}">{rate}%</span></td>
+            <td style="font-family:'DM Mono',monospace;font-size:.82rem;color:var(--text-muted);">{suite['time']}s</td>
+        </tr>""")
+
+    return f"""
+    <div class="failure-section" style="margin-bottom:24px;">
+        <h2 class="section-heading">模块汇总</h2>
+        <table class="detail-table" style="margin-top:12px;">
+            <thead>
+                <tr>
+                    <th>模块</th>
+                    <th>总计</th>
+                    <th>通过</th>
+                    <th>失败</th>
+                    <th>通过率</th>
+                    <th>耗时</th>
+                </tr>
+            </thead>
+            <tbody>{''.join(rows)}</tbody>
+        </table>
+    </div>"""
+
+
 def generate_report(data: dict, output_dir: str) -> str:
     """生成 HTML 报告文件"""
     summary = data["summary"]
@@ -481,6 +545,7 @@ def generate_report(data: dict, output_dir: str) -> str:
     failure_analysis = build_failure_analysis(suites)
     html = template.replace("{{REPORT_TIME}}", report_time)
     html = html.replace("{{FAILURE_ANALYSIS}}", build_failure_html(failure_analysis))
+    html = html.replace("{{MODULE_SUMMARY}}", build_module_summary(suites))
     html = html.replace("{{SUMMARY_CARDS}}", build_summary_cards(summary))
     html = html.replace("{{CHART_DATA}}", build_chart_data(cases))
     html = html.replace("{{MODULE_SECTIONS}}", build_module_sections(suites))
@@ -544,7 +609,11 @@ def main():
         )
 
         if os.path.exists(junit_xml):
-            data = parse_junit_xml(junit_xml)
+            # 从文件名提取模块名: test_owner.py → owner
+            module_name = os.path.splitext(file_name)[0]
+            if module_name.startswith("test_"):
+                module_name = module_name[5:]
+            data = parse_junit_xml(junit_xml, module_name)
             s = data["summary"]
             if s["tests"] > 0:
                 all_results.append(data)

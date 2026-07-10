@@ -1,0 +1,60 @@
+module: home
+module_name: "首页"
+base_url: "http://localhost:8080"
+
+global_variables:
+  env_version: "v1.0"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/x-www-form-urlencoded"
+  auth_headers: []
+
+auth_setup:
+  type: none
+  login_endpoint: "/none"
+  token_prefix: "none"
+  params: {}
+  accounts:
+    anonymous:
+      username: "N/A"
+      password: "N/A"
+  extracts:
+    token: "$.none"
+
+testcases:
+  - id: TC_HOME_001
+    title: "GET /_访问欢迎页_返回HTML页面"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: GET
+    path: "/"
+    description: "验证欢迎页正常加载，返回 Thymeleaf 渲染的 HTML 页面"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "PetClinic"
+        - "Welcome"
+
+  - id: TC_HOME_002
+    title: "GET /_服务器内部错误_返回错误页面"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/"
+    description: "验证服务器内部错误（如模板渲染失败）时返回错误页面，需服务端模拟异常"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "html"

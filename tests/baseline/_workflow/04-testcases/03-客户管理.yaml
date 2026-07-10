@@ -1,0 +1,518 @@
+module: owner
+module_name: "客户管理"
+base_url: "http://localhost:8080"
+
+global_variables:
+  env_version: "v1.0"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/x-www-form-urlencoded"
+  auth_headers: []
+
+auth_setup:
+  type: none
+  login_endpoint: "/none"
+  token_prefix: "none"
+  params: {}
+  accounts:
+    anonymous:
+      username: "N/A"
+      password: "N/A"
+  extracts:
+    token: "$.none"
+
+testcases:
+  # ── 1. GET /owners 查询客户列表 ──
+  - id: TC_OWNER_001
+    title: "GET /owners_查询客户列表_返回分页HTML页面"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: GET
+    path: "/owners"
+    description: "验证未指定姓氏时返回所有客户的分页列表页面"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Owners"
+
+  - id: TC_OWNER_002
+    title: "GET /owners_搜索不存在的姓氏_返回查找表单"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/owners"
+    description: "验证搜索不存在的姓氏时返回查找表单并提示 has not been found"
+    auth:
+      required: false
+    request:
+      query:
+        lastName: "NonExistentName12345"
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "has not been found"
+
+  # ── 2. GET /owners/find 查找客户表单 ──
+  - id: TC_OWNER_003
+    title: "GET /owners/find_访问查找客户表单_返回HTML页面"
+    priority: P1
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/owners/find"
+    description: "验证返回客户查找页面，包含姓氏输入表单"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Find"
+
+  - id: TC_OWNER_004
+    title: "GET /owners/find_服务器内部错误_返回错误页面"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/owners/find"
+    description: "验证服务器内部错误时返回 error 视图，需服务端模拟异常"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 500
+      response_type: html
+      body_contains:
+        - "error"
+
+  # ── 3. GET /owners/new 新增客户表单 ──
+  - id: TC_OWNER_005
+    title: "GET /owners/new_访问新增客户表单_返回空白表单"
+    priority: P1
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/owners/new"
+    description: "验证返回新增客户页面，包含空白 Owner 表单"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Owner"
+
+  - id: TC_OWNER_006
+    title: "GET /owners/new_服务器内部错误_返回错误页面"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/owners/new"
+    description: "验证服务器内部错误时返回 error 视图，需服务端模拟异常"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 500
+      response_type: html
+      body_contains:
+        - "error"
+
+  # ── 4. POST /owners/new 新增客户 ──
+  - id: TC_OWNER_007
+    title: "POST /owners/new_提交合法客户信息_创建成功并重定向"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/owners/new"
+    description: "验证提交完整合法的客户信息后成功创建并重定向到客户详情页"
+    auth:
+      required: false
+    request:
+      body:
+        firstName: "Test"
+        lastName: "Owner"
+        address: "123 Test St"
+        city: "TestCity"
+        telephone: "1234567890"
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Owner Information"
+
+  - id: TC_OWNER_008
+    title: "POST /owners/new_firstName为空_校验失败重定向回表单"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/owners/new"
+    description: "验证 firstName 为空时 @Valid 校验失败，重定向回新增表单页并显示错误"
+    auth:
+      required: false
+    request:
+      body:
+        firstName: ""
+        lastName: "Owner"
+        address: "123 Test St"
+        city: "TestCity"
+        telephone: "1234567890"
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Owner"
+
+  # ── 5. GET /owners/{ownerId} 查看客户详情 ──
+  - id: TC_OWNER_009
+    title: "GET /owners/{ownerId}_查看存在的客户_返回详情页面"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/owners/1"
+    description: "验证查看存在的客户详情页，包含宠物和就诊记录信息"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Owner Information"
+
+  - id: TC_OWNER_010
+    title: "GET /owners/{ownerId}_客户不存在_返回错误页面"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/owners/9999"
+    description: "验证 ownerId 对应的客户不存在时返回 error 视图"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "error"
+
+  # ── 6. GET /owners/{ownerId}/edit 编辑客户表单 ──
+  - id: TC_OWNER_011
+    title: "GET /owners/{ownerId}/edit_访问编辑客户表单_返回预填充表单"
+    priority: P1
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/owners/1/edit"
+    description: "验证返回编辑客户页面，表单预填充当前客户信息"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Owner"
+
+  - id: TC_OWNER_012
+    title: "GET /owners/{ownerId}/edit_客户不存在_返回错误页面"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/owners/9999/edit"
+    description: "验证编辑不存在的客户时返回 error 视图"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "error"
+
+  # ── 7. POST /owners/{ownerId}/edit 更新客户信息 ──
+  - id: TC_OWNER_013
+    title: "POST /owners/{ownerId}/edit_提交合法更新_更新成功并重定向"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/owners/1/edit"
+    description: "验证提交合法修改后的客户信息，成功更新并重定向到客户详情页"
+    auth:
+      required: false
+    request:
+      body:
+        firstName: "George"
+        lastName: "Franklin"
+        address: "110 W. Liberty St."
+        city: "Madison"
+        telephone: "6085551023"
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Owner Information"
+
+  - id: TC_OWNER_014
+    title: "POST /owners/{ownerId}/edit_firstName为空_校验失败重定向回表单"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/owners/1/edit"
+    description: "验证 firstName 为空时 @Valid 校验失败，重定向回编辑表单页并显示错误"
+    auth:
+      required: false
+    request:
+      body:
+        firstName: ""
+        lastName: "Franklin"
+        address: "110 W. Liberty St."
+        city: "Madison"
+        telephone: "6085551023"
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Owner"
+
+  # ── 8. GET /owners/{ownerId}/pets/new 新增宠物表单 ──
+  - id: TC_OWNER_015
+    title: "GET /owners/{ownerId}/pets/new_访问新增宠物表单_返回空白表单"
+    priority: P1
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/owners/1/pets/new"
+    description: "验证返回新增宠物页面，包含空白 Pet 表单及 PetType 下拉列表"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Pet"
+
+  - id: TC_OWNER_016
+    title: "GET /owners/{ownerId}/pets/new_客户不存在_返回错误页面"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/owners/9999/pets/new"
+    description: "验证客户不存在时返回 error 视图"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "error"
+
+  # ── 9. POST /owners/{ownerId}/pets/new 新增宠物 ──
+  - id: TC_OWNER_017
+    title: "POST /owners/{ownerId}/pets/new_提交合法宠物信息_创建成功并重定向"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/owners/1/pets/new"
+    description: "验证提交完整合法的宠物信息后成功创建并重定向到客户详情页"
+    auth:
+      required: false
+    request:
+      body:
+        name: "TestPet"
+        birthDate: "2024-01-01"
+        type: "1"
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Owner Information"
+
+  - id: TC_OWNER_018
+    title: "POST /owners/{ownerId}/pets/new_name为空_校验失败重定向回表单"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/owners/1/pets/new"
+    description: "验证宠物名称为空时 @Valid 校验失败，重定向回新增宠物表单页并显示错误"
+    auth:
+      required: false
+    request:
+      body:
+        name: ""
+        birthDate: "2024-01-01"
+        type: "1"
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Pet"
+
+  # ── 10. GET /owners/{ownerId}/pets/{petId}/edit 编辑宠物表单 ──
+  - id: TC_OWNER_019
+    title: "GET /owners/{ownerId}/pets/{petId}/edit_访问编辑宠物表单_返回预填充表单"
+    priority: P1
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/owners/1/pets/1/edit"
+    description: "验证返回编辑宠物页面，表单预填充当前宠物信息及 PetType 列表"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Pet"
+
+  - id: TC_OWNER_020
+    title: "GET /owners/{ownerId}/pets/{petId}/edit_宠物不存在_返回错误页面"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/owners/1/pets/9999/edit"
+    description: "验证宠物不存在时返回 error 视图"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "error"
+
+  # ── 11. POST /owners/{ownerId}/pets/{petId}/edit 更新宠物信息 ──
+  - id: TC_OWNER_021
+    title: "POST /owners/{ownerId}/pets/{petId}/edit_提交合法更新_更新成功并重定向"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/owners/1/pets/1/edit"
+    description: "验证提交合法修改后的宠物信息，成功更新并重定向到客户详情页"
+    auth:
+      required: false
+    request:
+      body:
+        name: "UpdatedPet"
+        birthDate: "2024-06-15"
+        type: "1"
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Owner Information"
+
+  - id: TC_OWNER_022
+    title: "POST /owners/{ownerId}/pets/{petId}/edit_name为空_校验失败重定向回表单"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/owners/1/pets/1/edit"
+    description: "验证宠物名称为空时 @Valid 校验失败，重定向回编辑宠物表单页并显示错误"
+    auth:
+      required: false
+    request:
+      body:
+        name: ""
+        birthDate: "2024-06-15"
+        type: "1"
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Pet"
+
+  # ── 12. GET /owners/{ownerId}/pets/{petId}/visits/new 新增就诊记录表单 ──
+  - id: TC_OWNER_023
+    title: "GET /owners/{ownerId}/pets/{petId}/visits/new_访问新增就诊表单_返回空白表单"
+    priority: P1
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/owners/1/pets/1/visits/new"
+    description: "验证返回新增就诊记录页面，包含空白 Visit 表单，日期默认为明天"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Visit"
+
+  - id: TC_OWNER_024
+    title: "GET /owners/{ownerId}/pets/{petId}/visits/new_宠物不存在_返回错误页面"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/owners/1/pets/9999/visits/new"
+    description: "验证宠物不存在时返回 error 视图"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "error"
+
+  # ── 13. POST /owners/{ownerId}/pets/{petId}/visits/new 新增就诊记录 ──
+  - id: TC_OWNER_025
+    title: "POST /owners/{ownerId}/pets/{petId}/visits/new_提交合法就诊信息_创建成功并重定向"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/owners/1/pets/1/visits/new"
+    description: "验证提交完整合法的就诊记录后成功创建并重定向到客户详情页"
+    auth:
+      required: false
+    request:
+      body:
+        date: "2024-07-01"
+        description: "Regular checkup"
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Owner Information"
+
+  - id: TC_OWNER_026
+    title: "POST /owners/{ownerId}/pets/{petId}/visits/new_description为空_校验失败重定向回表单"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/owners/1/pets/1/visits/new"
+    description: "验证就诊描述为空时 @Valid 校验失败，重定向回新增就诊表单页并显示错误"
+    auth:
+      required: false
+    request:
+      body:
+        date: "2024-07-01"
+        description: ""
+    expected:
+      status_code: 200
+      response_type: html
+      body_contains:
+        - "Visit"

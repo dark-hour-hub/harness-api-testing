@@ -1,0 +1,151 @@
+# ============================================================
+# 模块测试用例 YAML 模板 (Pytest 驱动优化版)
+# ============================================================
+module: <MODULE>
+module_name: "<模块中文名>"
+base_url: "<base url>"
+
+# ──────────────────────────────────────────
+# 1. 全局变量预设 (供全局 ${} 引用)
+# ──────────────────────────────────────────
+global_variables:
+  default_page_size: 10
+  env_version: "v1.0"
+
+# ──────────────────────────────────────────
+# 2. 全局请求头配置
+# ──────────────────────────────────────────
+headers_config:
+  # 公共请求头 (所有接口默认携带，无论是公开还是受保护接口)
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+    - name: "X-Request-Source"
+      value: "pytest-automation"
+
+  # 认证请求头 (仅当用例 auth.required 为 true 时，由 Pytest Fixture 动态注入)
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}" # 运行时替换
+    - name: "X-Client-Id"
+      value: "${auth.params.admin.tenant_id}"
+    - name: "username"
+      value: "${auth.accounts.admin.username}"
+
+# ──────────────────────────────────────────
+# 3. 认证统一配置 (用于 Pytest Session 级别的自动登录夹具)
+# ──────────────────────────────────────────
+auth_setup:
+  #   bearer_token  - Bearer Token 认证（JWT/Token）
+  #   basic         - HTTP Basic Auth
+  #   apikey        - API Key Header
+  #   oauth2        - OAuth2 认证
+  #   none          - 无认证
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+
+  # 其他参数
+  params:
+    admin:
+      tenant_id: "<admin_tenant_id>"
+    visitor:
+      tenant_id: "<visitor_tenant_id>"
+  # 登录账号池 (供用例按需切换)
+  accounts:
+    admin:
+      username: "<admin_user>"
+      password: "<admin_pwd>"
+    readonly:
+      username: "<readonly_user>"
+      password: "<readonly_pwd>"
+
+  # 从登录响应中提取凭证，供 auth_headers 使用
+  extracts:
+    token: "$.data.token"
+
+# ──────────────────────────────────────────
+# 4. 测试用例列表 (映射为 Pytest 的 @pytest.mark.parametrize)
+# ──────────────────────────────────────────
+testcases:
+  - id: TC_<MODULE>_001
+    title: "POST /api/users_创建新用户_成功"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/api/users"
+    description: "验证管理员可以成功创建新用户"
+
+    # 权限声明
+    auth:
+      required: true         # true: 注入 headers_config.auth_headers; false: 仅使用 public_headers
+      account: "admin"       # 指定使用 auth_setup.accounts 中的哪个账号夹具
+
+    # 请求定义
+    request:
+      # 接口特有请求头 (会与 public_headers 及 auth_headers 合并，同名覆盖)
+      headers:
+        - name: "X-Custom-Trace"
+          value: "trace_${env_version}"
+
+      # 路径参数
+      # 示例: 最终 URL 为 /api/users 或 /api/users/${userId}
+      path_params:
+        id: "${userId}"
+
+      # 查询参数 (自动转换为 requests/playwright 的 params)
+      query:
+        pageNum: 1
+        pageSize: 10
+
+      # 请求体 (支持嵌套和变量引用)
+      body:
+        username: "test_user_01"
+        status: "0"
+        role_ids: [1, 2]
+
+    # 变量提取 (运行完毕后，将响应中的字段存入上下文字典，供后续用例 ${} 引用)
+    extracts:
+      created_user_id: "$.data.userId"
+
+    # 预期断言
+    expected:
+      status_code: 200
+      response_type: json # json/html
+      business_code: 200
+      business_message: "操作成功"
+      # 支持断言响应体中必须存在的 JSON 键
+      data_exists:
+        - "userId"
+        - "createdAt"
+      # 支持具体的字段值断言
+      data_equals:
+        "$.data.status": "0"
+      # response_type=html 时必填
+      body_contains:
+        - "欢迎使用"
+
+  - id: TC_<MODULE>_002
+    title: "GET /api/users/{id}_查询公开用户信息_成功"
+    priority: P1
+    tags: ["正常"]
+    method: GET
+    # 使用上一个用例提取的变量 ${created_user_id}
+    path: "/api/users/${created_user_id}/public-info"
+    description: "未登录状态下查询用户公开资料"
+    depends_on:
+      - "TC_<MODULE>_001"  # 依赖创建用户的用例
+
+    auth:
+      required: false        # 公开接口，不注入认证头
+
+    request:
+      query: {}
+      body: {}
+
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 200
+      data_exists:
+        - "username"
