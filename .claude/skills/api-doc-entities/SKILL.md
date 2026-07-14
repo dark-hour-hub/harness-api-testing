@@ -9,6 +9,7 @@ description: 从 DTO/VO 源码生成实体类文档。读取 _manifest.yaml 中�
 
 ## 前置输入
 
+0. `config.yaml` — `source.backend[].path`（仅 `enabled: true`），作为 codegraph 的 `projectPath`
 1. `tests/baseline/_workflow/03-api-docs/_manifest.yaml` — 取 `all_dtos` 和 `all_vos` 字段
 2. `.claude/references/实体类文档模板.md` — 实体文件模板
 3. `.claude/skills/api-doc-entities/references/field-resolution.md` — JSON 键名优先级链
@@ -28,6 +29,12 @@ tests/baseline/_workflow/03-api-docs/entities/
 
 ## 流程
 
+### Step 0 — 读取源码路径配置
+
+读 `config.yaml`，提取 `source.backend[]` 中 `enabled: true` 的 `path`。取第一个作为默认 `projectPath`。
+
+多后端时：每个 Agent 收到的 prompt 中标注该模块实体对应的 projectPath。若 `source.backend[]` 为空或全部 disabled，报错退出。
+
 ### Step 1 — 读取输入
 
 读 `_manifest.yaml`，提取 `all_dtos` 和 `all_vos`。合并为一个全局去重清单，按模块分组。
@@ -41,7 +48,8 @@ tests/baseline/_workflow/03-api-docs/entities/
 1. **本模块 DTO/VO 类名清单**（从 manifest 提取，仅本模块的）
 2. **实体类文档模板**（完整内联）
 3. **字段解析规则**（精简版，见下方 Agent 规则）
-4. **禁止清单**
+4. **源码项目路径**（Step 0 提取的 `projectPath`，传递给 codegraph 工具）
+5. **禁止清单**
 
 ### Step 3 — 汇总索引
 
@@ -69,11 +77,13 @@ entities:
 
 ### 源码读取
 
-用 `codegraph_explore` 一次性批量读取本模块所有 DTO/VO 源码（1-2 次调用）。**禁止逐条 `codegraph_node`**。
+用 `codegraph_explore` 一次性批量读取本模块所有 DTO/VO 源码（1-2 次调用），**必须传入 `projectPath`**。**禁止逐条 `codegraph_node`**。
 
 ```
-codegraph_explore query="LoginBody PasswordLoginBody LoginVo CaptchaVo ..." maxFiles=15
+codegraph_explore query="LoginBody PasswordLoginBody LoginVo CaptchaVo ..." maxFiles=15 projectPath="{backend_path}"
 ```
+
+`{backend_path}` 替换为 Step 0 获取的源码路径。
 
 ### 字段 JSON 键名（优先级链，命中即停止）
 

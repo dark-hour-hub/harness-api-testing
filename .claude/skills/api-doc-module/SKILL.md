@@ -9,6 +9,7 @@ description: 为单个模块生成 API 接口文档。读取 _manifest.yaml 获�
 
 ## 前置输入
 
+0. `config.yaml` — `source.backend[].path`（仅 `enabled: true`），作为 codegraph 的 `projectPath` 和 i18n properties 搜索根目录
 1. `tests/baseline/_workflow/03-api-docs/_manifest.yaml` — 模块路由清单 + 全局上下文
 2. `tests/baseline/_workflow/03-api-docs/API接口文档.md` — 模块文档
 3. `tests/baseline/_workflow/03-api-docs/entities/` — 实体文件目录（按需读取）
@@ -29,6 +30,12 @@ tests/baseline/_workflow/03-api-docs/modules/
 ---
 
 ## 流程
+
+### Step 0 — 读取源码路径配置
+
+读 `config.yaml`，提取 `source.backend[]` 中 `enabled: true` 的 `path`。取第一个作为默认 `projectPath`。
+
+多后端时：每个 Agent 收到的 prompt 中标注该模块对应的 projectPath。若 `source.backend[]` 为空或全部 disabled，报错退出。
 
 ### Step 1 — 读取 manifest
 
@@ -65,10 +72,12 @@ tests/baseline/_workflow/03-api-docs/modules/
 
 5. **生成铁律**（见下方 Agent 规则）
 
-6. **i18n 解析指令**：
+6. **源码项目路径**（Step 0 提取的 `projectPath`，传递给 codegraph 和 Glob 工具）
+
+7. **i18n 解析指令**：
    - 错误响应 msg 来源有三种：校验注解 `message="{key}"`（需查 properties）、Service 层 `MessageUtils.message("key")`（需查 properties）、硬编码字符串（直接用）
    - 前两种必须搜索 properties 文件尝试解析，按 `i18n-resolution.md` 流程执行
-   - 寻找 properties 文件：用 Glob 搜索源码根目录下 `**/resources/**/messages*.properties`
+   - 寻找 properties 文件：用 Glob 在 `{backend_path}` 路径下搜索 `**/resources/**/messages*.properties`
    - 翻译后的实际文本填入 msg 列；仅在找不到时保留原始 key，并标注 `(i18n key, 未找到翻译)`
 
 ### Step 4 — 验证
@@ -86,15 +95,17 @@ Agent 返回后，检查模块文件：
 
 ### 源码读取（Agent 自己执行）
 
-用 `codegraph_explore` 一次性读取本模块所有 Controller + 关键 ServiceImpl：
+用 `codegraph_explore` 一次性读取本模块所有 Controller + 关键 ServiceImpl，**必须传入 `projectPath`**：
 
 ```
-codegraph_explore query="AuthController CaptchaController SysLoginService" maxFiles=8 projectPath="D:/java/project/RuoYi-Vue-Plus"
+codegraph_explore query="AuthController CaptchaController SysLoginService" maxFiles=8 projectPath="{backend_path}"
 ```
+
+`{backend_path}` 替换为 prompt 中提供的源码路径。
 
 实体文件从 `entities/` 目录按需 Read，不预加载全部。
 
-**当需要解析 i18n 消息时**，同步搜索项目的 i18n 资源文件。用 Glob 搜索 `{源码根目录}/**/src/main/resources/**/messages*.properties`，优先级：当前模块 resources > 主应用 resources > common 模块 resources。具体解析流程见 `i18n-resolution.md`。
+**当需要解析 i18n 消息时**，同步搜索项目的 i18n 资源文件。用 Glob 在 `{backend_path}` 路径下搜索 `**/src/main/resources/**/messages*.properties`，优先级：当前模块 resources > 主应用 resources > common 模块 resources。具体解析流程见 `i18n-resolution.md`。
 
 ### 输出模板
 
