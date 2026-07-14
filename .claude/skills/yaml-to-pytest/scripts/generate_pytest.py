@@ -2,11 +2,18 @@
 """
 YAML -> Pytest 脚本生成器
 
-从 tests/baseline/_workflow/04-testcases/ 读取 YAML 测试用例，
-生成 pytest 脚本到 tests/baseline/generated/api-test/。
+从 YAML 测试用例目录读取 YAML 测试用例，生成 pytest 脚本。
+
+支持两种模式:
+  --mode baseline  → 全量模式（默认）
+  --mode diff      → 增量模式
+
+也可显式指定 --yaml-dir 和 --output-dir（优先级高于 --mode）。
 
 用法:
-  python generate_pytest.py [--yaml-dir <dir>] [--output-dir <dir>]
+  python generate_pytest.py --mode baseline
+  python generate_pytest.py --mode diff
+  python generate_pytest.py --yaml-dir <dir> --output-dir <dir>
 """
 
 import sys
@@ -31,6 +38,20 @@ SKIP_CONTENT_TYPES = {"multipart/form-data"}
 _PROJECT_ROOT = Path(__file__).resolve().parents[4]
 _TEMPLATE_DIR = Path(__file__).resolve().parents[1] / "template"
 
+# 模式 → 默认路径映射
+MODE_PATHS = {
+    "baseline": {
+        "yaml_dir": "tests/baseline/_workflow/04-testcases",
+        "output_dir": "tests/baseline/generated/api-test",
+        "yaml_rel_path": "_workflow/04-testcases",
+    },
+    "diff": {
+        "yaml_dir": "tests/diff/_workflow/02-diff-testcases",
+        "output_dir": "tests/diff/generated/api-test",
+        "yaml_rel_path": "_workflow/02-diff-testcases",
+    },
+}
+
 TEST_FILE_TEMPLATE = '''\
 """
 test_{module}.py --- 由 yaml-to-pytest skill 自动生成，请勿手动修改
@@ -43,7 +64,7 @@ import yaml
 from pathlib import Path
 
 # --- 加载 YAML 数据（修改 YAML 后重新运行 pytest 即可生效，无需重新生成本文件）---
-_YAML_DIR = Path(__file__).resolve().parents[2] / "_workflow" / "04-testcases"
+_YAML_DIR = Path(__file__).resolve().parents[2] / "{yaml_rel_path}"
 _YAML_FILE = _YAML_DIR / "{yaml_filename}"
 with open(_YAML_FILE, "r", encoding="utf-8") as _f:
     MODULE_DATA = yaml.safe_load(_f)
@@ -151,7 +172,7 @@ def generate_conftest(output_dir):
     return dst
 
 
-def generate_test_file(yaml_path, output_dir):
+def generate_test_file(yaml_path, output_dir, yaml_rel_path):
     """从单个 YAML 文件生成 test_{module}.py"""
     yaml_path = Path(yaml_path)
     with open(yaml_path, "r", encoding="utf-8") as f:
@@ -182,6 +203,7 @@ def generate_test_file(yaml_path, output_dir):
     content = TEST_FILE_TEMPLATE.format(
         module=module,
         yaml_filename=yaml_path.name,
+        yaml_rel_path=yaml_rel_path,
         module_name=module_name,
         test_functions="\n".join(funcs),
     )
@@ -212,14 +234,16 @@ def validate_syntax(output_dir):
 def main():
     parser = argparse.ArgumentParser(description="YAML -> Pytest 脚本生成器")
     parser.add_argument(
-        "--yaml-dir",
-        default="tests/baseline/_workflow/04-testcases",
-        help="YAML 测试用例目录",
+        "--mode", choices=["baseline", "diff"], default="baseline",
+        help="baseline=全量模式（默认）, diff=增量模式",
     )
     parser.add_argument(
-        "--output-dir",
-        default="tests/baseline/generated/api-test",
-        help="输出目录",
+        "--yaml-dir", default=None,
+        help="YAML 测试用例目录（显式指定时覆盖 --mode 推导）",
+    )
+    parser.add_argument(
+        "--output-dir", default=None,
+        help="输出目录（显式指定时覆盖 --mode 推导）",
     )
     parser.add_argument(
         "--no-verify",
@@ -228,8 +252,14 @@ def main():
     )
     args = parser.parse_args()
 
-    yaml_dir = _PROJECT_ROOT / args.yaml_dir
-    output_dir = _PROJECT_ROOT / args.output_dir
+    # 路径决议: 显式指定 > mode 推导
+    mode_config = MODE_PATHS[args.mode]
+    yaml_dir_rel = args.yaml_dir if args.yaml_dir else mode_config["yaml_dir"]
+    output_dir_rel = args.output_dir if args.output_dir else mode_config["output_dir"]
+    yaml_rel_path = mode_config["yaml_rel_path"]
+
+    yaml_dir = _PROJECT_ROOT / yaml_dir_rel
+    output_dir = _PROJECT_ROOT / output_dir_rel
 
     if not yaml_dir.exists():
         print(f"ERROR: YAML 目录不存在: {yaml_dir}")
@@ -253,7 +283,7 @@ def main():
     total_cases = 0
     total_skipped = 0
     for yf in yaml_files:
-        result = generate_test_file(yf, output_dir)
+        result = generate_test_file(yf, output_dir, yaml_rel_path)
         if result:
             fpath, n_cases, n_skipped = result
             total_cases += n_cases

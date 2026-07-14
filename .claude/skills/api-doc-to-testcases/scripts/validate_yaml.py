@@ -195,24 +195,33 @@ def validate_yaml_structure(data, filepath):
     validate_required(auth_setup, "type", "auth_setup")
     validate_enum(auth_setup, "type", VALID_AUTH_TYPES, "auth_setup")
 
-    validate_required(auth_setup, "login_endpoint", "auth_setup")
-    validate_pattern(auth_setup, "login_endpoint", LOGIN_ENDPOINT_PATTERN,
-                     "应为纯路径如 /auth/login，不含 HTTP 方法前缀", "auth_setup")
+    auth_type = auth_setup.get("type", "")
+    is_no_auth = (auth_type == "none")
 
-    validate_required(auth_setup, "token_prefix", "auth_setup")
+    # login_endpoint: 无认证时可为空
+    if not is_no_auth:
+        validate_required(auth_setup, "login_endpoint", "auth_setup")
+        validate_pattern(auth_setup, "login_endpoint", LOGIN_ENDPOINT_PATTERN,
+                         "应为纯路径如 /auth/login，不含 HTTP 方法前缀", "auth_setup")
 
-    # accounts 必须至少有一个条目
-    validate_required(auth_setup, "accounts", "auth_setup")
+    # token_prefix: 无认证时可为空
+    if not is_no_auth:
+        validate_required(auth_setup, "token_prefix", "auth_setup")
+
+    # accounts: 无认证时可为空
     accounts = auth_setup.get("accounts", {})
-    if not accounts:
-        error("auth_setup.accounts 至少需要一个测试账号")
+    if not is_no_auth:
+        validate_required(auth_setup, "accounts", "auth_setup")
+        if not accounts:
+            error("auth_setup.accounts 至少需要一个测试账号")
 
     # extracts
-    validate_required(auth_setup, "extracts", "auth_setup")
     extracts = auth_setup.get("extracts", {})
-    if isinstance(extracts, dict):
-        if "token" not in extracts:
-            error("auth_setup.extracts 至少需要包含 'token' 字段")
+    if not is_no_auth:
+        validate_required(auth_setup, "extracts", "auth_setup")
+        if isinstance(extracts, dict):
+            if "token" not in extracts:
+                error("auth_setup.extracts 至少需要包含 'token' 字段")
 
     # ── auth_headers 中的 ${auth.xxx} 引用校验 ──
     auth_headers = hc.get("auth_headers", [])

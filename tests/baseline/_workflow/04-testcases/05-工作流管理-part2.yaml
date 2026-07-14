@@ -1,0 +1,824 @@
+module: workflow-instance-spel
+module_name: 工作流管理-流程实例+Spel表达式
+base_url: http://localhost:8080
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+  - name: Content-Type
+    value: application/json
+  auth_headers:
+  - name: Authorization
+    value: ${auth.token_prefix} ${auth.token}
+  - name: clientid
+    value: ${auth.params.admin.clientId}
+auth_setup:
+  type: bearer_token
+  login_endpoint: /auth/login
+  token_prefix: 'Bearer '
+  params:
+    admin:
+      clientId: e5cd7e4891bf95d1d19206ce24a7b32e
+      grantType: password
+      tenantId: '000000'
+    test:
+      clientId: e5cd7e4891bf95d1d19206ce24a7b32e
+      grantType: password
+      tenantId: '000000'
+  accounts:
+    admin:
+      username: admin
+      password: admin123
+    test:
+      username: test
+      password: '666666'
+  extracts:
+    token: $.data.access_token
+testcases:
+- id: TC_WF_INSTANCE_001
+  title: GET /workflow/instance/pageByRunning_默认分页查询_返回运行中流程实例列表
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  - 冒烟
+  method: GET
+  path: /workflow/instance/pageByRunning
+  description: 使用管理员账号分页查询正在运行的流程实例（状态包含草稿、待审核、已退回、已撤销），验证返回分页数据。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_WF_INSTANCE_002
+  title: GET /workflow/instance/pageByRunning_传入超界页码_返回空列表
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /workflow/instance/pageByRunning
+  description: 传入超出数据范围的超大页码，验证系统返回空rows列表且total不变，不会抛出异常。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 999999
+      pageSize: 10
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_WF_INSTANCE_003
+  title: GET /workflow/instance/pageByFinish_默认分页查询_返回已结束流程实例列表
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  - 冒烟
+  method: GET
+  path: /workflow/instance/pageByFinish
+  description: 使用管理员账号分页查询已结束的流程实例（状态包含已完成、已作废、已终止），验证返回分页数据。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_WF_INSTANCE_004
+  title: GET /workflow/instance/pageByFinish_传入超界页码_返回空列表
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /workflow/instance/pageByFinish
+  description: 传入超出数据范围的超大页码，验证系统返回空rows列表且total不变，不会抛出异常。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 999999
+      pageSize: 10
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_WF_INSTANCE_005
+  title: GET /workflow/instance/getInfo/{businessId}_有效业务ID查询_返回流程实例详情
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: GET
+  path: /workflow/instance/getInfo/{businessId}
+  description: 传入系统中存在的流程实例业务ID，验证返回流程实例详细信息，包含flowName、flowCode、businessId、flowStatus等核心字段。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      businessId: BIZ20230721001
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - data
+- id: TC_WF_INSTANCE_006
+  title: GET /workflow/instance/getInfo/{businessId}_不存在的业务ID_返回未找到流程实例
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /workflow/instance/getInfo/{businessId}
+  description: 传入系统中不存在的业务ID，验证系统返回500业务错误码并提示未找到流程实例。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      businessId: NONEXIST_99999
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_007
+  title: DELETE /workflow/instance/deleteByBusinessIds/{businessIds}_有效业务ID删除_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: DELETE
+  path: /workflow/instance/deleteByBusinessIds/{businessIds}
+  description: 传入系统中存在的流程实例业务ID，验证删除成功并返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      businessIds: BIZ20230721001
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_WF_INSTANCE_008
+  title: DELETE /workflow/instance/deleteByBusinessIds/{businessIds}_所有业务ID均不存在_返回操作失败
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: DELETE
+  path: /workflow/instance/deleteByBusinessIds/{businessIds}
+  description: 传入系统中全部不存在的业务ID列表，验证服务层返回false，系统返回500错误码提示操作失败。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      businessIds: 99999999,99999998
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_009
+  title: DELETE /workflow/instance/deleteByInstanceIds/{instanceIds}_有效实例ID删除_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: DELETE
+  path: /workflow/instance/deleteByInstanceIds/{instanceIds}
+  description: 传入系统中存在的流程实例ID，验证删除成功并返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      instanceIds: '1001'
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_WF_INSTANCE_010
+  title: DELETE /workflow/instance/deleteByInstanceIds/{instanceIds}_所有实例ID均不存在_返回操作失败
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: DELETE
+  path: /workflow/instance/deleteByInstanceIds/{instanceIds}
+  description: 传入系统中全部不存在的实例ID列表，验证服务层返回false，系统返回500错误码提示操作失败。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      instanceIds: 999999,999998
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_011
+  title: DELETE /workflow/instance/deleteHisByInstanceIds/{instanceIds}_有效已完成实例ID删除_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: DELETE
+  path: /workflow/instance/deleteHisByInstanceIds/{instanceIds}
+  description: 传入系统中已完成的流程实例ID，验证删除成功并返回操作成功（同时级联清理关联的任务、用户、历史任务数据）。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      instanceIds: '1002'
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_WF_INSTANCE_012
+  title: DELETE /workflow/instance/deleteHisByInstanceIds/{instanceIds}_所有实例ID均不存在_返回操作失败
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: DELETE
+  path: /workflow/instance/deleteHisByInstanceIds/{instanceIds}
+  description: 传入系统中全部不存在的已结束实例ID列表，验证服务层返回false，系统返回500错误码提示操作失败。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      instanceIds: 999999,999998
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_013
+  title: PUT /workflow/instance/cancelProcessApply_发起人撤销待审核流程_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: PUT
+  path: /workflow/instance/cancelProcessApply
+  description: 流程发起人撤销自己发起的待审核流程，传入有效的businessId和撤销意见，验证撤销成功返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    body:
+      businessId: BIZ20230721001
+      message: 申请撤销该流程
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_WF_INSTANCE_014
+  title: PUT /workflow/instance/cancelProcessApply_不存在业务ID_返回未找到流程实例
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: PUT
+  path: /workflow/instance/cancelProcessApply
+  description: 传入系统中不存在的业务ID尝试撤销流程，验证系统返回500错误码并提示未找到流程实例。
+  auth:
+    required: true
+    account: admin
+  request:
+    body:
+      businessId: NONEXIST_99999
+      message: 申请撤销不存在的流程
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_015
+  title: PUT /workflow/instance/active/{id}_激活流程实例_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: PUT
+  path: /workflow/instance/active/{id}
+  description: 传入有效的流程实例ID并将active设为true激活该流程实例，验证返回data为true。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      id: 1001
+    query:
+      active: true
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - data
+- id: TC_WF_INSTANCE_016
+  title: PUT /workflow/instance/active/{id}_挂起不存在的流程实例_返回操作失败
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: PUT
+  path: /workflow/instance/active/{id}
+  description: 传入系统中不存在的流程实例ID尝试挂起操作，验证系统返回false或业务异常。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      id: 999999
+    query:
+      active: false
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_017
+  title: GET /workflow/instance/pageByCurrent_默认分页查询_返回当前登录人流程实例列表
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  - 冒烟
+  method: GET
+  path: /workflow/instance/pageByCurrent
+  description: 使用管理员账号查询其发起的流程实例列表，验证按create_by自动过滤当前登录用户并返回分页数据。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_WF_INSTANCE_018
+  title: GET /workflow/instance/pageByCurrent_传入超界页码_返回空列表
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /workflow/instance/pageByCurrent
+  description: 传入超出数据范围的超大页码，验证系统返回空rows列表且total不变，不会抛出异常。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 999999
+      pageSize: 10
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_WF_INSTANCE_019
+  title: GET /workflow/instance/flowHisTaskList/{businessId}_有效业务ID查询_返回流程图和任务记录
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: GET
+  path: /workflow/instance/flowHisTaskList/{businessId}
+  description: 传入有效的流程业务ID，验证返回流程实例ID及任务列表（含待审批任务和历史任务），包含id、nodeCode、nodeName、flowStatus等字段。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      businessId: BIZ20230721001
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - data
+- id: TC_WF_INSTANCE_020
+  title: GET /workflow/instance/flowHisTaskList/{businessId}_不存在的业务ID_返回未找到流程实例
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /workflow/instance/flowHisTaskList/{businessId}
+  description: 传入系统中不存在的业务ID查询流程图和任务记录，验证系统返回500业务错误码并提示未找到流程实例。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      businessId: NONEXIST_99999
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_021
+  title: GET /workflow/instance/instanceVariable/{instanceId}_有效实例ID查询_返回流程变量键值对
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: GET
+  path: /workflow/instance/instanceVariable/{instanceId}
+  description: 传入有效的流程实例ID，验证返回该流程的变量列表（variableList含key和value字段）和原始variable JSON字符串。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      instanceId: 1001
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - data
+- id: TC_WF_INSTANCE_022
+  title: GET /workflow/instance/instanceVariable/{instanceId}_不存在的实例ID_返回未找到流程实例
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /workflow/instance/instanceVariable/{instanceId}
+  description: 传入系统中不存在的流程实例ID查询流程变量，验证系统返回500业务错误码并提示未找到流程实例。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      instanceId: 999999
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_023
+  title: PUT /workflow/instance/updateVariable_修改已存在的流程变量_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: PUT
+  path: /workflow/instance/updateVariable
+  description: 传入有效的instanceId和已存在的key及新value，验证修改流程变量成功并返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    body:
+      instanceId: 1001
+      key: leaveDays
+      value: '5'
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_WF_INSTANCE_024
+  title: PUT /workflow/instance/updateVariable_key为null_返回参数必须填写
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: PUT
+  path: /workflow/instance/updateVariable
+  description: 传入null的key值，触发@NotNull校验，验证系统返回500业务错误码并提示key必须填写。
+  auth:
+    required: true
+    account: admin
+  request:
+    body:
+      instanceId: 1001
+      key: null
+      value: '5'
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_025
+  title: POST /workflow/instance/invalid_作废待审核流程_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: POST
+  path: /workflow/instance/invalid
+  description: 传入有效的流程实例ID和作废意见，验证作废成功并返回data为true。
+  auth:
+    required: true
+    account: admin
+  request:
+    body:
+      id: 1001
+      comment: 流程信息有误，予以作废
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - data
+- id: TC_WF_INSTANCE_026
+  title: POST /workflow/instance/invalid_id为null_返回参数必须填写
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: POST
+  path: /workflow/instance/invalid
+  description: 传入null的id值，触发@NotNull校验，验证系统返回500业务错误码并提示id必须填写。
+  auth:
+    required: true
+    account: admin
+  request:
+    body:
+      id: null
+      comment: 流程信息有误，予以作废
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_027
+  title: GET /workflow/spel/list_默认分页查询_返回Spel表达式定义列表
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  - 冒烟
+  method: GET
+  path: /workflow/spel/list
+  description: 使用管理员账号分页查询流程Spel表达式定义列表，验证返回包含componentName、methodName、viewSpel、status等字段的分页数据。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_WF_INSTANCE_028
+  title: GET /workflow/spel/list_按状态过滤已停用_返回筛选结果
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /workflow/spel/list
+  description: 按status=1过滤已停用的Spel表达式定义，验证返回过滤后的分页数据（含空列表情况）。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+      status: '1'
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_WF_INSTANCE_029
+  title: GET /workflow/spel/{id}_有效ID查询_返回Spel表达式详情
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: GET
+  path: /workflow/spel/{id}
+  description: 传入有效的Spel表达式定义主键ID，验证返回完整的Spel表达式详情，包含id、componentName、methodName、viewSpel、status等字段。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      id: 1
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - data
+- id: TC_WF_INSTANCE_030
+  title: GET /workflow/spel/{id}_id为null_返回主键不能为空
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /workflow/spel/{id}
+  description: 传入null的路径参数id，触发@NotNull校验，验证系统返回500业务错误码并提示主键不能为空。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      id: null
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_031
+  title: POST /workflow/spel_新增有效Spel表达式定义_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: POST
+  path: /workflow/spel
+  description: 传入完整的Spel表达式定义字段（componentName、methodName、methodParams、viewSpel、status、remark），验证新增成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    body:
+      componentName: SysUserService
+      methodName: selectUserByDept
+      methodParams: deptId
+      viewSpel: '@sysUserService.selectUserByDept(deptId)'
+      status: '0'
+      remark: 按部门查找审批人
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_WF_INSTANCE_032
+  title: POST /workflow/spel_缺少viewSpel_返回参数必须填写
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: POST
+  path: /workflow/spel
+  description: 不传必填字段viewSpel，触发AddGroup的@NotBlank校验，验证系统返回500业务错误码并提示viewSpel必须填写。
+  auth:
+    required: true
+    account: admin
+  request:
+    body:
+      componentName: SysUserService
+      methodName: selectUserByDept
+      methodParams: deptId
+      status: '0'
+      remark: 按部门查找审批人
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_033
+  title: PUT /workflow/spel_修改已有Spel表达式定义_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: PUT
+  path: /workflow/spel
+  description: 传入有效的id及完整的Spel表达式定义字段，验证修改成功并返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    body:
+      id: 1
+      componentName: SysUserService
+      methodName: selectUserByDept
+      methodParams: deptId
+      viewSpel: '@sysUserService.selectUserByDept(deptId)'
+      status: '0'
+      remark: 按部门查找审批人（更新后的备注）
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_WF_INSTANCE_034
+  title: PUT /workflow/spel_缺少status_返回参数必须填写
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: PUT
+  path: /workflow/spel
+  description: 修改时不传必填字段status，触发EditGroup的@NotBlank校验，验证系统返回500业务错误码并提示status必须填写。
+  auth:
+    required: true
+    account: admin
+  request:
+    body:
+      id: 1
+      componentName: SysUserService
+      methodName: selectUserByDept
+      methodParams: deptId
+      viewSpel: '@sysUserService.selectUserByDept(deptId)'
+      remark: 按部门查找审批人
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_WF_INSTANCE_035
+  title: DELETE /workflow/spel/{ids}_有效ID删除_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: DELETE
+  path: /workflow/spel/{ids}
+  description: 传入系统中存在的Spel表达式定义主键ID，验证删除成功并返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      ids: '1'
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_WF_INSTANCE_036
+  title: DELETE /workflow/spel/{ids}_ids为空_返回主键不能为空
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: DELETE
+  path: /workflow/spel/{ids}
+  description: 传入空的ids参数，触发@NotEmpty校验，验证系统返回500业务错误码并提示主键不能为空。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      ids: ''
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []

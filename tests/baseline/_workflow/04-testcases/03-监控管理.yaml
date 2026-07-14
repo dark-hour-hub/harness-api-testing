@@ -1,0 +1,515 @@
+module: monitor
+module_name: 监控管理
+base_url: http://localhost:8080
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+  - name: Content-Type
+    value: application/json
+  auth_headers:
+  - name: Authorization
+    value: ${auth.token_prefix} ${auth.token}
+  - name: clientid
+    value: ${auth.params.admin.clientId}
+auth_setup:
+  type: bearer_token
+  login_endpoint: /auth/login
+  token_prefix: 'Bearer '
+  params:
+    admin:
+      clientId: e5cd7e4891bf95d1d19206ce24a7b32e
+      grantType: password
+      tenantId: '000000'
+    test:
+      clientId: e5cd7e4891bf95d1d19206ce24a7b32e
+      grantType: password
+      tenantId: '000000'
+  accounts:
+    admin:
+      username: admin
+      password: admin123
+    test:
+      username: test
+      password: '666666'
+  extracts:
+    token: $.data.access_token
+testcases:
+- id: TC_MONITOR_001
+  title: GET /monitor/logininfor/list_分页查询登录日志_返回rows和total
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  - 冒烟
+  method: GET
+  path: /monitor/logininfor/list
+  description: 使用admin账号分页查询系统访问记录列表，验证返回分页数据结构包含rows和total。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_MONITOR_002
+  title: GET /monitor/logininfor/list_传入非法排序字段_返回排序参数有误
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /monitor/logininfor/list
+  description: 传入不符合白名单的orderByColumn参数，验证系统返回500错误码并提示排序参数有误。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+      orderByColumn: invalid_field
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_MONITOR_003
+  title: DELETE /monitor/logininfor/{infoIds}_删除存在的登录日志ID_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: DELETE
+  path: /monitor/logininfor/{infoIds}
+  description: 传入一个存在的登录日志ID进行删除，验证系统返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      infoIds: '1'
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_MONITOR_004
+  title: DELETE /monitor/logininfor/{infoIds}_删除不存在的登录日志ID_返回操作失败
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: DELETE
+  path: /monitor/logininfor/{infoIds}
+  description: 传入一个不存在的登录日志ID（99999）进行删除，验证系统返回500错误码并提示操作失败。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      infoIds: '99999'
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_MONITOR_005
+  title: DELETE /monitor/logininfor/clean_清空所有登录日志_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: DELETE
+  path: /monitor/logininfor/clean
+  description: 清空所有系统访问记录（truncate操作），验证系统返回操作成功。该接口带@Lock4j防重锁。
+  auth:
+    required: true
+    account: admin
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_MONITOR_006
+  title: DELETE /monitor/logininfor/clean_并发清理触发防重锁_返回操作失败
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: DELETE
+  path: /monitor/logininfor/clean
+  description: 在@Lock4j分布式锁保护下的清理操作被并发调用时，第二次请求获取锁失败，验证系统返回500错误码并提示操作失败。
+  auth:
+    required: true
+    account: admin
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_MONITOR_007
+  title: GET /monitor/logininfor/unlock/{userName}_解锁被锁定用户_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: GET
+  path: /monitor/logininfor/unlock/{userName}
+  description: 解锁一个被锁定（密码错误次数超限）的用户账号，验证系统清除密码错误计数缓存并返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      userName: admin
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_MONITOR_008
+  title: GET /monitor/logininfor/unlock/{userName}_解锁不存在的用户_返回操作成功
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /monitor/logininfor/unlock/{userName}
+  description: 尝试解锁一个不存在的用户账号，验证系统因缓存key不存在仍返回操作成功（幂等设计）。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      userName: nonexistent_user_xyz
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_MONITOR_009
+  title: GET /monitor/operlog/list_分页查询操作日志_返回rows和total
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  - 冒烟
+  method: GET
+  path: /monitor/operlog/list
+  description: 使用admin账号分页查询操作日志记录列表，验证返回分页数据结构包含rows和total。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_MONITOR_010
+  title: GET /monitor/operlog/list_传入非法排序字段_返回排序参数有误
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /monitor/operlog/list
+  description: 传入不符合白名单的orderByColumn参数，验证系统返回500错误码并提示排序参数有误。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+      orderByColumn: invalid_field
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_MONITOR_011
+  title: DELETE /monitor/operlog/{operIds}_删除存在的操作日志ID_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: DELETE
+  path: /monitor/operlog/{operIds}
+  description: 传入一个存在的操作日志ID进行删除，验证系统返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      operIds: '1'
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_MONITOR_012
+  title: DELETE /monitor/operlog/{operIds}_删除不存在的操作日志ID_返回操作失败
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: DELETE
+  path: /monitor/operlog/{operIds}
+  description: 传入一个不存在的操作日志ID（99999）进行删除，验证系统返回500错误码并提示操作失败。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      operIds: '99999'
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_MONITOR_013
+  title: DELETE /monitor/operlog/clean_清空所有操作日志_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: DELETE
+  path: /monitor/operlog/clean
+  description: 清空所有操作日志记录（truncate操作），验证系统返回操作成功。该接口带@Lock4j防重锁。
+  auth:
+    required: true
+    account: admin
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_MONITOR_014
+  title: DELETE /monitor/operlog/clean_并发清理触发防重锁_返回操作失败
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: DELETE
+  path: /monitor/operlog/clean
+  description: 在@Lock4j分布式锁保护下的清理操作被并发调用时，第二次请求获取锁失败，验证系统返回500错误码并提示操作失败。
+  auth:
+    required: true
+    account: admin
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_MONITOR_015
+  title: GET /monitor/online/list_查询在线用户列表_返回rows和total
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  - 冒烟
+  method: GET
+  path: /monitor/online/list
+  description: 获取所有在线用户会话监控列表（从Redis缓存读取），验证返回数据结构包含rows和total。
+  auth:
+    required: true
+    account: admin
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_MONITOR_016
+  title: GET /monitor/online/list_筛选不存在的用户名_返回空结果集
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /monitor/online/list
+  description: 传入不存在的用户名筛选在线用户列表，验证系统正常返回200但rows为空数组且total为0。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      userName: nonexistent_user_xyz
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_MONITOR_017
+  title: DELETE /monitor/online/{tokenId}_强退在线用户token_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: DELETE
+  path: /monitor/online/{tokenId}
+  description: 管理员强制退出指定tokenId对应的在线用户会话，验证系统注销该token并返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tokenId: test-token-to-force-logout-001
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_MONITOR_018
+  title: DELETE /monitor/online/{tokenId}_强退不存在的token_返回操作成功
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: DELETE
+  path: /monitor/online/{tokenId}
+  description: 尝试强退一个不存在或已过期的tokenId，验证系统内部捕获NotLoginException后仍返回操作成功（容错处理）。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tokenId: non-existent-token-xyz-99999
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_MONITOR_019
+  title: GET /monitor/online_获取当前用户在线设备列表_返回设备信息
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: GET
+  path: /monitor/online
+  description: 获取当前登录用户（admin）的所有在线设备会话列表，验证返回数据结构包含rows和total且仅含本人的设备。
+  auth:
+    required: true
+    account: admin
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_MONITOR_020
+  title: GET /monitor/online_验证返回设备均属于当前登录用户_数据范围正确
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /monitor/online
+  description: 验证获取在线设备接口仅返回当前登录用户本人的设备，数据列表中每条的userName字段均为当前登录用户。
+  auth:
+    required: true
+    account: admin
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - rows
+    - total
+- id: TC_MONITOR_021
+  title: DELETE /monitor/online/myself/{tokenId}_强退自己的在线设备_返回操作成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: DELETE
+  path: /monitor/online/myself/{tokenId}
+  description: 当前用户强制退出自己的某个在线设备会话，验证系统注销指定token并返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tokenId: test-my-token-to-logout-001
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_MONITOR_022
+  title: DELETE /monitor/online/myself/{tokenId}_强退他人或不存在的token_返回操作成功
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: DELETE
+  path: /monitor/online/myself/{tokenId}
+  description: 尝试强退不属于当前用户或已失效的tokenId，验证系统内部仅操作本人的token且不存在时静默忽略，返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tokenId: other-user-token-not-mine-xyz
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_MONITOR_023
+  title: GET /monitor/cache_获取Redis缓存监控信息_返回info和dbSize和commandStats
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  - 冒烟
+  method: GET
+  path: /monitor/cache
+  description: 获取Redis缓存服务器的运行信息、数据库键数量和命令统计，验证返回info、dbSize、commandStats三个顶层字段。
+  auth:
+    required: true
+    account: admin
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - info
+    - dbSize
+    - commandStats
+- id: TC_MONITOR_024
+  title: GET /monitor/cache_Redis连接异常_返回发生系统异常
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /monitor/cache
+  description: 在Redis服务不可用或连接异常时调用缓存监控接口，验证系统通过全局异常处理器返回500错误码。
+  auth:
+    required: true
+    account: admin
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []

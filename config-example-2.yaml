@@ -1,0 +1,57 @@
+# ============================================================
+# 源码配置
+# ============================================================
+source:
+  backend:
+    - name: "spring-petclinic"
+      path: 'D:\java\project\spring-petclinic'
+      enabled: true
+      git:
+        repo: ""
+        branch: "main"
+
+  frontend:
+    - name: ""
+      path: ""
+      enabled: true
+      git:
+        repo: ""
+        branch: ""
+
+# ============================================================
+# 环境配置
+# ============================================================
+current_environment: "dev"
+environments:
+  dev:
+    frontend:
+      - name: ""
+        url: ""
+
+    backend:
+      - name: "spring-petclinic"
+        url: "http://localhost:8080"
+        description: "主应用服务"
+  test:
+    frontend:
+      - name: "mall-admin-web"
+        url: ""
+    backend:
+      - name: "mall-tiny"
+        url: ""
+
+  staging:
+    frontend:
+      - name: "mall-admin-web"
+        url: ""
+    backend:
+      - name: "mall-tiny"
+        url: ""
+
+# ============================================================
+# 测试工具配置
+# ============================================================
+tools:
+  python: "D:/python/Python314/bin"
+  jmeter: "D:/java/apache-jmeter-5.6.3/bin"
+  git: "D:/tools/git/Git"

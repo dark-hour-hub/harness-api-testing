@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="38" time="9.205" timestamp="2026-07-14T14:11:07.880476+08:00" hostname="旅行者"><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_001" time="1.675" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_002" time="0.196" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_003" time="0.206" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_004" time="0.179" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_005" time="0.431" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_006" time="0.129" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_007" time="0.281"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/system/notice&#10;  请求体: {&#10;  &quot;noticeId&quot;: 1,&#10;  &quot;noticeTitle&quot;: &quot;接口自动化测试公告（已更新）&quot;,&#10;  &quot;noticeType&quot;: &quot;1&quot;,&#10;  &quot;noticeContent&quot;: &quot;&lt;p&gt;这是接口自动化测试更新后的公告内容&lt;/p&gt;&quot;,&#10;  &quot;status&quot;: &quot;0&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part5.py:88: in test_TC_NOTICE_007
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/system/notice
+E     请求体: {
+E     "noticeId": 1,
+E     "noticeTitle": "接口自动化测试公告（已更新）",
+E     "noticeType": "1",
+E     "noticeContent": "&lt;p&gt;这是接口自动化测试更新后的公告内容&lt;/p&gt;",
+E     "status": "0"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_008" time="0.286" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_009" time="0.240"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/system/notice/1&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part5.py:102: in test_TC_NOTICE_009
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/system/notice/1
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_010" time="0.224" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_011" time="0.224" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_012" time="0.197" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_013" time="0.185" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_014" time="0.218" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_015" time="0.257" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_016" time="0.254" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_017" time="0.265"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/system/config&#10;  请求体: {&#10;  &quot;configName&quot;: &quot;接口自动化测试参数&quot;,&#10;  &quot;configKey&quot;: &quot;test.auto.config.key&quot;,&#10;  &quot;configValue&quot;: &quot;auto-test-value&quot;,&#10;  &quot;configType&quot;: &quot;N&quot;,&#10;  &quot;remark&quot;: &quot;自动化测试用参数&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;新增参数'接口自动化测试参数'失败，参数键名已存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part5.py:158: in test_TC_NOTICE_017
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/system/config
+E     请求体: {
+E     "configName": "接口自动化测试参数",
+E     "configKey": "test.auto.config.key",
+E     "configValue": "auto-test-value",
+E     "configType": "N",
+E     "remark": "自动化测试用参数"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "新增参数'接口自动化测试参数'失败，参数键名已存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_018" time="0.126" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_019" time="0.000" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_020" time="0.124" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_021" time="0.000" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_022" time="0.322" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_023" time="0.235"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/system/config/2&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;内置参数【sys.user.initPassword】不能删除&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part5.py:200: in test_TC_NOTICE_023
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/system/config/2
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "内置参数【sys.user.initPassword】不能删除",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_024" time="0.209" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_025" time="0.183" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_026" time="0.177" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_027" time="0.234" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_028" time="0.179" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_029" time="0.173" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_030" time="0.784"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/client/99999&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part5.py:249: in test_TC_NOTICE_030
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/client/99999
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_031" time="0.299" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_032" time="0.107" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_033" time="0.000" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_034" time="0.106" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_035" time="0.000" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_036" time="0.250" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_037" time="0.000" /><testcase classname="tests.baseline.generated.api-test.test_system-part5" name="test_TC_NOTICE_038" time="0.000" /></testsuite></testsuites>

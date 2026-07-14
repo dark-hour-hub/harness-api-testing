@@ -1,6 +1,0 @@
-DEBUG    urllib3.connectionpool:connectionpool.py:241 Starting new HTTP connection (1): localhost:8080
-DEBUG    urllib3.connectionpool:connectionpool.py:544 http://localhost:8080 "POST /admin/login HTTP/1.1" 200 None
-DEBUG    urllib3.connectionpool:connectionpool.py:241 Starting new HTTP connection (1): localhost:8080
-DEBUG    urllib3.connectionpool:connectionpool.py:544 http://localhost:8080 "POST /admin/login HTTP/1.1" 200 None
-DEBUG    urllib3.connectionpool:connectionpool.py:241 Starting new HTTP connection (1): localhost:8080
-DEBUG    urllib3.connectionpool:connectionpool.py:544 http://localhost:8080 "POST /admin/login HTTP/1.1" 200 None

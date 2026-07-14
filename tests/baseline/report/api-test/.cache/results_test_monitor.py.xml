@@ -1,0 +1,743 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="24" time="7.586" timestamp="2026-07-14T14:10:45.451805+08:00" hostname="旅行者"><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_001" time="1.509" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_002" time="0.242"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/monitor/logininfor/list&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;total&quot;: 18,&#10;  &quot;rows&quot;: [&#10;    {&#10;      &quot;infoId&quot;: &quot;2076910155715837953&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;userName&quot;: &quot;admin&quot;,&#10;      &quot;clientKey&quot;: &quot;&quot;,&#10;      &quot;deviceType&quot;: &quot;&quot;,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;ipaddr&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;loginLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;browser&quot;: &quot;Unknown&quot;,&#10;      &quot;os&quot;: &quot;Unknown&quot;,&#10;      &quot;msg&quot;: &quot;登录成功&quot;,&#10;      &quot;loginTime&quot;: &quot;2026-07-14 14:02:23&quot;&#10;    },&#10;    {&#10;      &quot;infoId&quot;: &quot;2076910177853374466&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;userName&quot;: &quot;admin&quot;,&#10;      &quot;clientKey&quot;: &quot;&quot;,&#10;      &quot;deviceType&quot;: &quot;&quot;,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;ipaddr&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;loginLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;browser&quot;: &quot;Unknown&quot;,&#10;      &quot;os&quot;: &quot;Unknown&quot;,&#10;      &quot;msg&quot;: &quot;登录成功&quot;,&#10;      &quot;loginTime&quot;: &quot;2026-07-14 14:02:28&quot;&#10;    },&#10;    {&#10;      &quot;infoId&quot;: &quot;2076910217007202305&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;userName&quot;: &quot;admin&quot;,&#10;      &quot;clientKey&quot;: &quot;&quot;,&#10;      &quot;deviceType&quot;: &quot;&quot;,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;ipaddr&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;loginLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;browser&quot;: &quot;Unknown&quot;,&#10;      &quot;os&quot;: &quot;Unknown&quot;,&#10;      &quot;msg&quot;: &quot;登录成功&quot;,&#10;      &quot;loginTime&quot;: &quot;2026-07-14 14:02:38&quot;&#10;    },&#10;    {&#10;      &quot;infoId&quot;: &quot;2076910255372500994&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;userName&quot;: &quot;admin&quot;,&#10;      &quot;clientKey&quot;: &quot;&quot;,&#10;      &quot;deviceType&quot;: &quot;&quot;,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;ipaddr&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;loginLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;browser&quot;: &quot;Unknown&quot;,&#10;      &quot;os&quot;: &quot;Unknown&quot;,&#10;      &quot;msg&quot;: &quot;登录成功&quot;,&#10;      &quot;loginTime&quot;: &quot;2026-07-14 14:02:47&quot;&#10;    },&#10;    {&#10;      &quot;infoId&quot;: &quot;2076910309252530178&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;userName&quot;: &quot;admin&quot;,&#10;      &quot;clientKey&quot;: &quot;&quot;,&#10;      &quot;deviceType&quot;: &quot;&quot;,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;ipaddr&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;loginLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;browser&quot;: &quot;Unknown&quot;,&#10;      &quot;os&quot;: &quot;Unknown&quot;,&#10;      &quot;msg&quot;: &quot;登录成功&quot;,&#10;      &quot;loginTime&quot;: &quot;2026-07-14 14:03:00&quot;&#10;    },&#10;    {&#10;      &quot;infoId&quot;: &quot;2076910357302476801&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;userName&quot;: &quot;admin&quot;,&#10;      &quot;clientKey&quot;: &quot;&quot;,&#10;      &quot;deviceType&quot;: &quot;&quot;,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;ipaddr&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;loginLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;browser&quot;: &quot;Unknown&quot;,&#10;      &quot;os&quot;: &quot;Unknown&quot;,&#10;      &quot;msg&quot;: &quot;登录成功&quot;,&#10;      &quot;loginTime&quot;: &quot;2026-07-14 14:03:11&quot;&#10;    },&#10;    {&#10;      &quot;infoId&quot;: &quot;2076910406069649409&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;userName&quot;: &quot;admin&quot;,&#10;      &quot;clientKey&quot;: &quot;&quot;,&#10;      &quot;deviceType&quot;: &quot;&quot;,&#10;      &quot;status&quot;: &quot;1&quot;,&#10;      &quot;ipaddr&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;loginLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;browser&quot;: &quot;Unknown&quot;,&#10;      &quot;os&quot;: &quot;Unknown&quot;,&#10;      &quot;msg&quot;: &quot;密码输入错误1次&quot;,&#10;      &quot;loginTime&quot;: &quot;2026-07-14 14:03:23&quot;&#10;    },&#10;    {&#10;      &quot;infoId&quot;: &quot;2076910413703282690&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;userName&quot;: &quot;admin&quot;,&#10;      &quot;clientKey&quot;: &quot;&quot;,&#10;      &quot;deviceType&quot;: &quot;&quot;,&#10;      &quot;status&quot;: &quot;1&quot;,&#10;      &quot;ipaddr&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;loginLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;browser&quot;: &quot;Unknown&quot;,&#10;      &quot;os&quot;: &quot;Unknown&quot;,&#10;      &quot;msg&quot;: &quot;密码输入错误2次&quot;,&#10;      &quot;loginTime&quot;: &quot;2026-07-14 14:03:24&quot;&#10;    },&#10;    {&#10;      &quot;infoId&quot;: &quot;2076910422133833729&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;userName&quot;: &quot;admin&quot;,&#10;      &quot;clientKey&quot;: &quot;&quot;,&#10;      &quot;deviceType&quot;: &quot;&quot;,&#10;      &quot;status&quot;: &quot;1&quot;,&#10;      &quot;ipaddr&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;loginLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;browser&quot;: &quot;Unknown&quot;,&#10;      &quot;os&quot;: &quot;Unknown&quot;,&#10;      &quot;msg&quot;: &quot;密码输入错误3次&quot;,&#10;      &quot;loginTime&quot;: &quot;2026-07-14 14:03:26&quot;&#10;    },&#10;    {&#10;      &quot;infoId&quot;: &quot;2076910431055118338&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;userName&quot;: &quot;admin&quot;,&#10;      &quot;clientKey&quot;: &quot;&quot;,&#10;      &quot;deviceType&quot;: &quot;&quot;,&#10;      &quot;status&quot;: &quot;1&quot;,&#10;      &quot;ipaddr&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;loginLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;browser&quot;: &quot;Unknown&quot;,&#10;      &quot;os&quot;: &quot;Unknown&quot;,&#10;      &quot;msg&quot;: &quot;密码输入错误4次&quot;,&#10;      &quot;loginTime&quot;: &quot;2026-07-14 14:03:29&quot;&#10;    }&#10;  ],&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;查询成功&quot;&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_monitor.py:53: in test_TC_MONITOR_002
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/monitor/logininfor/list
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "total": 18,
+E     "rows": [
+E       {
+E         "infoId": "2076910155715837953",
+E         "tenantId": "000000",
+E         "userName": "admin",
+E         "clientKey": "",
+E         "deviceType": "",
+E         "status": "0",
+E         "ipaddr": "0:0:0:0:0:0:0:1",
+E         "loginLocation": "内网IP",
+E         "browser": "Unknown",
+E         "os": "Unknown",
+E         "msg": "登录成功",
+E         "loginTime": "2026-07-14 14:02:23"
+E       },
+E       {
+E         "infoId": "2076910177853374466",
+E         "tenantId": "000000",
+E         "userName": "admin",
+E         "clientKey": "",
+E         "deviceType": "",
+E         "status": "0",
+E         "ipaddr": "0:0:0:0:0:0:0:1",
+E         "loginLocation": "内网IP",
+E         "browser": "Unknown",
+E         "os": "Unknown",
+E         "msg": "登录成功",
+E         "loginTime": "2026-07-14 14:02:28"
+E       },
+E       {
+E         "infoId": "2076910217007202305",
+E         "tenantId": "000000",
+E         "userName": "admin",
+E         "clientKey": "",
+E         "deviceType": "",
+E         "status": "0",
+E         "ipaddr": "0:0:0:0:0:0:0:1",
+E         "loginLocation": "内网IP",
+E         "browser": "Unknown",
+E         "os": "Unknown",
+E         "msg": "登录成功",
+E         "loginTime": "2026-07-14 14:02:38"
+E       },
+E       {
+E         "infoId": "2076910255372500994",
+E         "tenantId": "000000",
+E         "userName": "admin",
+E         "clientKey": "",
+E         "deviceType": "",
+E         "status": "0",
+E         "ipaddr": "0:0:0:0:0:0:0:1",
+E         "loginLocation": "内网IP",
+E         "browser": "Unknown",
+E         "os": "Unknown",
+E         "msg": "登录成功",
+E         "loginTime": "2026-07-14 14:02:47"
+E       },
+E       {
+E         "infoId": "2076910309252530178",
+E         "tenantId": "000000",
+E         "userName": "admin",
+E         "clientKey": "",
+E         "deviceType": "",
+E         "status": "0",
+E         "ipaddr": "0:0:0:0:0:0:0:1",
+E         "loginLocation": "内网IP",
+E         "browser": "Unknown",
+E         "os": "Unknown",
+E         "msg": "登录成功",
+E         "loginTime": "2026-07-14 14:03:00"
+E       },
+E       {
+E         "infoId": "2076910357302476801",
+E         "tenantId": "000000",
+E         "userName": "admin",
+E         "clientKey": "",
+E         "deviceType": "",
+E         "status": "0",
+E         "ipaddr": "0:0:0:0:0:0:0:1",
+E         "loginLocation": "内网IP",
+E         "browser": "Unknown",
+E         "os": "Unknown",
+E         "msg": "登录成功",
+E         "loginTime": "2026-07-14 14:03:11"
+E       },
+E       {
+E         "infoId": "2076910406069649409",
+E         "tenantId": "000000",
+E         "userName": "admin",
+E         "clientKey": "",
+E         "deviceType": "",
+E         "status": "1",
+E         "ipaddr": "0:0:0:0:0:0:0:1",
+E         "loginLocation": "内网IP",
+E         "browser": "Unknown",
+E         "os": "Unknown",
+E         "msg": "密码输入错误1次",
+E         "loginTime": "2026-07-14 14:03:23"
+E       },
+E       {
+E         "infoId": "2076910413703282690",
+E         "tenantId": "000000",
+E         "userName": "admin",
+E         "clientKey": "",
+E         "deviceType": "",
+E         "status": "1",
+E         "ipaddr": "0:0:0:0:0:0:0:1",
+E         "loginLocation": "内网IP",
+E         "browser": "Unknown",
+E         "os": "Unknown",
+E         "msg": "密码输入错误2次",
+E         "loginTime": "2026-07-14 14:03:24"
+E       },
+E       {
+E         "infoId": "2076910422133833729",
+E         "tenantId": "000000",
+E         "userName": "admin",
+E         "clientKey": "",
+E         "deviceType": "",
+E         "status": "1",
+E         "ipaddr": "0:0:0:0:0:0:0:1",
+E         "loginLocation": "内网IP",
+E         "browser": "Unknown",
+E         "os": "Unknown",
+E         "msg": "密码输入错误3次",
+E         "loginTime": "2026-07-14 14:03:26"
+E       },
+E       {
+E         "infoId": "2076910431055118338",
+E         "tenantId": "000000",
+E         "userName": "admin",
+E         "clientKey": "",
+E         "deviceType": "",
+E         "status": "1",
+E         "ipaddr": "0:0:0:0:0:0:0:1",
+E         "loginLocation": "内网IP",
+E         "browser": "Unknown",
+E         "os": "Unknown",
+E         "msg": "密码输入错误4次",
+E         "loginTime": "2026-07-14 14:03:29"
+E       }
+E     ],
+E     "code": 200,
+E     "msg": "查询成功"
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_003" time="0.238"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/monitor/logininfor/1&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_monitor.py:60: in test_TC_MONITOR_003
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/monitor/logininfor/1
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_004" time="0.239" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_005" time="0.333" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_006" time="0.343"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/monitor/logininfor/clean&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;操作成功&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_monitor.py:81: in test_TC_MONITOR_006
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/monitor/logininfor/clean
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "操作成功",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_007" time="0.225" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_008" time="0.208" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_009" time="0.219" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_010" time="0.217"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/monitor/operlog/list&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;total&quot;: 84,&#10;  &quot;rows&quot;: [&#10;    {&#10;      &quot;operId&quot;: &quot;2076910134639460353&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;title&quot;: &quot;操作日志&quot;,&#10;      &quot;businessType&quot;: 9,&#10;      &quot;businessTypes&quot;: null,&#10;      &quot;method&quot;: &quot;org.dromara.system.controller.monitor.SysOperlogController.clean()&quot;,&#10;      &quot;requestMethod&quot;: &quot;DELETE&quot;,&#10;      &quot;operatorType&quot;: 1,&#10;      &quot;operName&quot;: &quot;admin&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;operUrl&quot;: &quot;/monitor/operlog/clean&quot;,&#10;      &quot;operIp&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;operLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;operParam&quot;: &quot;&quot;,&#10;      &quot;jsonResult&quot;: &quot;{\&quot;code\&quot;:200,\&quot;msg\&quot;:\&quot;操作成功\&quot;,\&quot;data\&quot;:null}&quot;,&#10;      &quot;status&quot;: 0,&#10;      &quot;errorMsg&quot;: &quot;&quot;,&#10;      &quot;operTime&quot;: &quot;2026-07-14 14:02:18&quot;,&#10;      &quot;costTime&quot;: 62&#10;    },&#10;    {&#10;      &quot;operId&quot;: &quot;2076910142239539202&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;title&quot;: &quot;在线用户&quot;,&#10;      &quot;businessType&quot;: 7,&#10;      &quot;businessTypes&quot;: null,&#10;      &quot;method&quot;: &quot;org.dromara.system.controller.monitor.SysUserOnlineController.forceLogout()&quot;,&#10;      &quot;requestMethod&quot;: &quot;DELETE&quot;,&#10;      &quot;operatorType&quot;: 1,&#10;      &quot;operName&quot;: &quot;admin&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;operUrl&quot;: &quot;/monitor/online/test-token-to-force-logout-001&quot;,&#10;      &quot;operIp&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;operLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;operParam&quot;: &quot;\&quot;test-token-to-force-logout-001\&quot;&quot;,&#10;      &quot;jsonResult&quot;: &quot;{\&quot;code\&quot;:200,\&quot;msg\&quot;:\&quot;操作成功\&quot;,\&quot;data\&quot;:null}&quot;,&#10;      &quot;status&quot;: 0,&#10;      &quot;errorMsg&quot;: &quot;&quot;,&#10;      &quot;operTime&quot;: &quot;2026-07-14 14:02:20&quot;,&#10;      &quot;costTime&quot;: 60&#10;    },&#10;    {&#10;      &quot;operId&quot;: &quot;2076910142889656322&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;title&quot;: &quot;在线用户&quot;,&#10;      &quot;businessType&quot;: 7,&#10;      &quot;businessTypes&quot;: null,&#10;      &quot;method&quot;: &quot;org.dromara.system.controller.monitor.SysUserOnlineController.forceLogout()&quot;,&#10;      &quot;requestMethod&quot;: &quot;DELETE&quot;,&#10;      &quot;operatorType&quot;: 1,&#10;      &quot;operName&quot;: &quot;admin&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;operUrl&quot;: &quot;/monitor/online/non-existent-token-xyz-99999&quot;,&#10;      &quot;operIp&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;operLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;operParam&quot;: &quot;\&quot;non-existent-token-xyz-99999\&quot;&quot;,&#10;      &quot;jsonResult&quot;: &quot;{\&quot;code\&quot;:200,\&quot;msg\&quot;:\&quot;操作成功\&quot;,\&quot;data\&quot;:null}&quot;,&#10;      &quot;status&quot;: 0,&#10;      &quot;errorMsg&quot;: &quot;&quot;,&#10;      &quot;operTime&quot;: &quot;2026-07-14 14:02:20&quot;,&#10;      &quot;costTime&quot;: 30&#10;    },&#10;    {&#10;      &quot;operId&quot;: &quot;2076910147977347074&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;title&quot;: &quot;在线设备&quot;,&#10;      &quot;businessType&quot;: 7,&#10;      &quot;businessTypes&quot;: null,&#10;      &quot;method&quot;: &quot;org.dromara.system.controller.monitor.SysUserOnlineController.remove()&quot;,&#10;      &quot;requestMethod&quot;: &quot;DELETE&quot;,&#10;      &quot;operatorType&quot;: 1,&#10;      &quot;operName&quot;: &quot;admin&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;operUrl&quot;: &quot;/monitor/online/myself/test-my-token-to-logout-001&quot;,&#10;      &quot;operIp&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;operLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;operParam&quot;: &quot;\&quot;test-my-token-to-logout-001\&quot;&quot;,&#10;      &quot;jsonResult&quot;: &quot;{\&quot;code\&quot;:200,\&quot;msg\&quot;:\&quot;操作成功\&quot;,\&quot;data\&quot;:null}&quot;,&#10;      &quot;status&quot;: 0,&#10;      &quot;errorMsg&quot;: &quot;&quot;,&#10;      &quot;operTime&quot;: &quot;2026-07-14 14:02:21&quot;,&#10;      &quot;costTime&quot;: 1&#10;    },&#10;    {&#10;      &quot;operId&quot;: &quot;2076910148619075586&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;title&quot;: &quot;在线设备&quot;,&#10;      &quot;businessType&quot;: 7,&#10;      &quot;businessTypes&quot;: null,&#10;      &quot;method&quot;: &quot;org.dromara.system.controller.monitor.SysUserOnlineController.remove()&quot;,&#10;      &quot;requestMethod&quot;: &quot;DELETE&quot;,&#10;      &quot;operatorType&quot;: 1,&#10;      &quot;operName&quot;: &quot;admin&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;operUrl&quot;: &quot;/monitor/online/myself/other-user-token-not-mine-xyz&quot;,&#10;      &quot;operIp&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;operLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;operParam&quot;: &quot;\&quot;other-user-token-not-mine-xyz\&quot;&quot;,&#10;      &quot;jsonResult&quot;: &quot;{\&quot;code\&quot;:200,\&quot;msg\&quot;:\&quot;操作成功\&quot;,\&quot;data\&quot;:null}&quot;,&#10;      &quot;status&quot;: 0,&#10;      &quot;errorMsg&quot;: &quot;&quot;,&#10;      &quot;operTime&quot;: &quot;2026-07-14 14:02:21&quot;,&#10;      &quot;costTime&quot;: 0&#10;    },&#10;    {&#10;      &quot;operId&quot;: &quot;2076910161940185089&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;title&quot;: &quot;OSS对象存储&quot;,&#10;      &quot;businessType&quot;: 3,&#10;      &quot;businessTypes&quot;: null,&#10;      &quot;method&quot;: &quot;org.dromara.system.controller.system.SysOssController.remove()&quot;,&#10;      &quot;requestMethod&quot;: &quot;DELETE&quot;,&#10;      &quot;operatorType&quot;: 1,&#10;      &quot;operName&quot;: &quot;admin&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;operUrl&quot;: &quot;/resource/oss/1&quot;,&#10;      &quot;operIp&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;operLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;operParam&quot;: &quot;[1]&quot;,&#10;      &quot;jsonResult&quot;: &quot;{\&quot;code\&quot;:500,\&quot;msg\&quot;:\&quot;操作失败\&quot;,\&quot;data\&quot;:null}&quot;,&#10;      &quot;status&quot;: 0,&#10;      &quot;errorMsg&quot;: &quot;&quot;,&#10;      &quot;operTime&quot;: &quot;2026-07-14 14:02:24&quot;,&#10;      &quot;costTime&quot;: 151&#10;    },&#10;    {&#10;      &quot;operId&quot;: &quot;2076910165488566273&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;title&quot;: &quot;对象存储配置&quot;,&#10;      &quot;businessType&quot;: 1,&#10;      &quot;businessTypes&quot;: null,&#10;      &quot;method&quot;: &quot;org.dromara.system.controller.system.SysOssConfigController.add()&quot;,&#10;      &quot;requestMethod&quot;: &quot;POST&quot;,&#10;      &quot;operatorType&quot;: 1,&#10;      &quot;operName&quot;: &quot;admin&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;operUrl&quot;: &quot;/resource/oss/config&quot;,&#10;      &quot;operIp&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;operLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;operParam&quot;: &quot;{\&quot;createDept\&quot;:null,\&quot;createBy\&quot;:null,\&quot;createTime\&quot;:null,\&quot;updateBy\&quot;:null,\&quot;updateTime\&quot;:null,\&quot;ossConfigId\&quot;:null,\&quot;configKey\&quot;:\&quot;test-minio-001\&quot;,\&quot;accessKey\&quot;:\&quot;testAccessKey\&quot;,\&quot;secretKey\&quot;:\&quot;testSecretKey\&quot;,\&quot;bucketName\&quot;:\&quot;test-bucket\&quot;,\&quot;prefix\&quot;:\&quot;test/\&quot;,\&quot;endpoint\&quot;:\&quot;http://test-oss:9000\&quot;,\&quot;domain\&quot;:\&quot;https://test-oss.example.com\&quot;,\&quot;isHttps\&quot;:\&quot;N\&quot;,\&quot;status\&quot;:\&quot;1\&quot;,\&quot;region\&quot;:\&quot;cn-north-1\&quot;,\&quot;ext1\&quot;:\&quot;\&quot;,\&quot;remark\&quot;:\&quot;测试用配置\&quot;,\&quot;accessPolicy\&quot;:\&quot;1\&quot;}&quot;,&#10;      &quot;jsonResult&quot;: &quot;&quot;,&#10;      &quot;status&quot;: 1,&#10;      &quot;errorMsg&quot;: &quot;操作配置'test-minio-001'失败, 配置key已存在!&quot;,&#10;      &quot;operTime&quot;: &quot;2026-07-14 14:02:25&quot;,&#10;      &quot;costTime&quot;: 64&#10;    },&#10;    {&#10;      &quot;operId&quot;: &quot;2076910167518609409&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;title&quot;: &quot;对象存储配置&quot;,&#10;      &quot;businessType&quot;: 2,&#10;      &quot;businessTypes&quot;: null,&#10;      &quot;method&quot;: &quot;org.dromara.system.controller.system.SysOssConfigController.edit()&quot;,&#10;      &quot;requestMethod&quot;: &quot;PUT&quot;,&#10;      &quot;operatorType&quot;: 1,&#10;      &quot;operName&quot;: &quot;admin&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;operUrl&quot;: &quot;/resource/oss/config&quot;,&#10;      &quot;operIp&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;operLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;operParam&quot;: &quot;{\&quot;createDept\&quot;:null,\&quot;createBy\&quot;:null,\&quot;createTime\&quot;:null,\&quot;updateBy\&quot;:null,\&quot;updateTime\&quot;:null,\&quot;ossConfigId\&quot;:1,\&quot;configKey\&quot;:\&quot;minio\&quot;,\&quot;accessKey\&quot;:\&quot;minioadmin\&quot;,\&quot;secretKey\&quot;:\&quot;minioadmin\&quot;,\&quot;bucketName\&quot;:\&quot;ruoyi\&quot;,\&quot;prefix\&quot;:\&quot;prod/\&quot;,\&quot;endpoint\&quot;:\&quot;http://localhost:9000\&quot;,\&quot;domain\&quot;:null,\&quot;isHttps\&quot;:null,\&quot;status\&quot;:null,\&quot;region\&quot;:null,\&quot;ext1\&quot;:null,\&quot;remark\&quot;:null,\&quot;accessPolicy\&quot;:\&quot;1\&quot;}&quot;,&#10;      &quot;jsonResult&quot;: &quot;{\&quot;code\&quot;:200,\&quot;msg\&quot;:\&quot;操作成功\&quot;,\&quot;data\&quot;:null}&quot;,&#10;      &quot;status&quot;: 0,&#10;      &quot;errorMsg&quot;: &quot;&quot;,&#10;      &quot;operTime&quot;: &quot;2026-07-14 14:02:26&quot;,&#10;      &quot;costTime&quot;: 197&#10;    },&#10;    {&#10;      &quot;operId&quot;: &quot;2076910169733201922&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;title&quot;: &quot;对象存储状态修改&quot;,&#10;      &quot;businessType&quot;: 2,&#10;      &quot;businessTypes&quot;: null,&#10;      &quot;method&quot;: &quot;org.dromara.system.controller.system.SysOssConfigController.changeStatus()&quot;,&#10;      &quot;requestMethod&quot;: &quot;PUT&quot;,&#10;      &quot;operatorType&quot;: 1,&#10;      &quot;operName&quot;: &quot;admin&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;operUrl&quot;: &quot;/resource/oss/config/changeStatus&quot;,&#10;      &quot;operIp&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;operLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;operParam&quot;: &quot;{\&quot;createDept\&quot;:null,\&quot;createBy\&quot;:null,\&quot;createTime\&quot;:null,\&quot;updateBy\&quot;:null,\&quot;updateTime\&quot;:null,\&quot;ossConfigId\&quot;:1,\&quot;configKey\&quot;:\&quot;minio\&quot;,\&quot;accessKey\&quot;:null,\&quot;secretKey\&quot;:null,\&quot;bucketName\&quot;:null,\&quot;prefix\&quot;:null,\&quot;endpoint\&quot;:null,\&quot;domain\&quot;:null,\&quot;isHttps\&quot;:null,\&quot;status\&quot;:\&quot;0\&quot;,\&quot;region\&quot;:null,\&quot;ext1\&quot;:null,\&quot;remark\&quot;:null,\&quot;accessPolicy\&quot;:null}&quot;,&#10;      &quot;jsonResult&quot;: &quot;{\&quot;code\&quot;:200,\&quot;msg\&quot;:\&quot;操作成功\&quot;,\&quot;data\&quot;:null}&quot;,&#10;      &quot;status&quot;: 0,&#10;      &quot;errorMsg&quot;: &quot;&quot;,&#10;      &quot;operTime&quot;: &quot;2026-07-14 14:02:26&quot;,&#10;      &quot;costTime&quot;: 282&#10;    },&#10;    {&#10;      &quot;operId&quot;: &quot;2076910171494809601&quot;,&#10;      &quot;tenantId&quot;: &quot;000000&quot;,&#10;      &quot;title&quot;: &quot;对象存储状态修改&quot;,&#10;      &quot;businessType&quot;: 2,&#10;      &quot;businessTypes&quot;: null,&#10;      &quot;method&quot;: &quot;org.dromara.system.controller.system.SysOssConfigController.changeStatus()&quot;,&#10;      &quot;requestMethod&quot;: &quot;PUT&quot;,&#10;      &quot;operatorType&quot;: 1,&#10;      &quot;operName&quot;: &quot;admin&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;operUrl&quot;: &quot;/resource/oss/config/changeStatus&quot;,&#10;      &quot;operIp&quot;: &quot;0:0:0:0:0:0:0:1&quot;,&#10;      &quot;operLocation&quot;: &quot;内网IP&quot;,&#10;      &quot;operParam&quot;: &quot;{\&quot;createDept\&quot;:null,\&quot;createBy\&quot;:null,\&quot;createTime\&quot;:null,\&quot;updateBy\&quot;:null,\&quot;updateTime\&quot;:null,\&quot;ossConfigId\&quot;:99999,\&quot;configKey\&quot;:\&quot;nonexistent\&quot;,\&quot;accessKey\&quot;:null,\&quot;secretKey\&quot;:null,\&quot;bucketName\&quot;:null,\&quot;prefix\&quot;:null,\&quot;endpoint\&quot;:null,\&quot;domain\&quot;:null,\&quot;isHttps\&quot;:null,\&quot;status\&quot;:\&quot;0\&quot;,\&quot;region\&quot;:null,\&quot;ext1\&quot;:null,\&quot;remark\&quot;:null,\&quot;accessPolicy\&quot;:null}&quot;,&#10;      &quot;jsonResult&quot;: &quot;{\&quot;code\&quot;:200,\&quot;msg\&quot;:\&quot;操作成功\&quot;,\&quot;data\&quot;:null}&quot;,&#10;      &quot;status&quot;: 0,&#10;      &quot;errorMsg&quot;: &quot;&quot;,&#10;      &quot;operTime&quot;: &quot;2026-07-14 14:02:27&quot;,&#10;      &quot;costTime&quot;: 286&#10;    }&#10;  ],&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;查询成功&quot;&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_monitor.py:109: in test_TC_MONITOR_010
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/monitor/operlog/list
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "total": 84,
+E     "rows": [
+E       {
+E         "operId": "2076910134639460353",
+E         "tenantId": "000000",
+E         "title": "操作日志",
+E         "businessType": 9,
+E         "businessTypes": null,
+E         "method": "org.dromara.system.controller.monitor.SysOperlogController.clean()",
+E         "requestMethod": "DELETE",
+E         "operatorType": 1,
+E         "operName": "admin",
+E         "deptName": "研发部门",
+E         "operUrl": "/monitor/operlog/clean",
+E         "operIp": "0:0:0:0:0:0:0:1",
+E         "operLocation": "内网IP",
+E         "operParam": "",
+E         "jsonResult": "{\"code\":200,\"msg\":\"操作成功\",\"data\":null}",
+E         "status": 0,
+E         "errorMsg": "",
+E         "operTime": "2026-07-14 14:02:18",
+E         "costTime": 62
+E       },
+E       {
+E         "operId": "2076910142239539202",
+E         "tenantId": "000000",
+E         "title": "在线用户",
+E         "businessType": 7,
+E         "businessTypes": null,
+E         "method": "org.dromara.system.controller.monitor.SysUserOnlineController.forceLogout()",
+E         "requestMethod": "DELETE",
+E         "operatorType": 1,
+E         "operName": "admin",
+E         "deptName": "研发部门",
+E         "operUrl": "/monitor/online/test-token-to-force-logout-001",
+E         "operIp": "0:0:0:0:0:0:0:1",
+E         "operLocation": "内网IP",
+E         "operParam": "\"test-token-to-force-logout-001\"",
+E         "jsonResult": "{\"code\":200,\"msg\":\"操作成功\",\"data\":null}",
+E         "status": 0,
+E         "errorMsg": "",
+E         "operTime": "2026-07-14 14:02:20",
+E         "costTime": 60
+E       },
+E       {
+E         "operId": "2076910142889656322",
+E         "tenantId": "000000",
+E         "title": "在线用户",
+E         "businessType": 7,
+E         "businessTypes": null,
+E         "method": "org.dromara.system.controller.monitor.SysUserOnlineController.forceLogout()",
+E         "requestMethod": "DELETE",
+E         "operatorType": 1,
+E         "operName": "admin",
+E         "deptName": "研发部门",
+E         "operUrl": "/monitor/online/non-existent-token-xyz-99999",
+E         "operIp": "0:0:0:0:0:0:0:1",
+E         "operLocation": "内网IP",
+E         "operParam": "\"non-existent-token-xyz-99999\"",
+E         "jsonResult": "{\"code\":200,\"msg\":\"操作成功\",\"data\":null}",
+E         "status": 0,
+E         "errorMsg": "",
+E         "operTime": "2026-07-14 14:02:20",
+E         "costTime": 30
+E       },
+E       {
+E         "operId": "2076910147977347074",
+E         "tenantId": "000000",
+E         "title": "在线设备",
+E         "businessType": 7,
+E         "businessTypes": null,
+E         "method": "org.dromara.system.controller.monitor.SysUserOnlineController.remove()",
+E         "requestMethod": "DELETE",
+E         "operatorType": 1,
+E         "operName": "admin",
+E         "deptName": "研发部门",
+E         "operUrl": "/monitor/online/myself/test-my-token-to-logout-001",
+E         "operIp": "0:0:0:0:0:0:0:1",
+E         "operLocation": "内网IP",
+E         "operParam": "\"test-my-token-to-logout-001\"",
+E         "jsonResult": "{\"code\":200,\"msg\":\"操作成功\",\"data\":null}",
+E         "status": 0,
+E         "errorMsg": "",
+E         "operTime": "2026-07-14 14:02:21",
+E         "costTime": 1
+E       },
+E       {
+E         "operId": "2076910148619075586",
+E         "tenantId": "000000",
+E         "title": "在线设备",
+E         "businessType": 7,
+E         "businessTypes": null,
+E         "method": "org.dromara.system.controller.monitor.SysUserOnlineController.remove()",
+E         "requestMethod": "DELETE",
+E         "operatorType": 1,
+E         "operName": "admin",
+E         "deptName": "研发部门",
+E         "operUrl": "/monitor/online/myself/other-user-token-not-mine-xyz",
+E         "operIp": "0:0:0:0:0:0:0:1",
+E         "operLocation": "内网IP",
+E         "operParam": "\"other-user-token-not-mine-xyz\"",
+E         "jsonResult": "{\"code\":200,\"msg\":\"操作成功\",\"data\":null}",
+E         "status": 0,
+E         "errorMsg": "",
+E         "operTime": "2026-07-14 14:02:21",
+E         "costTime": 0
+E       },
+E       {
+E         "operId": "2076910161940185089",
+E         "tenantId": "000000",
+E         "title": "OSS对象存储",
+E         "businessType": 3,
+E         "businessTypes": null,
+E         "method": "org.dromara.system.controller.system.SysOssController.remove()",
+E         "requestMethod": "DELETE",
+E         "operatorType": 1,
+E         "operName": "admin",
+E         "deptName": "研发部门",
+E         "operUrl": "/resource/oss/1",
+E         "operIp": "0:0:0:0:0:0:0:1",
+E         "operLocation": "内网IP",
+E         "operParam": "[1]",
+E         "jsonResult": "{\"code\":500,\"msg\":\"操作失败\",\"data\":null}",
+E         "status": 0,
+E         "errorMsg": "",
+E         "operTime": "2026-07-14 14:02:24",
+E         "costTime": 151
+E       },
+E       {
+E         "operId": "2076910165488566273",
+E         "tenantId": "000000",
+E         "title": "对象存储配置",
+E         "businessType": 1,
+E         "businessTypes": null,
+E         "method": "org.dromara.system.controller.system.SysOssConfigController.add()",
+E         "requestMethod": "POST",
+E         "operatorType": 1,
+E         "operName": "admin",
+E         "deptName": "研发部门",
+E         "operUrl": "/resource/oss/config",
+E         "operIp": "0:0:0:0:0:0:0:1",
+E         "operLocation": "内网IP",
+E         "operParam": "{\"createDept\":null,\"createBy\":null,\"createTime\":null,\"updateBy\":null,\"updateTime\":null,\"ossConfigId\":null,\"configKey\":\"test-minio-001\",\"accessKey\":\"testAccessKey\",\"secretKey\":\"testSecretKey\",\"bucketName\":\"test-bucket\",\"prefix\":\"test/\",\"endpoint\":\"http://test-oss:9000\",\"domain\":\"https://test-oss.example.com\",\"isHttps\":\"N\",\"status\":\"1\",\"region\":\"cn-north-1\",\"ext1\":\"\",\"remark\":\"测试用配置\",\"accessPolicy\":\"1\"}",
+E         "jsonResult": "",
+E         "status": 1,
+E         "errorMsg": "操作配置'test-minio-001'失败, 配置key已存在!",
+E         "operTime": "2026-07-14 14:02:25",
+E         "costTime": 64
+E       },
+E       {
+E         "operId": "2076910167518609409",
+E         "tenantId": "000000",
+E         "title": "对象存储配置",
+E         "businessType": 2,
+E         "businessTypes": null,
+E         "method": "org.dromara.system.controller.system.SysOssConfigController.edit()",
+E         "requestMethod": "PUT",
+E         "operatorType": 1,
+E         "operName": "admin",
+E         "deptName": "研发部门",
+E         "operUrl": "/resource/oss/config",
+E         "operIp": "0:0:0:0:0:0:0:1",
+E         "operLocation": "内网IP",
+E         "operParam": "{\"createDept\":null,\"createBy\":null,\"createTime\":null,\"updateBy\":null,\"updateTime\":null,\"ossConfigId\":1,\"configKey\":\"minio\",\"accessKey\":\"minioadmin\",\"secretKey\":\"minioadmin\",\"bucketName\":\"ruoyi\",\"prefix\":\"prod/\",\"endpoint\":\"http://localhost:9000\",\"domain\":null,\"isHttps\":null,\"status\":null,\"region\":null,\"ext1\":null,\"remark\":null,\"accessPolicy\":\"1\"}",
+E         "jsonResult": "{\"code\":200,\"msg\":\"操作成功\",\"data\":null}",
+E         "status": 0,
+E         "errorMsg": "",
+E         "operTime": "2026-07-14 14:02:26",
+E         "costTime": 197
+E       },
+E       {
+E         "operId": "2076910169733201922",
+E         "tenantId": "000000",
+E         "title": "对象存储状态修改",
+E         "businessType": 2,
+E         "businessTypes": null,
+E         "method": "org.dromara.system.controller.system.SysOssConfigController.changeStatus()",
+E         "requestMethod": "PUT",
+E         "operatorType": 1,
+E         "operName": "admin",
+E         "deptName": "研发部门",
+E         "operUrl": "/resource/oss/config/changeStatus",
+E         "operIp": "0:0:0:0:0:0:0:1",
+E         "operLocation": "内网IP",
+E         "operParam": "{\"createDept\":null,\"createBy\":null,\"createTime\":null,\"updateBy\":null,\"updateTime\":null,\"ossConfigId\":1,\"configKey\":\"minio\",\"accessKey\":null,\"secretKey\":null,\"bucketName\":null,\"prefix\":null,\"endpoint\":null,\"domain\":null,\"isHttps\":null,\"status\":\"0\",\"region\":null,\"ext1\":null,\"remark\":null,\"accessPolicy\":null}",
+E         "jsonResult": "{\"code\":200,\"msg\":\"操作成功\",\"data\":null}",
+E         "status": 0,
+E         "errorMsg": "",
+E         "operTime": "2026-07-14 14:02:26",
+E         "costTime": 282
+E       },
+E       {
+E         "operId": "2076910171494809601",
+E         "tenantId": "000000",
+E         "title": "对象存储状态修改",
+E         "businessType": 2,
+E         "businessTypes": null,
+E         "method": "org.dromara.system.controller.system.SysOssConfigController.changeStatus()",
+E         "requestMethod": "PUT",
+E         "operatorType": 1,
+E         "operName": "admin",
+E         "deptName": "研发部门",
+E         "operUrl": "/resource/oss/config/changeStatus",
+E         "operIp": "0:0:0:0:0:0:0:1",
+E         "operLocation": "内网IP",
+E         "operParam": "{\"createDept\":null,\"createBy\":null,\"createTime\":null,\"updateBy\":null,\"updateTime\":null,\"ossConfigId\":99999,\"configKey\":\"nonexistent\",\"accessKey\":null,\"secretKey\":null,\"bucketName\":null,\"prefix\":null,\"endpoint\":null,\"domain\":null,\"isHttps\":null,\"status\":\"0\",\"region\":null,\"ext1\":null,\"remark\":null,\"accessPolicy\":null}",
+E         "jsonResult": "{\"code\":200,\"msg\":\"操作成功\",\"data\":null}",
+E         "status": 0,
+E         "errorMsg": "",
+E         "operTime": "2026-07-14 14:02:27",
+E         "costTime": 286
+E       }
+E     ],
+E     "code": 200,
+E     "msg": "查询成功"
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_011" time="0.220"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/monitor/operlog/1&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_monitor.py:116: in test_TC_MONITOR_011
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/monitor/operlog/1
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_012" time="0.236" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_013" time="0.328" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_014" time="0.310"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/monitor/operlog/clean&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;操作成功&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_monitor.py:137: in test_TC_MONITOR_014
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/monitor/operlog/clean
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "操作成功",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_015" time="0.494" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_016" time="0.330" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_017" time="0.148" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_018" time="0.197" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_019" time="0.343" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_020" time="0.292" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_021" time="0.139" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_022" time="0.137" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_023" time="0.194" /><testcase classname="tests.baseline.generated.api-test.test_monitor" name="test_TC_MONITOR_024" time="0.208"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/monitor/cache&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;操作成功&quot;,&#10;  &quot;data&quot;: {&#10;    &quot;info&quot;: {&#10;      &quot;uptime_in_seconds&quot;: &quot;7932&quot;,&#10;      &quot;maxmemory_human&quot;: &quot;0B&quot;,&#10;      &quot;aof_last_cow_size&quot;: &quot;0&quot;,&#10;      &quot;master_replid2&quot;: &quot;0000000000000000000000000000000000000000&quot;,&#10;      &quot;mem_replication_backlog&quot;: &quot;0&quot;,&#10;      &quot;aof_rewrite_scheduled&quot;: &quot;0&quot;,&#10;      &quot;total_net_input_bytes&quot;: &quot;1231395&quot;,&#10;      &quot;rss_overhead_ratio&quot;: &quot;2.18&quot;,&#10;      &quot;hz&quot;: &quot;10&quot;,&#10;      &quot;redis_build_id&quot;: &quot;9529b692c0384fb7&quot;,&#10;      &quot;aof_last_bgrewrite_status&quot;: &quot;ok&quot;,&#10;      &quot;multiplexing_api&quot;: &quot;epoll&quot;,&#10;      &quot;client_recent_max_output_buffer&quot;: &quot;0&quot;,&#10;      &quot;allocator_resident&quot;: &quot;4296704&quot;,&#10;      &quot;mem_fragmentation_bytes&quot;: &quot;8264848&quot;,&#10;      &quot;repl_backlog_first_byte_offset&quot;: &quot;0&quot;,&#10;      &quot;redis_mode&quot;: &quot;standalone&quot;,&#10;      &quot;redis_git_dirty&quot;: &quot;0&quot;,&#10;      &quot;allocator_rss_bytes&quot;: &quot;2584576&quot;,&#10;      &quot;repl_backlog_histlen&quot;: &quot;0&quot;,&#10;      &quot;rss_overhead_bytes&quot;: &quot;5070848&quot;,&#10;      &quot;total_system_memory&quot;: &quot;8338313216&quot;,&#10;      &quot;loading&quot;: &quot;0&quot;,&#10;      &quot;evicted_keys&quot;: &quot;0&quot;,&#10;      &quot;cluster_enabled&quot;: &quot;0&quot;,&#10;      &quot;redis_version&quot;: &quot;5.0.3&quot;,&#10;      &quot;repl_backlog_active&quot;: &quot;0&quot;,&#10;      &quot;mem_aof_buffer&quot;: &quot;0&quot;,&#10;      &quot;allocator_frag_bytes&quot;: &quot;446320&quot;,&#10;      &quot;instantaneous_ops_per_sec&quot;: &quot;30&quot;,&#10;      &quot;used_memory_human&quot;: &quot;1.05M&quot;,&#10;      &quot;role&quot;: &quot;master&quot;,&#10;      &quot;maxmemory&quot;: &quot;0&quot;,&#10;      &quot;used_memory_lua&quot;: &quot;67584&quot;,&#10;      &quot;rdb_current_bgsave_time_sec&quot;: &quot;-1&quot;,&#10;      &quot;used_memory_startup&quot;: &quot;791008&quot;,&#10;      &quot;lazyfree_pending_objects&quot;: &quot;0&quot;,&#10;      &quot;used_memory_dataset_perc&quot;: &quot;26.18%&quot;,&#10;      &quot;allocator_frag_ratio&quot;: &quot;1.35&quot;,&#10;      &quot;arch_bits&quot;: &quot;64&quot;,&#10;      &quot;mem_clients_normal&quot;: &quot;218914&quot;,&#10;      &quot;expired_time_cap_reached_count&quot;: &quot;0&quot;,&#10;      &quot;mem_fragmentation_ratio&quot;: &quot;8.50&quot;,&#10;      &quot;aof_last_rewrite_time_sec&quot;: &quot;-1&quot;,&#10;      &quot;master_replid&quot;: &quot;3ae513c3e8d41272f9d7e5f5443fce351b11080b&quot;,&#10;      &quot;aof_rewrite_in_progress&quot;: &quot;0&quot;,&#10;      &quot;config_file&quot;: &quot;/etc/redis.conf&quot;,&#10;      &quot;lru_clock&quot;: &quot;5624557&quot;,&#10;      &quot;maxmemory_policy&quot;: &quot;noeviction&quot;,&#10;      &quot;run_id&quot;: &quot;b3cb315071c8da77e4e3620a5113bddd4fc0422b&quot;,&#10;      &quot;latest_fork_usec&quot;: &quot;222&quot;,&#10;      &quot;total_commands_processed&quot;: &quot;5214&quot;,&#10;      &quot;expired_keys&quot;: &quot;150&quot;,&#10;      &quot;used_memory&quot;: &quot;1103768&quot;,&#10;      &quot;mem_clients_slaves&quot;: &quot;0&quot;,&#10;      &quot;keyspace_misses&quot;: &quot;612&quot;,&#10;      &quot;executable&quot;: &quot;/usr/bin/redis-server&quot;,&#10;      &quot;db0&quot;: &quot;keys=39,expires=35,avg_ttl=460170716&quot;,&#10;      &quot;used_memory_peak_human&quot;: &quot;1.25M&quot;,&#10;      &quot;keyspace_hits&quot;: &quot;1385&quot;,&#10;      &quot;rdb_last_cow_size&quot;: &quot;516096&quot;,&#10;      &quot;used_memory_overhead&quot;: &quot;1021890&quot;,&#10;      &quot;active_defrag_hits&quot;: &quot;0&quot;,&#10;      &quot;tcp_port&quot;: &quot;6379&quot;,&#10;      &quot;uptime_in_days&quot;: &quot;0&quot;,&#10;      &quot;used_memory_peak_perc&quot;: &quot;84.05%&quot;,&#10;      &quot;blocked_clients&quot;: &quot;0&quot;,&#10;      &quot;sync_partial_err&quot;: &quot;0&quot;,&#10;      &quot;used_memory_scripts_human&quot;: &quot;8.34K&quot;,&#10;      &quot;aof_current_rewrite_time_sec&quot;: &quot;-1&quot;,&#10;      &quot;aof_enabled&quot;: &quot;0&quot;,&#10;      &quot;master_repl_offset&quot;: &quot;0&quot;,&#10;      &quot;used_memory_dataset&quot;: &quot;81878&quot;,&#10;      &quot;used_cpu_user&quot;: &quot;4.060324&quot;,&#10;      &quot;rdb_last_bgsave_status&quot;: &quot;ok&quot;,&#10;      &quot;atomicvar_api&quot;: &quot;atomic-builtin&quot;,&#10;      &quot;allocator_rss_ratio&quot;: &quot;2.51&quot;,&#10;      &quot;client_recent_max_input_buffer&quot;: &quot;2&quot;,&#10;      &quot;aof_last_write_status&quot;: &quot;ok&quot;,&#10;      &quot;mem_allocator&quot;: &quot;jemalloc-5.1.0&quot;,&#10;      &quot;used_memory_scripts&quot;: &quot;8544&quot;,&#10;      &quot;used_memory_peak&quot;: &quot;1313232&quot;,&#10;      &quot;process_id&quot;: &quot;644911&quot;,&#10;      &quot;used_cpu_sys&quot;: &quot;2.203953&quot;,&#10;      &quot;repl_backlog_size&quot;: &quot;1048576&quot;,&#10;      &quot;connected_slaves&quot;: &quot;0&quot;,&#10;      &quot;gcc_version&quot;: &quot;8.4.1&quot;,&#10;      &quot;total_system_memory_human&quot;: &quot;7.77G&quot;,&#10;      &quot;sync_full&quot;: &quot;0&quot;,&#10;      &quot;connected_clients&quot;: &quot;11&quot;,&#10;      &quot;allocator_active&quot;: &quot;1712128&quot;,&#10;      &quot;total_net_output_bytes&quot;: &quot;438294&quot;,&#10;      &quot;pubsub_channels&quot;: &quot;1&quot;,&#10;      &quot;active_defrag_key_hits&quot;: &quot;0&quot;,&#10;      &quot;rdb_changes_since_last_save&quot;: &quot;251&quot;,&#10;      &quot;instantaneous_input_kbps&quot;: &quot;10.94&quot;,&#10;      &quot;configured_hz&quot;: &quot;10&quot;,&#10;      &quot;used_memory_rss_human&quot;: &quot;8.93M&quot;,&#10;      &quot;expired_stale_perc&quot;: &quot;0.04&quot;,&#10;      &quot;active_defrag_misses&quot;: &quot;0&quot;,&#10;      &quot;used_cpu_sys_children&quot;: &quot;0.000543&quot;,&#10;      &quot;number_of_cached_scripts&quot;: &quot;8&quot;,&#10;      &quot;sync_partial_ok&quot;: &quot;0&quot;,&#10;      &quot;used_memory_lua_human&quot;: &quot;66.00K&quot;,&#10;      &quot;rdb_last_save_time&quot;: &quot;1784009359&quot;,&#10;      &quot;pubsub_patterns&quot;: &quot;0&quot;,&#10;      &quot;slave_expires_tracked_keys&quot;: &quot;0&quot;,&#10;      &quot;redis_git_sha1&quot;: &quot;00000000&quot;,&#10;      &quot;used_memory_rss&quot;: &quot;9367552&quot;,&#10;      &quot;rdb_last_bgsave_time_sec&quot;: &quot;0&quot;,&#10;      &quot;os&quot;: &quot;Linux 4.18.0-348.7.1.el8_5.x86_64 x86_64&quot;,&#10;      &quot;mem_not_counted_for_evict&quot;: &quot;0&quot;,&#10;      &quot;active_defrag_running&quot;: &quot;0&quot;,&#10;      &quot;rejected_connections&quot;: &quot;0&quot;,&#10;      &quot;active_defrag_key_misses&quot;: &quot;0&quot;,&#10;      &quot;allocator_allocated&quot;: &quot;1265808&quot;,&#10;      &quot;instantaneous_output_kbps&quot;: &quot;10.90&quot;,&#10;      &quot;second_repl_offset&quot;: &quot;-1&quot;,&#10;      &quot;rdb_bgsave_in_progress&quot;: &quot;0&quot;,&#10;      &quot;used_cpu_user_children&quot;: &quot;0.003471&quot;,&#10;      &quot;total_connections_received&quot;: &quot;71&quot;,&#10;      &quot;migrate_cached_sockets&quot;: &quot;0&quot;&#10;    },&#10;    &quot;dbSize&quot;: 39,&#10;    &quot;commandStats&quot;: [&#10;      {&#10;        &quot;name&quot;: &quot;flushall&quot;,&#10;        &quot;value&quot;: &quot;2&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;dbsize&quot;,&#10;        &quot;value&quot;: &quot;5&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;setnx&quot;,&#10;        &quot;value&quot;: &quot;82&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;zadd&quot;,&#10;        &quot;value&quot;: &quot;13&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;hdel&quot;,&#10;        &quot;value&quot;: &quot;13&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;evalsha&quot;,&#10;        &quot;value&quot;: &quot;234&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;auth&quot;,&#10;        &quot;value&quot;: &quot;66&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;publish&quot;,&#10;        &quot;value&quot;: &quot;58&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;zrem&quot;,&#10;        &quot;value&quot;: &quot;31&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;info&quot;,&#10;        &quot;value&quot;: &quot;250&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;del&quot;,&#10;        &quot;value&quot;: &quot;155&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;hget&quot;,&#10;        &quot;value&quot;: &quot;113&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;hmset&quot;,&#10;        &quot;value&quot;: &quot;7&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;script&quot;,&#10;        &quot;value&quot;: &quot;8&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;hincrby&quot;,&#10;        &quot;value&quot;: &quot;66&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;get&quot;,&#10;        &quot;value&quot;: &quot;1053&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;ping&quot;,&#10;        &quot;value&quot;: &quot;1347&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;zscore&quot;,&#10;        &quot;value&quot;: &quot;22&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;scan&quot;,&#10;        &quot;value&quot;: &quot;8&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;zrangebyscore&quot;,&#10;        &quot;value&quot;: &quot;164&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;hset&quot;,&#10;        &quot;value&quot;: &quot;40&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;pttl&quot;,&#10;        &quot;value&quot;: &quot;539&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;hexists&quot;,&#10;        &quot;value&quot;: &quot;67&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;slaveof&quot;,&#10;        &quot;value&quot;: &quot;1&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;exists&quot;,&#10;        &quot;value&quot;: &quot;39&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;pexpire&quot;,&#10;        &quot;value&quot;: &quot;54&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;set&quot;,&#10;        &quot;value&quot;: &quot;119&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;psetex&quot;,&#10;        &quot;value&quot;: &quot;573&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;expire&quot;,&#10;        &quot;value&quot;: &quot;82&quot;&#10;      },&#10;      {&#10;        &quot;name&quot;: &quot;subscribe&quot;,&#10;        &quot;value&quot;: &quot;2&quot;&#10;      }&#10;    ]&#10;  }&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_monitor.py:207: in test_TC_MONITOR_024
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/monitor/cache
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "操作成功",
+E     "data": {
+E       "info": {
+E         "uptime_in_seconds": "7932",
+E         "maxmemory_human": "0B",
+E         "aof_last_cow_size": "0",
+E         "master_replid2": "0000000000000000000000000000000000000000",
+E         "mem_replication_backlog": "0",
+E         "aof_rewrite_scheduled": "0",
+E         "total_net_input_bytes": "1231395",
+E         "rss_overhead_ratio": "2.18",
+E         "hz": "10",
+E         "redis_build_id": "9529b692c0384fb7",
+E         "aof_last_bgrewrite_status": "ok",
+E         "multiplexing_api": "epoll",
+E         "client_recent_max_output_buffer": "0",
+E         "allocator_resident": "4296704",
+E         "mem_fragmentation_bytes": "8264848",
+E         "repl_backlog_first_byte_offset": "0",
+E         "redis_mode": "standalone",
+E         "redis_git_dirty": "0",
+E         "allocator_rss_bytes": "2584576",
+E         "repl_backlog_histlen": "0",
+E         "rss_overhead_bytes": "5070848",
+E         "total_system_memory": "8338313216",
+E         "loading": "0",
+E         "evicted_keys": "0",
+E         "cluster_enabled": "0",
+E         "redis_version": "5.0.3",
+E         "repl_backlog_active": "0",
+E         "mem_aof_buffer": "0",
+E         "allocator_frag_bytes": "446320",
+E         "instantaneous_ops_per_sec": "30",
+E         "used_memory_human": "1.05M",
+E         "role": "master",
+E         "maxmemory": "0",
+E         "used_memory_lua": "67584",
+E         "rdb_current_bgsave_time_sec": "-1",
+E         "used_memory_startup": "791008",
+E         "lazyfree_pending_objects": "0",
+E         "used_memory_dataset_perc": "26.18%",
+E         "allocator_frag_ratio": "1.35",
+E         "arch_bits": "64",
+E         "mem_clients_normal": "218914",
+E         "expired_time_cap_reached_count": "0",
+E         "mem_fragmentation_ratio": "8.50",
+E         "aof_last_rewrite_time_sec": "-1",
+E         "master_replid": "3ae513c3e8d41272f9d7e5f5443fce351b11080b",
+E         "aof_rewrite_in_progress": "0",
+E         "config_file": "/etc/redis.conf",
+E         "lru_clock": "5624557",
+E         "maxmemory_policy": "noeviction",
+E         "run_id": "b3cb315071c8da77e4e3620a5113bddd4fc0422b",
+E         "latest_fork_usec": "222",
+E         "total_commands_processed": "5214",
+E         "expired_keys": "150",
+E         "used_memory": "1103768",
+E         "mem_clients_slaves": "0",
+E         "keyspace_misses": "612",
+E         "executable": "/usr/bin/redis-server",
+E         "db0": "keys=39,expires=35,avg_ttl=460170716",
+E         "used_memory_peak_human": "1.25M",
+E         "keyspace_hits": "1385",
+E         "rdb_last_cow_size": "516096",
+E         "used_memory_overhead": "1021890",
+E         "active_defrag_hits": "0",
+E         "tcp_port": "6379",
+E         "uptime_in_days": "0",
+E         "used_memory_peak_perc": "84.05%",
+E         "blocked_clients": "0",
+E         "sync_partial_err": "0",
+E         "used_memory_scripts_human": "8.34K",
+E         "aof_current_rewrite_time_sec": "-1",
+E         "aof_enabled": "0",
+E         "master_repl_offset": "0",
+E         "used_memory_dataset": "81878",
+E         "used_cpu_user": "4.060324",
+E         "rdb_last_bgsave_status": "ok",
+E         "atomicvar_api": "atomic-builtin",
+E         "allocator_rss_ratio": "2.51",
+E         "client_recent_max_input_buffer": "2",
+E         "aof_last_write_status": "ok",
+E         "mem_allocator": "jemalloc-5.1.0",
+E         "used_memory_scripts": "8544",
+E         "used_memory_peak": "1313232",
+E         "process_id": "644911",
+E         "used_cpu_sys": "2.203953",
+E         "repl_backlog_size": "1048576",
+E         "connected_slaves": "0",
+E         "gcc_version": "8.4.1",
+E         "total_system_memory_human": "7.77G",
+E         "sync_full": "0",
+E         "connected_clients": "11",
+E         "allocator_active": "1712128",
+E         "total_net_output_bytes": "438294",
+E         "pubsub_channels": "1",
+E         "active_defrag_key_hits": "0",
+E         "rdb_changes_since_last_save": "251",
+E         "instantaneous_input_kbps": "10.94",
+E         "configured_hz": "10",
+E         "used_memory_rss_human": "8.93M",
+E         "expired_stale_perc": "0.04",
+E         "active_defrag_misses": "0",
+E         "used_cpu_sys_children": "0.000543",
+E         "number_of_cached_scripts": "8",
+E         "sync_partial_ok": "0",
+E         "used_memory_lua_human": "66.00K",
+E         "rdb_last_save_time": "1784009359",
+E         "pubsub_patterns": "0",
+E         "slave_expires_tracked_keys": "0",
+E         "redis_git_sha1": "00000000",
+E         "used_memory_rss": "9367552",
+E         "rdb_last_bgsave_time_sec": "0",
+E         "os": "Linux 4.18.0-348.7.1.el8_5.x86_64 x86_64",
+E         "mem_not_counted_for_evict": "0",
+E         "active_defrag_running": "0",
+E         "rejected_connections": "0",
+E         "active_defrag_key_misses": "0",
+E         "allocator_allocated": "1265808",
+E         "instantaneous_output_kbps": "10.90",
+E         "second_repl_offset": "-1",
+E         "rdb_bgsave_in_progress": "0",
+E         "used_cpu_user_children": "0.003471",
+E         "total_connections_received": "71",
+E         "migrate_cached_sockets": "0"
+E       },
+E       "dbSize": 39,
+E       "commandStats": [
+E         {
+E           "name": "flushall",
+E           "value": "2"
+E         },
+E         {
+E           "name": "dbsize",
+E           "value": "5"
+E         },
+E         {
+E           "name": "setnx",
+E           "value": "82"
+E         },
+E         {
+E           "name": "zadd",
+E           "value": "13"
+E         },
+E         {
+E           "name": "hdel",
+E           "value": "13"
+E         },
+E         {
+E           "name": "evalsha",
+E           "value": "234"
+E         },
+E         {
+E           "name": "auth",
+E           "value": "66"
+E         },
+E         {
+E           "name": "publish",
+E           "value": "58"
+E         },
+E         {
+E           "name": "zrem",
+E           "value": "31"
+E         },
+E         {
+E           "name": "info",
+E           "value": "250"
+E         },
+E         {
+E           "name": "del",
+E           "value": "155"
+E         },
+E         {
+E           "name": "hget",
+E           "value": "113"
+E         },
+E         {
+E           "name": "hmset",
+E           "value": "7"
+E         },
+E         {
+E           "name": "script",
+E           "value": "8"
+E         },
+E         {
+E           "name": "hincrby",
+E           "value": "66"
+E         },
+E         {
+E           "name": "get",
+E           "value": "1053"
+E         },
+E         {
+E           "name": "ping",
+E           "value": "1347"
+E         },
+E         {
+E           "name": "zscore",
+E           "value": "22"
+E         },
+E         {
+E           "name": "scan",
+E           "value": "8"
+E         },
+E         {
+E           "name": "zrangebyscore",
+E           "value": "164"
+E         },
+E         {
+E           "name": "hset",
+E           "value": "40"
+E         },
+E         {
+E           "name": "pttl",
+E           "value": "539"
+E         },
+E         {
+E           "name": "hexists",
+E           "value": "67"
+E         },
+E         {
+E           "name": "slaveof",
+E           "value": "1"
+E         },
+E         {
+E           "name": "exists",
+E           "value": "39"
+E         },
+E         {
+E           "name": "pexpire",
+E           "value": "54"
+E         },
+E         {
+E           "name": "set",
+E           "value": "119"
+E         },
+E         {
+E           "name": "psetex",
+E           "value": "573"
+E         },
+E         {
+E           "name": "expire",
+E           "value": "82"
+E         },
+E         {
+E           "name": "subscribe",
+E           "value": "2"
+E         }
+E       ]
+E     }
+E   }
+E   ------------------------------------------------------------</failure></testcase></testsuite></testsuites>

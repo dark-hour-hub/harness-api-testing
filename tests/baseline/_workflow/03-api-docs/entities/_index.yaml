@@ -1,33 +1,1319 @@
 # 实体索引 — 由 api-doc-entities 生成
-# 生成日期: 2026-07-10
 entities:
-  Vets:
-    file: Vets.md
-    module: 兽医管理
+  AvatarVo:
+    file: AvatarVo.md
+    module: system
     type: VO
-    fields: [vetList]
-  Vet:
-    file: Vet.md
-    module: 兽医管理
+    fields:
+    - imgUrl
+  BackProcessBo:
+    file: BackProcessBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - taskId
+    - fileId
+    - messageType
+    - nodeCode
+    - message
+    - notice
+    - variables
+  CacheListInfoVo:
+    file: CacheListInfoVo.md
+    module: monitor
     type: VO
-    fields: [id, firstName, lastName, specialties, nrOfSpecialties]
-  Owner:
-    file: Owner.md
-    module: 客户管理
+    fields:
+    - info
+    - dbSize
+    - commandStats
+  CaptchaVo:
+    file: CaptchaVo.md
+    module: auth
     type: VO
-    fields: [id, firstName, lastName, address, city, telephone, pets]
-  Pet:
-    file: Pet.md
-    module: 客户管理
+    fields:
+    - captchaEnabled
+    - uuid
+    - img
+  CompleteTaskBo:
+    file: CompleteTaskBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - taskId
+    - fileId
+    - flowCopyList
+    - messageType
+    - message
+    - notice
+    - handler
+    - variables
+    - assigneeMap
+    - ext
+    - flowCopyList[].userId
+    - flowCopyList[].nickName
+  Definition:
+    file: Definition.md
+    module: workflow
     type: VO
-    fields: [id, name, birthDate, type, visits]
-  Visit:
-    file: Visit.md
-    module: 客户管理
+    fields:
+    - id
+    - flowCode
+    - flowName
+    - version
+    - isPublish
+    - category
+    - formCustom
+    - formPath
+    - activityStatus
+    - listenerType
+    - listenerPath
+    - ext
+  EmailLoginBody:
+    file: EmailLoginBody.md
+    module: auth
+    type: DTO
+    fields:
+    - email
+    - emailCode
+    - clientId
+    - grantType
+    - tenantId
+    - code
+    - uuid
+  FlowCancelBo:
+    file: FlowCancelBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - businessId
+    - message
+  FlowCategoryBo:
+    file: FlowCategoryBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - categoryId
+    - parentId
+    - categoryName
+    - orderNum
+    - searchValue
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  FlowCategoryVo:
+    file: FlowCategoryVo.md
+    module: workflow
     type: VO
-    fields: [id, date, description]
-  PetType:
-    file: PetType.md
-    module: 客户管理
+    fields:
+    - categoryId
+    - parentId
+    - parentName
+    - ancestors
+    - categoryName
+    - orderNum
+    - createTime
+  FlowCopyBo:
+    file: FlowCopyBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - userId
+    - nickName
+  FlowDefinition:
+    file: FlowDefinition.md
+    module: workflow
+    type: DTO
+    fields:
+    - id
+    - flowCode
+    - flowName
+    - version
+    - isPublish
+    - category
+    - formCustom
+    - formPath
+    - activityStatus
+    - listenerType
+    - listenerPath
+    - ext
+    - createTime
+    - updateTime
+  FlowDefinitionVo:
+    file: FlowDefinitionVo.md
+    module: workflow
     type: VO
-    fields: [id, name]
+    fields:
+    - id
+    - createTime
+    - updateTime
+    - tenantId
+    - delFlag
+    - flowCode
+    - flowName
+    - category
+    - categoryName
+    - version
+    - isPublish
+    - formCustom
+    - formPath
+    - activityStatus
+    - listenerType
+    - listenerPath
+    - ext
+  FlowHisTaskVo:
+    file: FlowHisTaskVo.md
+    module: workflow
+    type: VO
+    fields:
+    - id
+    - createTime
+    - updateTime
+    - tenantId
+    - delFlag
+    - definitionId
+    - flowName
+    - instanceId
+    - taskId
+    - cooperateType
+    - cooperateTypeName
+    - businessId
+    - nodeCode
+    - nodeName
+    - nodeType
+    - targetNodeCode
+    - targetNodeName
+    - approver
+    - approveName
+    - collaborator
+    - permissionList
+    - skipType
+    - flowStatus
+    - flowTaskStatus
+    - flowStatusName
+    - message
+    - ext
+    - createBy
+    - createByName
+    - category
+    - categoryName
+    - formCustom
+    - formPath
+    - flowCode
+    - version
+    - runDuration
+    - businessCode
+    - businessTitle
+  FlowInstanceVo:
+    file: FlowInstanceVo.md
+    module: workflow
+    type: VO
+    fields:
+    - id
+    - createTime
+    - updateTime
+    - tenantId
+    - delFlag
+    - definitionId
+    - flowName
+    - flowCode
+    - businessId
+    - nodeType
+    - nodeCode
+    - nodeName
+    - variable
+    - flowStatus
+    - flowStatusName
+    - activityStatus
+    - formCustom
+    - formPath
+    - ext
+    - version
+    - createBy
+    - createByName
+    - category
+    - categoryName
+    - businessCode
+    - businessTitle
+  FlowInvalidBo:
+    file: FlowInvalidBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - id
+    - comment
+  FlowNextNodeBo:
+    file: FlowNextNodeBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - taskId
+    - variables
+  FlowNode:
+    file: FlowNode.md
+    module: workflow
+    type: VO
+    fields:
+    - id
+    - definitionId
+    - nodeCode
+    - nodeName
+    - nodeType
+    - permissionFlag
+    - nodeRatio
+    - version
+    - skipAnyNode
+    - coordinate
+    - ext
+    - createTime
+    - updateTime
+  FlowSpelBo:
+    file: FlowSpelBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - id
+    - componentName
+    - methodName
+    - methodParams
+    - viewSpel
+    - status
+    - remark
+    - searchValue
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  FlowSpelVo:
+    file: FlowSpelVo.md
+    module: workflow
+    type: VO
+    fields:
+    - id
+    - componentName
+    - methodName
+    - methodParams
+    - viewSpel
+    - status
+    - remark
+    - createTime
+  FlowTaskVo:
+    file: FlowTaskVo.md
+    module: workflow
+    type: VO
+    fields:
+    - id
+    - createTime
+    - updateTime
+    - tenantId
+    - delFlag
+    - definitionId
+    - instanceId
+    - flowName
+    - businessId
+    - nodeCode
+    - nodeName
+    - nodeType
+    - permissionList
+    - userList
+    - formCustom
+    - formPath
+    - flowCode
+    - version
+    - flowStatus
+    - flowStatusName
+    - category
+    - categoryName
+    - type
+    - assigneeIds
+    - assigneeNames
+    - processedBy
+    - processedByName
+    - nodeRatio
+    - createBy
+    - createByName
+    - applyNode
+    - buttonList
+    - copyList
+    - varList
+    - businessCode
+    - businessTitle
+  FlowTerminationBo:
+    file: FlowTerminationBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - taskId
+    - comment
+  FlowUrgeTaskBo:
+    file: FlowUrgeTaskBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - taskIdList
+    - messageType
+    - message
+  FlowVariableBo:
+    file: FlowVariableBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - instanceId
+    - key
+    - value
+  GenTable:
+    file: GenTable.md
+    module: codegen
+    type: BO
+    fields:
+    - tableId
+    - dataName
+    - tableName
+    - tableComment
+    - subTableName
+    - subTableFkName
+    - className
+    - tplCategory
+    - packageName
+    - moduleName
+    - businessName
+    - functionName
+    - functionAuthor
+    - genType
+    - genPath
+    - pkColumn
+    - columns
+    - options
+    - remark
+    - treeCode
+    - treeParentCode
+    - treeName
+    - menuIds
+    - parentMenuId
+    - parentMenuName
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  GenTableColumn:
+    file: GenTableColumn.md
+    module: codegen
+    type: BO
+    fields:
+    - columnId
+    - tableId
+    - columnName
+    - columnComment
+    - columnType
+    - javaType
+    - javaField
+    - isPk
+    - isIncrement
+    - isRequired
+    - isInsert
+    - isEdit
+    - isList
+    - isQuery
+    - queryType
+    - htmlType
+    - dictType
+    - sort
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  LoginBody:
+    file: LoginBody.md
+    module: auth
+    type: DTO
+    fields:
+    - clientId
+    - grantType
+    - tenantId
+    - code
+    - uuid
+  LoginTenantVo:
+    file: LoginTenantVo.md
+    module: auth
+    type: VO
+    fields:
+    - tenantEnabled
+    - voList
+    - voList[].tenantId
+    - voList[].companyName
+    - voList[].domain
+  LoginVo:
+    file: LoginVo.md
+    module: auth
+    type: VO
+    fields:
+    - accessToken
+    - refreshToken
+    - expireIn
+    - refreshExpireIn
+    - clientId
+    - scope
+    - openid
+  MenuTreeSelectVo:
+    file: MenuTreeSelectVo.md
+    module: system
+    type: VO
+    fields:
+    - checkedKeys
+    - menus
+  Node:
+    file: Node.md
+    module: workflow
+    type: VO
+    fields:
+    - nodeCode
+    - nodeName
+    - nodeType
+    - permissionFlag
+    - nodeRatio
+    - setHandler
+    - ext
+  PasswordLoginBody:
+    file: PasswordLoginBody.md
+    module: auth
+    type: DTO
+    fields:
+    - username
+    - password
+    - clientId
+    - grantType
+    - tenantId
+    - code
+    - uuid
+  ProfileVo:
+    file: ProfileVo.md
+    module: system
+    type: VO
+    fields:
+    - user
+    - roleGroup
+    - postGroup
+  RegisterBody:
+    file: RegisterBody.md
+    module: auth
+    type: DTO
+    fields:
+    - username
+    - password
+    - userType
+    - clientId
+    - grantType
+    - tenantId
+    - code
+    - uuid
+  RouterVo:
+    file: RouterVo.md
+    module: system
+    type: VO
+    fields:
+    - name
+    - path
+    - hidden
+    - redirect
+    - component
+    - query
+    - alwaysShow
+    - meta
+    - children
+  SmsLoginBody:
+    file: SmsLoginBody.md
+    module: auth
+    type: DTO
+    fields:
+    - phonenumber
+    - smsCode
+    - clientId
+    - grantType
+    - tenantId
+    - code
+    - uuid
+  SocialLoginBody:
+    file: SocialLoginBody.md
+    module: auth
+    type: DTO
+    fields:
+    - source
+    - socialCode
+    - socialState
+    - clientId
+    - grantType
+    - tenantId
+    - code
+    - uuid
+  StartProcessBo:
+    file: StartProcessBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - businessId
+    - flowCode
+    - handler
+    - variables
+    - bizExt
+    - bizExt.id
+    - bizExt.instanceId
+    - bizExt.businessId
+    - bizExt.businessCode
+    - bizExt.businessTitle
+    - bizExt.delFlag
+    - bizExt.tenantId
+    - bizExt.searchValue
+    - bizExt.createDept
+    - bizExt.createBy
+    - bizExt.createTime
+    - bizExt.updateBy
+    - bizExt.updateTime
+    - bizExt.params
+  StartProcessReturnDTO:
+    file: StartProcessReturnDTO.md
+    module: workflow
+    type: VO
+    fields:
+    - processInstanceId
+    - taskId
+  SysClientBo:
+    file: SysClientBo.md
+    module: system
+    type: DTO
+    fields:
+    - id
+    - clientId
+    - clientKey
+    - clientSecret
+    - grantTypeList
+    - grantType
+    - deviceType
+    - activeTimeout
+    - timeout
+    - status
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  SysClientVo:
+    file: SysClientVo.md
+    module: system
+    type: VO
+    fields:
+    - id
+    - clientId
+    - clientKey
+    - clientSecret
+    - grantTypeList
+    - grantType
+    - deviceType
+    - activeTimeout
+    - timeout
+    - status
+  SysConfigBo:
+    file: SysConfigBo.md
+    module: system
+    type: DTO
+    fields:
+    - configId
+    - configName
+    - configKey
+    - configValue
+    - configType
+    - remark
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  SysConfigVo:
+    file: SysConfigVo.md
+    module: system
+    type: VO
+    fields:
+    - configId
+    - configName
+    - configKey
+    - configValue
+    - configType
+    - remark
+    - createTime
+  SysDeptBo:
+    file: SysDeptBo.md
+    module: system
+    type: DTO
+    fields:
+    - searchValue
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+    - deptId
+    - parentId
+    - deptName
+    - deptCategory
+    - orderNum
+    - leader
+    - phone
+    - email
+    - status
+    - belongDeptId
+  SysDeptVo:
+    file: SysDeptVo.md
+    module: system
+    type: VO
+    fields:
+    - deptId
+    - parentId
+    - parentName
+    - ancestors
+    - deptName
+    - deptCategory
+    - orderNum
+    - leader
+    - leaderName
+    - phone
+    - email
+    - status
+    - createTime
+    - children
+  SysDictDataBo:
+    file: SysDictDataBo.md
+    module: system
+    type: DTO
+    fields:
+    - dictCode
+    - dictSort
+    - dictLabel
+    - dictValue
+    - dictType
+    - cssClass
+    - listClass
+    - isDefault
+    - createDept
+    - remark
+    - searchValue
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  SysDictDataVo:
+    file: SysDictDataVo.md
+    module: system
+    type: VO
+    fields:
+    - dictCode
+    - dictSort
+    - dictLabel
+    - dictValue
+    - dictType
+    - cssClass
+    - listClass
+    - isDefault
+    - remark
+    - createTime
+  SysDictTypeBo:
+    file: SysDictTypeBo.md
+    module: system
+    type: DTO
+    fields:
+    - dictId
+    - dictName
+    - dictType
+    - remark
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  SysDictTypeVo:
+    file: SysDictTypeVo.md
+    module: system
+    type: VO
+    fields:
+    - dictId
+    - dictName
+    - dictType
+    - remark
+    - createTime
+  SysLogininforVo:
+    file: SysLogininforVo.md
+    module: monitor
+    type: VO
+    fields:
+    - infoId
+    - tenantId
+    - userName
+    - clientKey
+    - deviceType
+    - status
+    - ipaddr
+    - loginLocation
+    - browser
+    - os
+    - msg
+    - loginTime
+  SysMenuBo:
+    file: SysMenuBo.md
+    module: system
+    type: DTO
+    fields:
+    - searchValue
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+    - menuId
+    - parentId
+    - menuName
+    - orderNum
+    - path
+    - component
+    - queryParam
+    - isFrame
+    - isCache
+    - menuType
+    - visible
+    - status
+    - perms
+    - icon
+    - remark
+  SysMenuVo:
+    file: SysMenuVo.md
+    module: system
+    type: VO
+    fields:
+    - menuId
+    - menuName
+    - parentId
+    - orderNum
+    - path
+    - component
+    - queryParam
+    - isFrame
+    - isCache
+    - menuType
+    - visible
+    - status
+    - perms
+    - icon
+    - createDept
+    - remark
+    - createTime
+    - children
+  SysNoticeBo:
+    file: SysNoticeBo.md
+    module: system
+    type: DTO
+    fields:
+    - noticeId
+    - noticeTitle
+    - noticeType
+    - noticeContent
+    - status
+    - remark
+    - createByName
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  SysNoticeVo:
+    file: SysNoticeVo.md
+    module: system
+    type: VO
+    fields:
+    - noticeId
+    - noticeTitle
+    - noticeType
+    - noticeContent
+    - status
+    - remark
+    - createBy
+    - createByName
+    - createTime
+  SysOperLogVo:
+    file: SysOperLogVo.md
+    module: monitor
+    type: VO
+    fields:
+    - operId
+    - tenantId
+    - title
+    - businessType
+    - businessTypes
+    - method
+    - requestMethod
+    - operatorType
+    - operName
+    - deptName
+    - operUrl
+    - operIp
+    - operLocation
+    - operParam
+    - jsonResult
+    - status
+    - errorMsg
+    - operTime
+    - costTime
+  SysOssConfigBo:
+    file: SysOssConfigBo.md
+    module: system
+    type: BO
+    fields:
+    - ossConfigId
+    - configKey
+    - accessKey
+    - secretKey
+    - bucketName
+    - prefix
+    - endpoint
+    - domain
+    - isHttps
+    - status
+    - region
+    - ext1
+    - remark
+    - accessPolicy
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  SysOssConfigVo:
+    file: SysOssConfigVo.md
+    module: system
+    type: VO
+    fields:
+    - ossConfigId
+    - configKey
+    - accessKey
+    - secretKey
+    - bucketName
+    - prefix
+    - endpoint
+    - domain
+    - isHttps
+    - status
+    - region
+    - ext1
+    - remark
+    - accessPolicy
+  SysOssUploadVo:
+    file: SysOssUploadVo.md
+    module: system
+    type: VO
+    fields:
+    - url
+    - fileName
+    - ossId
+  SysOssVo:
+    file: SysOssVo.md
+    module: system
+    type: VO
+    fields:
+    - ossId
+    - fileName
+    - originalName
+    - fileSuffix
+    - url
+    - ext1
+    - createTime
+    - createBy
+    - createByName
+    - service
+  SysPostBo:
+    file: SysPostBo.md
+    module: system
+    type: DTO
+    fields:
+    - postId
+    - deptId
+    - belongDeptId
+    - postCode
+    - postName
+    - postCategory
+    - postSort
+    - status
+    - remark
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  SysPostVo:
+    file: SysPostVo.md
+    module: system
+    type: VO
+    fields:
+    - postId
+    - deptId
+    - postCode
+    - postName
+    - postCategory
+    - postSort
+    - status
+    - remark
+    - createTime
+    - deptName
+    - address
+  SysRoleBo:
+    file: SysRoleBo.md
+    module: system
+    type: DTO
+    fields:
+    - searchValue
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+    - roleId
+    - roleName
+    - roleKey
+    - roleSort
+    - dataScope
+    - menuCheckStrictly
+    - deptCheckStrictly
+    - status
+    - remark
+    - menuIds
+    - deptIds
+  SysRoleVo:
+    file: SysRoleVo.md
+    module: system
+    type: VO
+    fields:
+    - roleId
+    - roleName
+    - roleKey
+    - roleSort
+    - dataScope
+    - menuCheckStrictly
+    - deptCheckStrictly
+    - status
+    - remark
+    - createTime
+    - flag
+  SysSocialVo:
+    file: SysSocialVo.md
+    module: system
+    type: VO
+    fields:
+    - id
+    - userId
+    - tenantId
+    - authId
+    - source
+    - accessToken
+    - expireIn
+    - refreshToken
+    - openId
+    - userName
+    - nickName
+    - email
+    - avatar
+    - accessCode
+    - unionId
+    - scope
+    - tokenType
+    - idToken
+    - macAlgorithm
+    - macKey
+    - code
+    - oauthToken
+    - oauthTokenSecret
+    - createTime
+  SysTenantBo:
+    file: SysTenantBo.md
+    module: system
+    type: BO
+    fields:
+    - id
+    - tenantId
+    - contactUserName
+    - contactPhone
+    - companyName
+    - username
+    - password
+    - licenseNumber
+    - address
+    - domain
+    - intro
+    - remark
+    - packageId
+    - expireTime
+    - accountCount
+    - status
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  SysTenantPackageBo:
+    file: SysTenantPackageBo.md
+    module: system
+    type: BO
+    fields:
+    - packageId
+    - packageName
+    - menuIds
+    - remark
+    - menuCheckStrictly
+    - status
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  SysTenantPackageVo:
+    file: SysTenantPackageVo.md
+    module: system
+    type: VO
+    fields:
+    - packageId
+    - packageName
+    - menuIds
+    - remark
+    - menuCheckStrictly
+    - status
+  SysTenantVo:
+    file: SysTenantVo.md
+    module: system
+    type: VO
+    fields:
+    - id
+    - tenantId
+    - contactUserName
+    - contactPhone
+    - companyName
+    - licenseNumber
+    - address
+    - domain
+    - intro
+    - remark
+    - packageId
+    - expireTime
+    - accountCount
+    - status
+  SysUserBo:
+    file: SysUserBo.md
+    module: system
+    type: DTO
+    fields:
+    - searchValue
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+    - userId
+    - deptId
+    - userName
+    - nickName
+    - userType
+    - email
+    - phonenumber
+    - sex
+    - password
+    - status
+    - remark
+    - roleIds
+    - postIds
+    - roleId
+    - userIds
+    - excludeUserIds
+  SysUserInfoVo:
+    file: SysUserInfoVo.md
+    module: system
+    type: VO
+    fields:
+    - user
+    - roleIds
+    - roles
+    - postIds
+    - posts
+  SysUserOnline:
+    file: SysUserOnline.md
+    module: monitor
+    type: VO
+    fields:
+    - tokenId
+    - deptName
+    - userName
+    - clientKey
+    - deviceType
+    - ipaddr
+    - loginLocation
+    - browser
+    - os
+    - loginTime
+  SysUserPasswordBo:
+    file: SysUserPasswordBo.md
+    module: system
+    type: DTO
+    fields:
+    - oldPassword
+    - newPassword
+  SysUserProfileBo:
+    file: SysUserProfileBo.md
+    module: system
+    type: DTO
+    fields:
+    - searchValue
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+    - nickName
+    - email
+    - phonenumber
+    - sex
+  SysUserRole:
+    file: SysUserRole.md
+    module: system
+    type: BO
+    fields:
+    - userId
+    - roleId
+  SysUserVo:
+    file: SysUserVo.md
+    module: system
+    type: VO
+    fields:
+    - userId
+    - tenantId
+    - deptId
+    - userName
+    - nickName
+    - userType
+    - email
+    - phonenumber
+    - sex
+    - avatar
+    - password
+    - status
+    - loginIp
+    - loginDate
+    - remark
+    - createTime
+    - deptName
+    - roles
+    - roleIds
+    - postIds
+    - roleId
+  TaskOperationBo:
+    file: TaskOperationBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - userId
+    - userIds
+    - taskId
+    - messageType
+    - message
+  TenantListVo:
+    file: TenantListVo.md
+    module: auth
+    type: VO
+    fields:
+    - tenantId
+    - companyName
+    - domain
+  TestLeaveBo:
+    file: TestLeaveBo.md
+    module: workflow
+    type: DTO
+    fields:
+    - id
+    - flowCode
+    - applyCode
+    - leaveType
+    - startDate
+    - endDate
+    - leaveDays
+    - startLeaveDays
+    - endLeaveDays
+    - remark
+    - status
+    - searchValue
+    - createDept
+    - createBy
+    - createTime
+    - updateBy
+    - updateTime
+    - params
+  TestLeaveVo:
+    file: TestLeaveVo.md
+    module: workflow
+    type: VO
+    fields:
+    - id
+    - applyCode
+    - leaveType
+    - startDate
+    - endDate
+    - leaveDays
+    - remark
+    - status
+  UserDTO:
+    file: UserDTO.md
+    module: workflow
+    type: VO
+    fields:
+    - userId
+    - deptId
+    - userName
+    - nickName
+    - userType
+    - email
+    - phonenumber
+    - sex
+    - status
+    - createTime
+  UserInfoVo:
+    file: UserInfoVo.md
+    module: system
+    type: VO
+    fields:
+    - user
+    - permissions
+    - roles
+  XcxLoginBody:
+    file: XcxLoginBody.md
+    module: auth
+    type: DTO
+    fields:
+    - appid
+    - xcxCode
+    - clientId
+    - grantType
+    - tenantId
+    - code
+    - uuid

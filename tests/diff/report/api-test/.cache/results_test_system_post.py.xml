@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="6" time="3.173" timestamp="2026-07-14T15:13:15.719503+08:00" hostname="旅行者"><testcase classname="tests.diff.generated.api-test.test_system_post" name="test_TC_POST_001" time="1.737" /><testcase classname="tests.diff.generated.api-test.test_system_post" name="test_TC_POST_002" time="0.240"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/post/list&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;total&quot;: 6,&#10;  &quot;rows&quot;: [&#10;    {&#10;      &quot;postId&quot;: 1,&#10;      &quot;deptId&quot;: 103,&#10;      &quot;postCode&quot;: &quot;ceo&quot;,&#10;      &quot;postName&quot;: &quot;董事长&quot;,&#10;      &quot;postCategory&quot;: &quot;manager&quot;,&#10;      &quot;postSort&quot;: 1,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: &quot;更新后的备注信息&quot;,&#10;      &quot;createTime&quot;: &quot;2026-06-26 14:32:24&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;address&quot;: null&#10;    },&#10;    {&#10;      &quot;postId&quot;: &quot;2075118841244508161&quot;,&#10;      &quot;deptId&quot;: 100,&#10;      &quot;postCode&quot;: &quot;test_post_001&quot;,&#10;      &quot;postName&quot;: &quot;测试岗位&quot;,&#10;      &quot;postCategory&quot;: &quot;test&quot;,&#10;      &quot;postSort&quot;: 1,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: &quot;自动化测试新增岗位&quot;,&#10;      &quot;createTime&quot;: &quot;2026-07-09 15:24:20&quot;,&#10;      &quot;deptName&quot;: &quot;根部门&quot;,&#10;      &quot;address&quot;: null&#10;    },&#10;    {&#10;      &quot;postId&quot;: 2,&#10;      &quot;deptId&quot;: 100,&#10;      &quot;postCode&quot;: &quot;se&quot;,&#10;      &quot;postName&quot;: &quot;项目经理&quot;,&#10;      &quot;postCategory&quot;: null,&#10;      &quot;postSort&quot;: 2,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: &quot;&quot;,&#10;      &quot;createTime&quot;: &quot;2026-06-26 14:32:24&quot;,&#10;      &quot;deptName&quot;: &quot;根部门&quot;,&#10;      &quot;address&quot;: null&#10;    },&#10;    {&#10;      &quot;postId&quot;: &quot;2070396339519852545&quot;,&#10;      &quot;deptId&quot;: 103,&#10;      &quot;postCode&quot;: &quot;test_post_1782455927554&quot;,&#10;      &quot;postName&quot;: &quot;测试岗位_1782455927554&quot;,&#10;      &quot;postCategory&quot;: null,&#10;      &quot;postSort&quot;: 99,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;createTime&quot;: &quot;2026-06-26 14:38:48&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;address&quot;: null&#10;    },&#10;    {&#10;      &quot;postId&quot;: &quot;2075477172744155138&quot;,&#10;      &quot;deptId&quot;: 103,&#10;      &quot;postCode&quot;: &quot;test_post_005&quot;,&#10;      &quot;postName&quot;: &quot;测试岗位005&quot;,&#10;      &quot;postCategory&quot;: null,&#10;      &quot;postSort&quot;: 99,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;createTime&quot;: &quot;2026-07-10 15:08:13&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;address&quot;: null&#10;    },&#10;    {&#10;      &quot;postId&quot;: &quot;2076910316911329281&quot;,&#10;      &quot;deptId&quot;: 103,&#10;      &quot;postCode&quot;: &quot;test_post_auto&quot;,&#10;      &quot;postName&quot;: &quot;测试岗位&quot;,&#10;      &quot;postCategory&quot;: &quot;tech&quot;,&#10;      &quot;postSort&quot;: 99,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: &quot;自动化测试新增的岗位&quot;,&#10;      &quot;createTime&quot;: &quot;2026-07-14 14:03:01&quot;,&#10;      &quot;deptName&quot;: &quot;研发部门&quot;,&#10;      &quot;address&quot;: null&#10;    }&#10;  ],&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;查询成功&quot;&#10;}&#10;------------------------------------------------------------">tests\diff\generated\api-test\test_system_post.py:53: in test_TC_POST_002
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\diff\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\diff\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/post/list
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "total": 6,
+E     "rows": [
+E       {
+E         "postId": 1,
+E         "deptId": 103,
+E         "postCode": "ceo",
+E         "postName": "董事长",
+E         "postCategory": "manager",
+E         "postSort": 1,
+E         "status": "0",
+E         "remark": "更新后的备注信息",
+E         "createTime": "2026-06-26 14:32:24",
+E         "deptName": "研发部门",
+E         "address": null
+E       },
+E       {
+E         "postId": "2075118841244508161",
+E         "deptId": 100,
+E         "postCode": "test_post_001",
+E         "postName": "测试岗位",
+E         "postCategory": "test",
+E         "postSort": 1,
+E         "status": "0",
+E         "remark": "自动化测试新增岗位",
+E         "createTime": "2026-07-09 15:24:20",
+E         "deptName": "根部门",
+E         "address": null
+E       },
+E       {
+E         "postId": 2,
+E         "deptId": 100,
+E         "postCode": "se",
+E         "postName": "项目经理",
+E         "postCategory": null,
+E         "postSort": 2,
+E         "status": "0",
+E         "remark": "",
+E         "createTime": "2026-06-26 14:32:24",
+E         "deptName": "根部门",
+E         "address": null
+E       },
+E       {
+E         "postId": "2070396339519852545",
+E         "deptId": 103,
+E         "postCode": "test_post_1782455927554",
+E         "postName": "测试岗位_1782455927554",
+E         "postCategory": null,
+E         "postSort": 99,
+E         "status": "0",
+E         "remark": null,
+E         "createTime": "2026-06-26 14:38:48",
+E         "deptName": "研发部门",
+E         "address": null
+E       },
+E       {
+E         "postId": "2075477172744155138",
+E         "deptId": 103,
+E         "postCode": "test_post_005",
+E         "postName": "测试岗位005",
+E         "postCategory": null,
+E         "postSort": 99,
+E         "status": "0",
+E         "remark": null,
+E         "createTime": "2026-07-10 15:08:13",
+E         "deptName": "研发部门",
+E         "address": null
+E       },
+E       {
+E         "postId": "2076910316911329281",
+E         "deptId": 103,
+E         "postCode": "test_post_auto",
+E         "postName": "测试岗位",
+E         "postCategory": "tech",
+E         "postSort": 99,
+E         "status": "0",
+E         "remark": "自动化测试新增的岗位",
+E         "createTime": "2026-07-14 14:03:01",
+E         "deptName": "研发部门",
+E         "address": null
+E       }
+E     ],
+E     "code": 200,
+E     "msg": "查询成功"
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.diff.generated.api-test.test_system_post" name="test_TC_POST_003" time="0.191" /><testcase classname="tests.diff.generated.api-test.test_system_post" name="test_TC_POST_004" time="0.202"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/post/99999&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;操作成功&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\diff\generated\api-test\test_system_post.py:67: in test_TC_POST_004
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\diff\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\diff\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/post/99999
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "操作成功",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.diff.generated.api-test.test_system_post" name="test_TC_POST_005" time="0.180" /><testcase classname="tests.diff.generated.api-test.test_system_post" name="test_TC_POST_006" time="0.212" /></testsuite></testsuites>

@@ -1,0 +1,35 @@
+# 增量实体索引 — 仅含受影响和被引用的实体
+entities:
+  - class: SysPostVo
+    file: "SysPostVo.md"
+    package: org.dromara.system.domain.vo
+    type: vo
+    status: modified
+    change: "新增 address 字段"
+    referenced_by:
+      - GET /system/post/list
+      - GET /system/post/{postId}
+      - GET /system/post/optionselect
+      - POST /system/post/export
+      - GET /system/user/getInfo
+      - GET /system/user/{userId}
+
+  - class: SysUserInfoVo
+    file: "SysUserInfoVo.md"
+    package: org.dromara.system.domain.vo
+    type: vo
+    status: unchanged
+    change: null
+    referenced_by:
+      - GET /system/user/getInfo
+      - GET /system/user/{userId}
+      - GET /system/user/authRole/{userId}
+
+  - class: UserInfoVo
+    file: "UserInfoVo.md"
+    package: org.dromara.system.domain.vo
+    type: vo
+    status: unchanged
+    change: null
+    referenced_by:
+      - GET /system/user/getInfo

@@ -1,0 +1,154 @@
+module: "workflow_task"
+module_name: "任务管理"
+base_url: "http://localhost:8080"
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    test:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    test:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+testcases:
+  - id: "TC_WFTASK_001"
+    title: "POST /workflow/task/getNextNodeList_传入有效taskId_返回下一节点信息列表"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "POST"
+    path: "/workflow/task/getNextNodeList"
+    description: "传入有效taskId和流程变量，验证获取下一节点信息成功，返回节点列表包含nodeCode、nodeName、nodeType字段，且NULL_SKIP_TYPE异常被跳过不出错。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        taskId: 1
+        variables:
+          businessStatus: "approved"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["nodeCode", "nodeName", "nodeType"]
+
+  - id: "TC_WFTASK_002"
+    title: "POST /workflow/task/getNextNodeList_taskId不存在_返回任务不存在错误"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/task/getNextNodeList"
+    description: "传入不存在的taskId，验证接口返回500业务错误并提示任务不存在。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        taskId: 999999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  - id: "TC_WFTASK_003"
+    title: "POST /workflow/task/completeTask_传入有效taskId_办理任务成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/task/completeTask"
+    description: "传入有效taskId办理任务，验证返回操作成功且data为null，任务流转至下一节点。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        taskId: 1
+        message: "同意"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WFTASK_004"
+    title: "POST /workflow/task/completeTask_taskId为空_返回任务id不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/task/completeTask"
+    description: "不传taskId或传空值，验证接口返回500业务错误并提示任务id不能为空。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        message: "同意"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  - id: "TC_WFTASK_005"
+    title: "POST /workflow/task/backProcess_传入有效taskId_驳回审批成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/task/backProcess"
+    description: "传入有效taskId驳回审批，验证返回操作成功且data为null，驳回后可重新提交。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        taskId: 1
+        message: "需补充材料，驳回重填"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WFTASK_006"
+    title: "POST /workflow/task/backProcess_taskId为空_返回任务ID不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/task/backProcess"
+    description: "不传taskId或传空值，验证接口返回500业务错误并提示任务ID不能为空。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        message: "驳回"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []

@@ -6,10 +6,11 @@ API 测试执行与报告生成脚本
 破坏性用例失效，确保模块间完全隔离。
 
 用法:
-    python run_tests.py                           # 默认运行所有测试
+    python run_tests.py --mode baseline           # 全量模式（默认）
+    python run_tests.py --mode diff               # 增量模式
     python run_tests.py -m smoke                  # 只运行冒烟测试
     python run_tests.py -k "test_ums"             # 运行特定模块
-    python run_tests.py --output report/api-test  # 指定输出目录
+    python run_tests.py --test-path <dir> --output <dir>  # 显式指定路径
 """
 import argparse
 import json
@@ -25,9 +26,19 @@ from pathlib import Path
 # 项目根目录
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
 SKILL_DIR = Path(__file__).resolve().parent.parent
-TEST_PATH = PROJECT_ROOT / "tests" / "baseline" / "generated" / "api-test"
 TEMPLATE_PATH = SKILL_DIR / "template" / "report_template.html"
-DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "tests" / "baseline" / "report" / "api-test"
+
+# 模式 → 默认路径映射
+MODE_PATHS = {
+    "baseline": {
+        "test_path": PROJECT_ROOT / "tests" / "baseline" / "generated" / "api-test",
+        "output_dir": PROJECT_ROOT / "tests" / "baseline" / "report" / "api-test",
+    },
+    "diff": {
+        "test_path": PROJECT_ROOT / "tests" / "diff" / "generated" / "api-test",
+        "output_dir": PROJECT_ROOT / "tests" / "diff" / "report" / "api-test",
+    },
+}
 
 
 def find_python() -> str:
@@ -568,13 +579,18 @@ def generate_report(data: dict, output_dir: str) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="执行 pytest 测试并生成 HTML 报告（逐文件隔离执行）")
-    parser.add_argument("--test-path", default=str(TEST_PATH), help="测试文件目录或单个文件")
+    parser.add_argument("--mode", choices=["baseline", "diff"], default="baseline",
+                        help="模式: baseline=全量, diff=增量 (默认: baseline)")
+    parser.add_argument("--test-path", default=None, help="测试文件目录或单个文件（优先级高于 --mode）")
     parser.add_argument("-m", "--markers", default=None, help="pytest markers (如 smoke, P0)")
     parser.add_argument("-k", "--keyword", default=None, help="pytest -k 筛选表达式")
-    parser.add_argument("--output", default=str(DEFAULT_OUTPUT_DIR), help="报告输出目录")
+    parser.add_argument("--output", default=None, help="报告输出目录（优先级高于 --mode）")
     args = parser.parse_args()
 
-    test_path = args.test_path
+    # 路径决议: 显式参数 > mode 默认值
+    mode_config = MODE_PATHS[args.mode]
+    test_path = args.test_path if args.test_path else str(mode_config["test_path"])
+    output_dir = args.output if args.output else str(mode_config["output_dir"])
     if not os.path.exists(test_path):
         print(f"[run_tests] 错误: 测试路径不存在: {test_path}")
         sys.exit(1)
@@ -586,7 +602,7 @@ def main():
         sys.exit(1)
 
     # 缓存目录
-    cache_dir = os.path.join(args.output, ".cache")
+    cache_dir = os.path.join(output_dir, ".cache")
     os.makedirs(cache_dir, exist_ok=True)
 
     # ── Step 1: 逐文件执行 pytest ──────────────────────────
@@ -655,7 +671,7 @@ def main():
     print(f"{'=' * 60}\n")
 
     # ── Step 4: 生成报告 ──────────────────────────────────
-    report_path = generate_report(data, args.output)
+    report_path = generate_report(data, output_dir)
     return report_path
 
 

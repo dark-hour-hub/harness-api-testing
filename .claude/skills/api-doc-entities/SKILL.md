@@ -54,12 +54,12 @@ entities:
     file: LoginBody.md
     module: auth
     type: DTO
-    fields: [clientId, grantType, tenantId, code, uuid, username, password]
+    fields: [code, uuid, username, password]
   LoginVo:
     file: LoginVo.md
     module: auth
     type: VO
-    fields: [accessToken, refreshToken, expireIn, refreshExpireIn, clientId, scope]
+    fields: [token, scope]
   # ...
 ```
 

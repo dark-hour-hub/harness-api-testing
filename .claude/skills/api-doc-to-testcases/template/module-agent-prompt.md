@@ -40,7 +40,7 @@ base_url: `{BASE_URL}`
 
 ## 引用的实体文档
 
-本模块接口引用的实体文档，按需读取 `tests/baseline/_workflow/03-api-docs/entities/` 下的文件。
+本模块接口引用的实体文档，按需读取 `{ENTITY_PATH}` 下的文件。
 
 **不要预读全量实体文件**，只读取本模块用到的实体。
 
@@ -49,7 +49,7 @@ base_url: `{BASE_URL}`
 
 ## 输出要求
 
-将生成的 YAML 写入 `tests/baseline/_workflow/04-testcases/{MODULE_FILE_NAME}.yaml`。
+将生成的 YAML 写入 `{OUTPUT_PATH}/{MODULE_FILE_NAME}.yaml`。
 
 ## 生成规则摘要
 
@@ -109,5 +109,19 @@ base_url: `{BASE_URL}`
 - `doc-mapping.md` — 文档→YAML 映射
 - `variable-reference.md` — 变量引用规范
 - `generation-rules.md` — 生成约束
+
+### 业务规则
+
+- 若模块文档包含「业务规则」表，逐条解析规则的触发条件和预期行为
+- **反向用例条件优先从业务规则中选取**（优先于错误响应表）
+- 正向用例的请求参数不得违反业务规则
+- 业务规则中的校验逻辑（如"用户名不能重复"、"金额必须大于0"）→ 转化为反向用例的触发条件
+
+### 断言参照（diff 模式）
+
+- 若文档接口已声明预期断言（status_code、business_code、data_exists），**直接使用文档断言值**
+- 不自行修改或推断文档已给出的断言
+- 仅当文档缺少断言信息时，才回退到默认推断规则
+- 文档断言格式为表格 → 提取值填入 YAML expected 块
 
 直接开始生成，不需要确认。

@@ -1,0 +1,153 @@
+module: "system_post"
+module_name: "岗位管理"
+base_url: "http://localhost:8080"
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    test:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    test:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+testcases:
+  - id: "TC_POST_001"
+    title: "GET /system/post/list_正常分页查询_返回岗位列表含address字段"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/system/post/list"
+    description: "使用管理员账号分页查询岗位列表，验证响应中包含新增address字段且值为LosAngeles。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: "${global_variables.default_page_size}"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      business_message: "查询成功"
+      data_exists: ["rows"]
+
+  - id: "TC_POST_002"
+    title: "GET /system/post/list_无效分页参数_返回错误码500"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/post/list"
+    description: "使用负数分页参数查询岗位列表，验证系统返回业务错误码500并拒绝无效参数。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: -1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  - id: "TC_POST_003"
+    title: "GET /system/post/{postId}_查询存在的岗位_返回岗位详情含address字段"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/system/post/{postId}"
+    description: "使用管理员账号查询存在的岗位详细信息，验证响应中包含新增address字段且值为LosAngeles。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        postId: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["address", "postId"]
+
+  - id: "TC_POST_004"
+    title: "GET /system/post/{postId}_查询不存在的岗位_返回错误码500"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/post/{postId}"
+    description: "使用管理员账号查询不存在的岗位ID，验证系统返回业务错误码500且提示岗位不存在。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        postId: "99999"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  - id: "TC_POST_005"
+    title: "GET /system/post/optionselect_按部门筛选岗位_返回岗位选择列表含address字段"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/system/post/optionselect"
+    description: "使用管理员账号按部门ID筛选岗位选择框列表，验证deptId模式下响应中包含新增address字段且值为LosAngeles。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        deptId: "100"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["address", "postId"]
+
+  - id: "TC_POST_006"
+    title: "GET /system/post/optionselect_查询不存在的岗位ID_返回空列表"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/post/optionselect"
+    description: "使用管理员账号查询不存在的岗位ID，验证postIds模式下系统正常返回空列表不报错。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        postIds: "99999"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []

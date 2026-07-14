@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="14" skipped="0" tests="46" time="12.675" timestamp="2026-07-14T14:12:22.388406+08:00" hostname="旅行者"><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_001" time="1.947"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/task/startWorkFlow&#10;  请求体: {&#10;  &quot;businessId&quot;: &quot;TEST_BIZ_1761024000000&quot;,&#10;  &quot;flowCode&quot;: &quot;leave1&quot;,&#10;  &quot;variables&quot;: {&#10;    &quot;entity&quot;: {&#10;      &quot;leaveType&quot;: &quot;年假&quot;,&#10;      &quot;startDate&quot;: &quot;2026-07-14&quot;,&#10;      &quot;endDate&quot;: &quot;2026-07-16&quot;,&#10;      &quot;leaveDays&quot;: 3,&#10;      &quot;remark&quot;: &quot;测试启动流程&quot;&#10;    }&#10;  }&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;流程【leave1】未发布，请先在流程设计器中发布流程定义&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:46: in test_TC_WF_TASK_001
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/task/startWorkFlow
+E     请求体: {
+E     "businessId": "TEST_BIZ_1761024000000",
+E     "flowCode": "leave1",
+E     "variables": {
+E       "entity": {
+E         "leaveType": "年假",
+E         "startDate": "2026-07-14",
+E         "endDate": "2026-07-16",
+E         "leaveDays": 3,
+E         "remark": "测试启动流程"
+E       }
+E     }
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "流程【leave1】未发布，请先在流程设计器中发布流程定义",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_002" time="0.109" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_003" time="0.473"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/task/completeTask&#10;  请求体: {&#10;  &quot;taskId&quot;: 1,&#10;  &quot;message&quot;: &quot;同意&quot;,&#10;  &quot;variables&quot;: {&#10;    &quot;auditResult&quot;: &quot;PASS&quot;&#10;  }&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;流程任务不存在或任务已审批！&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:60: in test_TC_WF_TASK_003
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/task/completeTask
+E     请求体: {
+E     "taskId": 1,
+E     "message": "同意",
+E     "variables": {
+E       "auditResult": "PASS"
+E     }
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "流程任务不存在或任务已审批！",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_004" time="0.129" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_005" time="0.204" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_006" time="0.195" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_007" time="0.201" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_008" time="0.194" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_009" time="0.217" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_010" time="0.196" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_011" time="0.205" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_012" time="0.197" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_013" time="0.194" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_014" time="0.202" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_015" time="0.193" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_016" time="0.207" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_017" time="0.203"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/task/getNextNodeList&#10;  请求体: {&#10;  &quot;taskId&quot;: 1&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;任务不存在！&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:158: in test_TC_WF_TASK_017
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/task/getNextNodeList
+E     请求体: {
+E     "taskId": 1
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "任务不存在！",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_018" time="0.198" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_019" time="0.361"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/task/terminationTask&#10;  请求体: {&#10;  &quot;taskId&quot;: 1,&#10;  &quot;comment&quot;: &quot;业务已取消，终止流程&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;任务不存在！&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:172: in test_TC_WF_TASK_019
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/task/terminationTask
+E     请求体: {
+E     "taskId": 1,
+E     "comment": "业务已取消，终止流程"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "任务不存在！",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_020" time="0.371" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_021" time="0.413"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/task/taskOperation/delegateTask&#10;  请求体: {&#10;  &quot;taskId&quot;: 1,&#10;  &quot;userId&quot;: &quot;1003&quot;,&#10;  &quot;message&quot;: &quot;委派给王五处理&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;任务不存在！&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:186: in test_TC_WF_TASK_021
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/task/taskOperation/delegateTask
+E     请求体: {
+E     "taskId": 1,
+E     "userId": "1003",
+E     "message": "委派给王五处理"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "任务不存在！",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_022" time="0.326" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_023" time="0.433" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_024" time="0.296"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/workflow/task/updateAssignee/1003&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:207: in test_TC_WF_TASK_024
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/workflow/task/updateAssignee/1003
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_025" time="0.376"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/task/backProcess&#10;  请求体: {&#10;  &quot;taskId&quot;: 1,&#10;  &quot;message&quot;: &quot;请假申请信息不完整，请补充后重新提交&quot;,&#10;  &quot;notice&quot;: &quot;您的请假申请已被驳回&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;任务不存在！&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:214: in test_TC_WF_TASK_025
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/task/backProcess
+E     请求体: {
+E     "taskId": 1,
+E     "message": "请假申请信息不完整，请补充后重新提交",
+E     "notice": "您的请假申请已被驳回"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "任务不存在！",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_026" time="0.114" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_027" time="0.196"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/workflow/task/getBackTaskNode/1/node_approval&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;任务不存在！&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:228: in test_TC_WF_TASK_027
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/workflow/task/getBackTaskNode/1/node_approval
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "任务不存在！",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_028" time="0.191"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/workflow/task/getBackTaskNode/99999/node_approval&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;任务不存在！&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:235: in test_TC_WF_TASK_028
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/workflow/task/getBackTaskNode/99999/node_approval
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "任务不存在！",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_029" time="0.188" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_030" time="0.182" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_031" time="0.214"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/task/urgeTask&#10;  请求体: {&#10;  &quot;taskIdList&quot;: [&#10;    1&#10;  ],&#10;  &quot;messageType&quot;: [&#10;    &quot;1&quot;&#10;  ],&#10;  &quot;message&quot;: &quot;请尽快处理您的待办任务&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:256: in test_TC_WF_TASK_031
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/task/urgeTask
+E     请求体: {
+E     "taskIdList": [
+E       1
+E     ],
+E     "messageType": [
+E       "1"
+E     ],
+E     "message": "请尽快处理您的待办任务"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_032" time="0.194" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_033" time="0.019"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 404&#10;assert 404 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/task/copyTask&#10;  请求体: [&#10;  {&#10;    &quot;userId&quot;: 1003,&#10;    &quot;nickName&quot;: &quot;王五&quot;&#10;  }&#10;]&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 404,&#10;  &quot;msg&quot;: &quot;请求地址不存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:270: in test_TC_WF_TASK_033
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 404
+E   assert 404 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/task/copyTask
+E     请求体: [
+E     {
+E       "userId": 1003,
+E       "nickName": "王五"
+E     }
+E   ]
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 404,
+E     "msg": "请求地址不存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_034" time="0.019"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 404&#10;assert 404 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/task/copyTask&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 404,&#10;  &quot;msg&quot;: &quot;请求地址不存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:277: in test_TC_WF_TASK_034
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 404
+E   assert 404 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/task/copyTask
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 404,
+E     "msg": "请求地址不存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_035" time="0.276" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_036" time="0.195" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_037" time="0.183" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_038" time="0.187" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_039" time="0.291" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_040" time="0.120" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_041" time="0.624"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/leave/submitAndFlowStart&#10;  请求体: {&#10;  &quot;leaveType&quot;: &quot;事假&quot;,&#10;  &quot;startDate&quot;: &quot;2026-07-15&quot;,&#10;  &quot;endDate&quot;: &quot;2026-07-17&quot;,&#10;  &quot;leaveDays&quot;: 3,&#10;  &quot;remark&quot;: &quot;测试提交并启动流程&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;流程【leave1】未发布，请先在流程设计器中发布流程定义&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:326: in test_TC_WF_TASK_041
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/leave/submitAndFlowStart
+E     请求体: {
+E     "leaveType": "事假",
+E     "startDate": "2026-07-15",
+E     "endDate": "2026-07-17",
+E     "leaveDays": 3,
+E     "remark": "测试提交并启动流程"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "流程【leave1】未发布，请先在流程设计器中发布流程定义",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_042" time="0.154" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_043" time="0.272" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_044" time="0.115" /><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_045" time="0.420"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/workflow/leave/1&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow_task_leave.py:354: in test_TC_WF_TASK_045
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/workflow/leave/1
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow_task_leave" name="test_TC_WF_TASK_046" time="0.120" /></testsuite></testsuites>

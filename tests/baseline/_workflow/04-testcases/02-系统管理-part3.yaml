@@ -1,0 +1,738 @@
+module: "system-part3"
+module_name: "系统管理-菜单管理+部门管理"
+base_url: "http://localhost:8080"
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    test:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    test:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+testcases:
+  # ============================================================
+  # 一、菜单管理 /system/menu (10 endpoints → TC_MENU_001 ~ TC_MENU_020)
+  # ============================================================
+
+  # --- 1. GET /system/menu/getRouters ---
+  - id: "TC_MENU_001"
+    title: "GET /system/menu/getRouters_管理员获取路由信息_返回路由列表"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/system/menu/getRouters"
+    description: "管理员获取当前登录用户的路由信息，验证返回路由列表，每个路由包含path、name、meta等路由配置字段。该接口无权限限制，仅需认证。"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["path", "name"]
+
+  - id: "TC_MENU_002"
+    title: "GET /system/menu/getRouters_普通用户获取路由_返回受限路由列表"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/menu/getRouters"
+    description: "使用普通test用户获取路由信息，验证接口仍正常返回（该接口无权限注解限制），但返回的路由数据按用户角色过滤。"
+    auth:
+      required: true
+      account: "test"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["path"]
+
+  # --- 2. GET /system/menu/list ---
+  - id: "TC_MENU_003"
+    title: "GET /system/menu/list_管理员查询菜单列表_返回菜单数据"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/system/menu/list"
+    description: "管理员获取完整菜单列表，验证返回的菜单数据包含menuId、menuName、menuType、parentId等核心字段。"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["menuId", "menuName"]
+
+  - id: "TC_MENU_004"
+    title: "GET /system/menu/list_查询不存在的菜单名称_返回空列表"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/menu/list"
+    description: "按不存在的菜单名称模糊查询，验证接口正常返回但数据列表为空，不报错。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        menuName: "不存在的菜单名称XYZ"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # --- 3. GET /system/menu/{menuId} ---
+  - id: "TC_MENU_005"
+    title: "GET /system/menu/{menuId}_查询存在的菜单_返回菜单详情"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/system/menu/{menuId}"
+    description: "查询menuId=1（系统管理目录）的详细菜单信息，验证返回menuId、menuName、menuType等完整字段。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        menuId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["menuId", "menuName", "menuType"]
+
+  - id: "TC_MENU_006"
+    title: "GET /system/menu/{menuId}_查询不存在的菜单_返回空数据"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/menu/{menuId}"
+    description: "查询menuId=99999（不存在的菜单ID），验证接口正常返回但data为null，不抛出异常。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        menuId: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # --- 4. GET /system/menu/treeselect ---
+  - id: "TC_MENU_007"
+    title: "GET /system/menu/treeselect_管理员获取菜单树_返回树形结构"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/system/menu/treeselect"
+    description: "管理员获取菜单下拉树列表，验证返回树形结构数据，每个节点包含id和label字段。"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["id", "label"]
+
+  - id: "TC_MENU_008"
+    title: "GET /system/menu/treeselect_按不存在的菜单名称过滤_返回空树"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/menu/treeselect"
+    description: "按不存在的菜单名称筛选菜单树，验证接口正常返回但树数据为空，不报错。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        menuName: "不存在的菜单名称XYZ"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # --- 5. GET /system/menu/roleMenuTreeselect/{roleId} ---
+  - id: "TC_MENU_009"
+    title: "GET /system/menu/roleMenuTreeselect/{roleId}_查询角色菜单树_返回选中键和树结构"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/system/menu/roleMenuTreeselect/{roleId}"
+    description: "查询roleId=1（超级管理员角色）的菜单树及已选菜单ID列表，验证返回checkedKeys数组和menus树结构。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        roleId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["checkedKeys", "menus"]
+
+  - id: "TC_MENU_010"
+    title: "GET /system/menu/roleMenuTreeselect/{roleId}_查询不存在的角色_返回空选中键"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/menu/roleMenuTreeselect/{roleId}"
+    description: "查询roleId=99999（不存在的角色）的菜单树，验证接口正常返回但checkedKeys为空数组。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        roleId: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # --- 6. GET /system/menu/tenantPackageMenuTreeselect/{packageId} ---
+  - id: "TC_MENU_011"
+    title: "GET /system/menu/tenantPackageMenuTreeselect/{packageId}_查询套餐菜单树_返回选中键和树结构"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/system/menu/tenantPackageMenuTreeselect/{packageId}"
+    description: "查询packageId=1的租户套餐菜单树及已选菜单ID列表，验证返回checkedKeys数组和menus树结构。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        packageId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["checkedKeys", "menus"]
+
+  - id: "TC_MENU_012"
+    title: "GET /system/menu/tenantPackageMenuTreeselect/{packageId}_新建套餐查询_返回空选中键"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/menu/tenantPackageMenuTreeselect/{packageId}"
+    description: "查询packageId=0（新建套餐场景），验证接口正常返回菜单树但checkedKeys为空数组。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        packageId: 0
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # --- 7. POST /system/menu ---
+  - id: "TC_MENU_013"
+    title: "POST /system/menu_新增菜单有效字段_返回新增成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/system/menu"
+    description: "管理员新增一个类型为菜单(C)的菜单记录，传入完整的必填字段menuName、orderNum、menuType及常用可选字段，验证返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        parentId: 0
+        menuName: "测试菜单001"
+        orderNum: 99
+        path: "/test001"
+        component: "test001/index"
+        isFrame: "1"
+        isCache: "0"
+        menuType: "C"
+        visible: "0"
+        status: "0"
+        perms: "system:test:list"
+        icon: "build"
+        remark: "自动化测试用菜单"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_MENU_014"
+    title: "POST /system/menu_缺少必填字段menuName_返回菜单名称不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/system/menu"
+    description: "新增菜单时不传menuName必填字段，验证系统返回业务错误码500并提示菜单名称不能为空。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        parentId: 0
+        orderNum: 99
+        menuType: "C"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # --- 8. PUT /system/menu ---
+  - id: "TC_MENU_015"
+    title: "PUT /system/menu_修改菜单名称_返回修改成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/system/menu"
+    description: "管理员修改menuId=2的菜单名称，验证返回操作成功。使用admin账户修改系统监控菜单的名称。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        menuId: 2
+        parentId: 0
+        menuName: "系统监控-测试修改"
+        orderNum: 2
+        path: "/monitor"
+        component: ""
+        isFrame: "1"
+        isCache: "0"
+        menuType: "M"
+        visible: "0"
+        status: "0"
+        perms: ""
+        icon: "monitor"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_MENU_016"
+    title: "PUT /system/menu_缺少必填字段menuName_返回菜单名称不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/system/menu"
+    description: "修改菜单时不传menuName必填字段，验证系统返回业务错误码500并提示菜单名称不能为空。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        menuId: 1
+        parentId: 0
+        orderNum: 1
+        menuType: "M"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # --- 9. DELETE /system/menu/{menuId} ---
+  - id: "TC_MENU_017"
+    title: "DELETE /system/menu/{menuId}_删除可删除菜单_返回删除成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "DELETE"
+    path: "/system/menu/{menuId}"
+    description: "管理员删除一个无子菜单且未分配角色的菜单（使用不存在的menuId=9999作乐观测试，服务端存在性检查不阻止删除），验证返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        menuId: 9999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_MENU_018"
+    title: "DELETE /system/menu/{menuId}_删除存在子菜单的菜单_返回不允许删除"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "DELETE"
+    path: "/system/menu/{menuId}"
+    description: "尝试删除menuId=1（系统管理目录，存在子菜单），验证系统返回业务错误码601并提示存在子菜单不允许删除。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        menuId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 601
+      data_exists: []
+
+  # --- 10. DELETE /system/menu/cascade/{menuIds} ---
+  - id: "TC_MENU_019"
+    title: "DELETE /system/menu/cascade/{menuIds}_批量级联删除可删除菜单_返回删除成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "DELETE"
+    path: "/system/menu/cascade/{menuIds}"
+    description: "管理员批量级联删除多个无子菜单的菜单，验证返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        menuIds: "9999,10000"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_MENU_020"
+    title: "DELETE /system/menu/cascade/{menuIds}_批量删除含子菜单的菜单_返回不允许删除"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "DELETE"
+    path: "/system/menu/cascade/{menuIds}"
+    description: "批量级联删除中包含存在子菜单的菜单（menuId=1），验证系统返回业务错误码601并提示存在子菜单不允许删除。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        menuIds: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 601
+      data_exists: []
+
+  # ============================================================
+  # 二、部门管理 /system/dept (7 endpoints → TC_MENU_021 ~ TC_MENU_034)
+  # ============================================================
+
+  # --- 11. GET /system/dept/list ---
+  - id: "TC_MENU_021"
+    title: "GET /system/dept/list_管理员查询部门列表_返回部门数据"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/system/dept/list"
+    description: "管理员获取完整部门列表，验证返回部门数据包含deptId、deptName、orderNum等核心字段。"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["deptId", "deptName"]
+
+  - id: "TC_MENU_022"
+    title: "GET /system/dept/list_查询不存在的部门名称_返回空列表"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/dept/list"
+    description: "按不存在的部门名称模糊查询，验证接口正常返回但数据列表为空，不报错。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        deptName: "不存在的部门名称XYZ"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # --- 12. GET /system/dept/list/exclude/{deptId} ---
+  - id: "TC_MENU_023"
+    title: "GET /system/dept/list/exclude/{deptId}_排除指定部门_返回排除后的部门列表"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/system/dept/list/exclude/{deptId}"
+    description: "查询部门列表并排除deptId=100（研发部）及其子孙部门，验证返回的列表中不包含被排除的部门。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        deptId: 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["deptId", "deptName"]
+
+  - id: "TC_MENU_024"
+    title: "GET /system/dept/list/exclude/{deptId}_排除不存在的部门_返回全部部门"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/dept/list/exclude/{deptId}"
+    description: "排除一个不存在的deptId=99999，由于排除条件无匹配项，验证接口正常返回全部部门列表。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        deptId: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # --- 13. GET /system/dept/{deptId} ---
+  - id: "TC_MENU_025"
+    title: "GET /system/dept/{deptId}_查询存在的部门_返回部门详情"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/system/dept/{deptId}"
+    description: "查询deptId=100（研发部）的详细部门信息，验证返回deptId、deptName、parentId、parentName等完整字段。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        deptId: 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["deptId", "deptName", "parentId"]
+
+  - id: "TC_MENU_026"
+    title: "GET /system/dept/{deptId}_查询不存在的部门_返回空数据"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/dept/{deptId}"
+    description: "查询deptId=99999（不存在的部门ID），验证接口正常返回但data为null，不抛出异常。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        deptId: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # --- 14. POST /system/dept ---
+  - id: "TC_MENU_027"
+    title: "POST /system/dept_新增部门有效字段_返回新增成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/system/dept"
+    description: "管理员新增一个部门，传入完整的必填字段deptName、orderNum及常用可选字段，验证返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        parentId: 0
+        deptName: "测试部门001"
+        deptCategory: "DEPT_TEST"
+        orderNum: 99
+        leader: 1
+        phone: "010-88888888"
+        email: "test001@example.com"
+        status: "0"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_MENU_028"
+    title: "POST /system/dept_缺少必填字段deptName_返回部门名称不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/system/dept"
+    description: "新增部门时不传deptName必填字段，验证系统返回业务错误码500并提示部门名称不能为空。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        parentId: 0
+        orderNum: 99
+        status: "0"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # --- 15. PUT /system/dept ---
+  - id: "TC_MENU_029"
+    title: "PUT /system/dept_修改部门名称_返回修改成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/system/dept"
+    description: "管理员修改deptId=100的部门名称，验证返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        deptId: 100
+        parentId: 0
+        deptName: "研发部-测试修改"
+        deptCategory: "DEPT_RD"
+        orderNum: 1
+        leader: 1
+        phone: "010-88888888"
+        email: "rd@example.com"
+        status: "0"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_MENU_030"
+    title: "PUT /system/dept_缺少必填字段deptName_返回部门名称不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/system/dept"
+    description: "修改部门时不传deptName必填字段，验证系统返回业务错误码500并提示部门名称不能为空。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        deptId: 100
+        parentId: 0
+        orderNum: 1
+        status: "0"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # --- 16. DELETE /system/dept/{deptId} ---
+  - id: "TC_MENU_031"
+    title: "DELETE /system/dept/{deptId}_删除可删除部门_返回删除成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "DELETE"
+    path: "/system/dept/{deptId}"
+    description: "管理员删除一个无子部门、无用户、无岗位分配的部门（使用不存在的deptId=9999作乐观测试），验证返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        deptId: 9999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_MENU_032"
+    title: "DELETE /system/dept/{deptId}_删除默认部门_返回不允许删除"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "DELETE"
+    path: "/system/dept/{deptId}"
+    description: "尝试删除deptId=100（系统默认部门），验证系统返回业务错误码601并提示默认部门不允许删除。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        deptId: 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 601
+      data_exists: []
+
+  # --- 17. GET /system/dept/optionselect ---
+  - id: "TC_MENU_033"
+    title: "GET /system/dept/optionselect_管理员获取部门下拉列表_返回部门选项"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/system/dept/optionselect"
+    description: "管理员获取部门下拉选择框列表，验证只返回正常状态的部门，且每个部门只含deptId、deptName、leader三个精简字段。"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["deptId", "deptName"]
+
+  - id: "TC_MENU_034"
+    title: "GET /system/dept/optionselect_筛选不存在的部门ID_返回空列表"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/dept/optionselect"
+    description: "传入不存在的deptIds数组进行筛选，验证接口正常返回但列表为空，不报错。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        deptIds: "99999"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []

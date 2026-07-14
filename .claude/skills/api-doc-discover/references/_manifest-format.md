@@ -29,9 +29,6 @@ test_accounts:
   - role: admin
     username: admin
     password: admin123
-    clientId: e5cd7e4891bf95d1d19206ce24a7b32e
-    grantType: password
-    tenantId: "000000"
     description: 超级管理员
 
 auth:
@@ -46,10 +43,10 @@ auth:
       type: String
       required: true
       example: "Bearer eyJhbG..."
-    - name: clientid
+    - name: id
       type: String
       required: true
-      example: e5cd7e4891bf95d1d19206ce24a7b32e
+      example: adfasdfadfafdasf
 
 permission_model:
   type: RBAC

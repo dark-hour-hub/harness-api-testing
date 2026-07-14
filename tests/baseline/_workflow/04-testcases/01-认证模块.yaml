@@ -1,0 +1,439 @@
+module: "auth"
+module_name: "认证模块"
+base_url: "http://localhost:8080"
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    test:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    test:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+testcases:
+  # ============================================================
+  # 1. POST /auth/login — 用户登录
+  # ============================================================
+  - id: "TC_AUTH_001"
+    title: "POST /auth/login_有效密码凭证登录_返回token"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "POST"
+    path: "/auth/login"
+    description: "使用有效的管理员账号密码进行登录，验证登录成功后返回access_token和refresh_token。该接口使用@ApiEncrypt加密传输请求体。"
+    auth:
+      required: false
+    request:
+      body:
+        clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+        grantType: "password"
+        tenantId: "000000"
+        username: "admin"
+        password: "admin123"
+    extracts:
+      token: "$.data.access_token"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["access_token", "refresh_token"]
+
+  - id: "TC_AUTH_002"
+    title: "POST /auth/login_密码错误_返回用户认证失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/auth/login"
+    description: "使用错误密码尝试登录，验证系统返回业务错误码500并提示密码错误。"
+    auth:
+      required: false
+    request:
+      body:
+        clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+        grantType: "password"
+        tenantId: "000000"
+        username: "admin"
+        password: "wrongPassword"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 2. GET /auth/binding/{source} — 获取第三方登录跳转URL
+  # ============================================================
+  - id: "TC_AUTH_003"
+    title: "GET /auth/binding/{source}_获取github授权URL_返回OAuth跳转地址"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/auth/binding/{source}"
+    description: "传入已配置的第三方平台标识github及租户信息，验证返回第三方OAuth授权跳转URL。"
+    auth:
+      required: false
+    request:
+      path_params:
+        source: "github"
+      query:
+        tenantId: "000000"
+        domain: "https://example.com"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_AUTH_004"
+    title: "GET /auth/binding/{source}_未配置的第三方平台_返回平台不支持"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/auth/binding/{source}"
+    description: "传入系统未配置的第三方平台标识，验证系统返回该平台账号暂不支持的提示。"
+    auth:
+      required: false
+    request:
+      path_params:
+        source: "unknown_platform"
+      query:
+        tenantId: "000000"
+        domain: "https://example.com"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 3. POST /auth/social/callback — 第三方登录回调绑定
+  # ============================================================
+  - id: "TC_AUTH_005"
+    title: "POST /auth/social/callback_绑定第三方账号_返回绑定成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/auth/social/callback"
+    description: "已登录用户通过第三方平台授权code绑定社交账号，验证绑定成功并返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+        grantType: "social"
+        tenantId: "000000"
+        source: "github"
+        socialCode: "test_auth_code_123456"
+        socialState: "test_state_abc123"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_AUTH_006"
+    title: "POST /auth/social/callback_未携带Token_返回401认证失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/auth/social/callback"
+    description: "不携带认证Token访问需要认证的第三方绑定接口，验证Sa-Token框架返回401未认证错误。"
+    auth:
+      required: false
+    request:
+      body:
+        clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+        grantType: "social"
+        tenantId: "000000"
+        source: "github"
+        socialCode: "test_auth_code_123456"
+        socialState: "test_state_abc123"
+    expected:
+      status_code: 401
+      response_type: "json"
+      business_code: 401
+      data_exists: []
+
+  # ============================================================
+  # 4. DELETE /auth/unlock/{socialId} — 取消第三方授权
+  # ============================================================
+  - id: "TC_AUTH_007"
+    title: "DELETE /auth/unlock/{socialId}_取消第三方授权_返回取消成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "DELETE"
+    path: "/auth/unlock/{socialId}"
+    description: "已登录用户取消已绑定的第三方平台授权，验证返回取消成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        socialId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_AUTH_008"
+    title: "DELETE /auth/unlock/{socialId}_传入不存在的绑定记录_返回取消失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "DELETE"
+    path: "/auth/unlock/{socialId}"
+    description: "传入不存在的socialId尝试取消授权，验证系统返回业务错误码500并提示取消失败。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        socialId: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 5. POST /auth/logout — 退出登录
+  # ============================================================
+  - id: "TC_AUTH_009"
+    title: "POST /auth/logout_正常退出登录_返回退出成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/auth/logout"
+    description: "正常退出登录，验证系统清除Sa-Token会话并返回退出成功。"
+    auth:
+      required: false
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_AUTH_010"
+    title: "POST /auth/logout_未登录状态调用_返回退出成功"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/auth/logout"
+    description: "在未登录状态下调用退出登录接口，验证系统内部捕获NotLoginException后仍正常返回退出成功。"
+    auth:
+      required: false
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # ============================================================
+  # 6. POST /auth/register — 用户注册
+  # ============================================================
+  - id: "TC_AUTH_011"
+    title: "POST /auth/register_有效信息注册新用户_返回注册成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/auth/register"
+    description: "使用符合业务规则的用户名和密码注册新用户，验证注册成功。该接口使用@ApiEncrypt加密传输请求体。"
+    auth:
+      required: false
+    request:
+      body:
+        clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+        grantType: "register"
+        tenantId: "000000"
+        username: "newUserTest001"
+        password: "Test@12345"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_AUTH_012"
+    title: "POST /auth/register_用户名已存在_返回注册失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/auth/register"
+    description: "使用系统中已存在的用户名admin进行注册，触发唯一性约束，验证系统返回注册账号已存在的错误。"
+    auth:
+      required: false
+    request:
+      body:
+        clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+        grantType: "register"
+        tenantId: "000000"
+        username: "admin"
+        password: "Test@12345"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 7. GET /auth/tenant/list — 获取租户列表
+  # ============================================================
+  - id: "TC_AUTH_013"
+    title: "GET /auth/tenant/list_获取租户列表_返回租户信息"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/auth/tenant/list"
+    description: "获取登录页面可选的租户列表，验证返回租户功能开关状态及企业租户列表信息。"
+    auth:
+      required: false
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["tenantEnabled", "voList"]
+
+  - id: "TC_AUTH_014"
+    title: "GET /auth/tenant/list_触发限流_返回访问频繁提示"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/auth/tenant/list"
+    description: "租户列表接口触发@RateLimiter限流控制（60秒内同一IP超过20次），验证系统返回访问过于频繁的错误提示。"
+    auth:
+      required: false
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 8. GET /auth/code — 生成验证码
+  # ============================================================
+  - id: "TC_AUTH_015"
+    title: "GET /auth/code_生成图形验证码_返回验证码图片及uuid"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/auth/code"
+    description: "调用生成验证码接口，验证系统返回验证码开关状态为true、uuid及Base64格式的验证码图片。"
+    auth:
+      required: false
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["captchaEnabled"]
+
+  - id: "TC_AUTH_016"
+    title: "GET /auth/code_验证码功能关闭_返回captchaEnabled为false"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/auth/code"
+    description: "在系统验证码功能关闭时调用接口，验证系统仍返回成功但captchaEnabled为false且不生成验证码图片。"
+    auth:
+      required: false
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["captchaEnabled"]
+
+  # ============================================================
+  # 9. GET /resource/sms/code — 发送短信验证码
+  # ============================================================
+  - id: "TC_AUTH_017"
+    title: "GET /resource/sms/code_有效手机号发送短信验证码_返回发送成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/resource/sms/code"
+    description: "传入有效手机号发送短信验证码，验证系统生成4位验证码并返回发送成功。"
+    auth:
+      required: false
+    request:
+      query:
+        phonenumber: "13800138000"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_AUTH_018"
+    title: "GET /resource/sms/code_手机号为空_返回参数校验失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/resource/sms/code"
+    description: "不传手机号参数调用短信验证码接口，验证系统返回参数不能为空的校验错误。"
+    auth:
+      required: false
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 10. GET /resource/email/code — 发送邮箱验证码
+  # ============================================================
+  - id: "TC_AUTH_019"
+    title: "GET /resource/email/code_有效邮箱发送邮箱验证码_返回发送成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/resource/email/code"
+    description: "传入有效邮箱地址发送邮箱验证码，验证系统生成4位验证码并返回发送成功。"
+    auth:
+      required: false
+    request:
+      query:
+        email: "admin@example.com"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_AUTH_020"
+    title: "GET /resource/email/code_邮箱为空_返回参数校验失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/resource/email/code"
+    description: "不传邮箱参数调用邮箱验证码接口，验证系统返回参数不能为空的校验错误。"
+    auth:
+      required: false
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []

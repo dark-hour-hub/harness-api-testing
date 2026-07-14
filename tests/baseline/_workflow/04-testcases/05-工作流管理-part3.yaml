@@ -1,0 +1,1045 @@
+module: "workflow_task_leave"
+module_name: "工作流管理-任务管理+请假示例"
+base_url: "http://localhost:8080"
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    test:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    test:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+testcases:
+  # ============================================================
+  # 1. POST /workflow/task/startWorkFlow — 启动任务
+  # ============================================================
+  - id: "TC_WF_TASK_001"
+    title: "POST /workflow/task/startWorkFlow_有效流程信息启动任务_返回流程实例和任务ID"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/task/startWorkFlow"
+    description: "使用有效的businessId和已发布的flowCode启动工作流，验证返回流程实例ID和任务ID。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        businessId: "TEST_BIZ_1761024000000"
+        flowCode: "leave1"
+        variables:
+          entity:
+            leaveType: "年假"
+            startDate: "2026-07-14"
+            endDate: "2026-07-16"
+            leaveDays: 3
+            remark: "测试启动流程"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["processInstanceId", "taskId"]
+
+  - id: "TC_WF_TASK_002"
+    title: "POST /workflow/task/startWorkFlow_businessId为空_返回业务ID不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/task/startWorkFlow"
+    description: "不传businessId启动工作流，验证@NotBlank校验返回业务ID不能为空的错误。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        flowCode: "leave1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 2. POST /workflow/task/completeTask — 办理任务
+  # ============================================================
+  - id: "TC_WF_TASK_003"
+    title: "POST /workflow/task/completeTask_有效taskId办理任务_返回操作成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/task/completeTask"
+    description: "使用有效taskId办理待办任务（审批通过），验证返回操作成功且推动流程流转。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        taskId: 1
+        message: "同意"
+        variables:
+          auditResult: "PASS"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_TASK_004"
+    title: "POST /workflow/task/completeTask_taskId为空_返回任务id不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/task/completeTask"
+    description: "不传taskId办理任务，验证@NotNull校验返回任务id不能为空的错误。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        message: "同意"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 3. GET /workflow/task/pageByTaskWait — 查询当前用户的待办任务
+  # ============================================================
+  - id: "TC_WF_TASK_005"
+    title: "GET /workflow/task/pageByTaskWait_默认分页查询待办任务_返回待办列表及总数"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/workflow/task/pageByTaskWait"
+    description: "默认分页查询当前登录用户的待办任务列表，验证返回rows数组和total总数。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_WF_TASK_006"
+    title: "GET /workflow/task/pageByTaskWait_分页参数异常_返回空列表或默认分页"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/task/pageByTaskWait"
+    description: "传入非法的pageSize=0分页参数，验证系统能容错处理返回rows和total。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 0
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  # ============================================================
+  # 4. GET /workflow/task/pageByTaskFinish — 查询当前用户的已办任务
+  # ============================================================
+  - id: "TC_WF_TASK_007"
+    title: "GET /workflow/task/pageByTaskFinish_默认分页查询已办任务_返回已办列表及总数"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/workflow/task/pageByTaskFinish"
+    description: "默认分页查询当前登录用户已办理的历史任务列表，验证返回rows数组和total总数。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_WF_TASK_008"
+    title: "GET /workflow/task/pageByTaskFinish_分页参数异常_返回空列表或默认分页"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/task/pageByTaskFinish"
+    description: "传入非法的pageSize=0分页参数，验证系统能容错处理返回rows和total。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 0
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  # ============================================================
+  # 5. GET /workflow/task/pageByAllTaskWait — 查询所有待办任务
+  # ============================================================
+  - id: "TC_WF_TASK_009"
+    title: "GET /workflow/task/pageByAllTaskWait_管理员查询所有待办任务_返回待办列表及总数"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/workflow/task/pageByAllTaskWait"
+    description: "管理员权限查询系统所有待办任务列表，验证返回rows数组和total总数。需要workflow:task:list权限。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_WF_TASK_010"
+    title: "GET /workflow/task/pageByAllTaskWait_按流程名称筛选查询_返回匹配的待办任务"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/task/pageByAllTaskWait"
+    description: "传入不存在的流程定义名称flowName进行筛选，验证系统返回空列表rows但不报错。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+        flowName: "不存在的流程名称XYZ123"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  # ============================================================
+  # 6. GET /workflow/task/pageByAllTaskFinish — 查询所有已办任务
+  # ============================================================
+  - id: "TC_WF_TASK_011"
+    title: "GET /workflow/task/pageByAllTaskFinish_管理员查询所有已办任务_返回已办列表及总数"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/workflow/task/pageByAllTaskFinish"
+    description: "管理员权限查询系统所有已办历史任务列表，验证返回rows数组和total总数。需要workflow:task:list权限。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_WF_TASK_012"
+    title: "GET /workflow/task/pageByAllTaskFinish_按流程状态筛选查询_返回匹配的已办任务"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/task/pageByAllTaskFinish"
+    description: "传入不存在的流程状态flowStatus进行筛选，验证系统返回空列表rows但不报错。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+        flowStatus: "99"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  # ============================================================
+  # 7. GET /workflow/task/pageByTaskCopy — 查询当前用户的抄送
+  # ============================================================
+  - id: "TC_WF_TASK_013"
+    title: "GET /workflow/task/pageByTaskCopy_默认分页查询抄送任务_返回抄送列表及总数"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/workflow/task/pageByTaskCopy"
+    description: "默认分页查询当前登录用户被抄送的任务列表，验证返回rows数组和total总数。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_WF_TASK_014"
+    title: "GET /workflow/task/pageByTaskCopy_分页参数异常_返回空列表或默认分页"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/task/pageByTaskCopy"
+    description: "传入非法的pageSize=0分页参数，验证系统能容错处理返回rows和total。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 0
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  # ============================================================
+  # 8. GET /workflow/task/getTask/{taskId} — 根据taskId查询任务
+  # ============================================================
+  - id: "TC_WF_TASK_015"
+    title: "GET /workflow/task/getTask/{taskId}_有效taskId查询任务_返回任务详情"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/workflow/task/getTask/{taskId}"
+    description: "使用有效taskId查询任务详细信息，验证返回任务的id和flowName等字段。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        taskId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["id", "flowName"]
+
+  - id: "TC_WF_TASK_016"
+    title: "GET /workflow/task/getTask/{taskId}_不存在的taskId_返回data为null"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/task/getTask/{taskId}"
+    description: "传入不存在的taskId查询任务，验证返回操作成功但data为null。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        taskId: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # ============================================================
+  # 9. POST /workflow/task/getNextNodeList — 获取下一节点信息
+  # ============================================================
+  - id: "TC_WF_TASK_017"
+    title: "POST /workflow/task/getNextNodeList_有效taskId获取下一节点_返回节点列表"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/task/getNextNodeList"
+    description: "使用有效taskId查询当前任务的下一审批节点列表，验证返回data为FlowNode数组。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        taskId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_TASK_018"
+    title: "POST /workflow/task/getNextNodeList_不存在的taskId_返回任务不存在"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/task/getNextNodeList"
+    description: "传入不存在的taskId获取下一节点信息，验证返回业务错误码500并提示任务不存在。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        taskId: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 10. POST /workflow/task/terminationTask — 终止任务
+  # ============================================================
+  - id: "TC_WF_TASK_019"
+    title: "POST /workflow/task/terminationTask_有效taskId终止任务_返回终止成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/task/terminationTask"
+    description: "使用有效taskId和审批意见终止正在进行的流程任务，验证返回data为true表示终止成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        taskId: 1
+        comment: "业务已取消，终止流程"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_TASK_020"
+    title: "POST /workflow/task/terminationTask_taskId为空_返回任务id为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/task/terminationTask"
+    description: "不传taskId终止任务，验证@NotNull校验返回任务id为空的错误。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        comment: "终止测试"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 11. POST /workflow/task/taskOperation/{taskOperation} — 任务操作
+  # ============================================================
+  - id: "TC_WF_TASK_021"
+    title: "POST /workflow/task/taskOperation/{taskOperation}_委派任务_返回操作成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/task/taskOperation/{taskOperation}"
+    description: "对任务执行委派操作（delegateTask），将任务委派给其他用户处理，验证返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        taskOperation: "delegateTask"
+      body:
+        taskId: 1
+        userId: "1003"
+        message: "委派给王五处理"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_TASK_022"
+    title: "POST /workflow/task/taskOperation/{taskOperation}_无效操作类型_返回操作类型无效"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/task/taskOperation/{taskOperation}"
+    description: "传入无效的任务操作类型枚举值，验证返回业务错误码500并提示Invalid operation type。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        taskOperation: "invalidOperation"
+      body:
+        taskId: 1
+        userId: "1003"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 12. PUT /workflow/task/updateAssignee/{userId} — 修改任务办理人
+  # ============================================================
+  - id: "TC_WF_TASK_023"
+    title: "PUT /workflow/task/updateAssignee/{userId}_批量修改任务办理人_返回操作成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/workflow/task/updateAssignee/{userId}"
+    description: "管理员批量修改指定任务的办理人，验证返回操作成功。需要workflow:task:edit权限。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        userId: "1003"
+      body:
+        - 1
+        - 2
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_TASK_024"
+    title: "PUT /workflow/task/updateAssignee/{userId}_taskIdList为空_返回false不执行操作"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/workflow/task/updateAssignee/{userId}"
+    description: "传入空的taskIdList批量修改办理人，验证系统静默返回false不做任何操作。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        userId: "1003"
+      body: []
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # ============================================================
+  # 13. POST /workflow/task/backProcess — 驳回审批
+  # ============================================================
+  - id: "TC_WF_TASK_025"
+    title: "POST /workflow/task/backProcess_有效taskId驳回审批_返回操作成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/task/backProcess"
+    description: "驳回当前任务到申请人节点，验证返回操作成功并设置流程状态为已退回。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        taskId: 1
+        message: "请假申请信息不完整，请补充后重新提交"
+        notice: "您的请假申请已被驳回"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_TASK_026"
+    title: "POST /workflow/task/backProcess_taskId为空_返回任务ID不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/task/backProcess"
+    description: "不传taskId驳回审批，验证@NotNull校验返回任务ID不能为空的错误。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        message: "驳回测试"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 14. GET /workflow/task/getBackTaskNode/{taskId}/{nowNodeCode} — 获取可驳回的前置节点
+  # ============================================================
+  - id: "TC_WF_TASK_027"
+    title: "GET /workflow/task/getBackTaskNode/{taskId}/{nowNodeCode}_有效参数获取可驳回节点_返回前置节点列表"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/workflow/task/getBackTaskNode/{taskId}/{nowNodeCode}"
+    description: "使用有效taskId和当前节点编码查询可驳回的前置节点列表，验证返回data为Node数组。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        taskId: 1
+        nowNodeCode: "node_approval"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_TASK_028"
+    title: "GET /workflow/task/getBackTaskNode/{taskId}/{nowNodeCode}_不存在的taskId_返回空列表"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/task/getBackTaskNode/{taskId}/{nowNodeCode}"
+    description: "传入不存在的taskId查询可驳回的前置节点，验证返回操作成功但data为空列表。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        taskId: 99999
+        nowNodeCode: "node_approval"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # ============================================================
+  # 15. GET /workflow/task/currentTaskAllUser/{taskId} — 获取当前任务的所有办理人
+  # ============================================================
+  - id: "TC_WF_TASK_029"
+    title: "GET /workflow/task/currentTaskAllUser/{taskId}_有效taskId获取办理人_返回办理人列表"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/workflow/task/currentTaskAllUser/{taskId}"
+    description: "使用有效taskId获取指定任务当前关联的所有办理人信息，验证返回data为UserDTO数组。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        taskId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_TASK_030"
+    title: "GET /workflow/task/currentTaskAllUser/{taskId}_不存在的taskId_返回空列表"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/task/currentTaskAllUser/{taskId}"
+    description: "传入不存在的taskId查询办理人，验证返回操作成功但data为空列表。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        taskId: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # ============================================================
+  # 16. POST /workflow/task/urgeTask — 催办任务
+  # ============================================================
+  - id: "TC_WF_TASK_031"
+    title: "POST /workflow/task/urgeTask_有效taskIdList催办任务_返回操作成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/task/urgeTask"
+    description: "对有效任务ID列表发送催办消息，验证返回操作成功并向办理人发送站内信。需要workflow:task:edit权限。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        taskIdList: [1]
+        messageType: ["1"]
+        message: "请尽快处理您的待办任务"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_TASK_032"
+    title: "POST /workflow/task/urgeTask_message为空_返回催办内容为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/task/urgeTask"
+    description: "不传催办消息内容调用催办接口，验证@NotNull校验返回催办内容为空的错误。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        taskIdList: [1]
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 17. POST /workflow/task/copyTask — 流程任务抄送
+  # ============================================================
+  - id: "TC_WF_TASK_033"
+    title: "POST /workflow/task/copyTask_有效抄送人员列表_返回操作成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/task/copyTask"
+    description: "将任务抄送给指定用户，验证返回操作成功并生成抄送历史任务记录。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        - userId: 1003
+          nickName: "王五"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_TASK_034"
+    title: "POST /workflow/task/copyTask_空抄送列表_返回操作成功但不执行抄送"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/task/copyTask"
+    description: "传入空的抄送人员列表，验证系统返回操作成功但实际不执行任何抄送操作。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body: []
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # ============================================================
+  # 二、请假示例接口 /workflow/leave
+  # ============================================================
+
+  # ============================================================
+  # 18. GET /workflow/leave/list — 查询请假列表
+  # ============================================================
+  - id: "TC_WF_TASK_035"
+    title: "GET /workflow/leave/list_默认分页查询请假列表_返回请假列表及总数"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/workflow/leave/list"
+    description: "默认分页查询请假申请记录列表，验证返回rows数组和total总数。需要workflow:leave:list权限。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_WF_TASK_036"
+    title: "GET /workflow/leave/list_按请假类型筛选查询_返回匹配的请假记录"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/leave/list"
+    description: "传入不存在的请假类型leaveType进行筛选，验证系统返回空列表rows但不报错。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+        leaveType: "不存在的类型XYZ"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  # ============================================================
+  # 19. POST /workflow/leave/export — 导出请假列表 (SKIPPED: file download)
+  # ============================================================
+
+  # ============================================================
+  # 20. GET /workflow/leave/{id} — 获取请假详细信息
+  # ============================================================
+  - id: "TC_WF_TASK_037"
+    title: "GET /workflow/leave/{id}_有效id查询请假_返回请假详情"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/workflow/leave/{id}"
+    description: "使用有效id查询请假记录的详细信息，验证返回id和leaveType等字段。需要workflow:leave:query权限。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["id", "leaveType"]
+
+  - id: "TC_WF_TASK_038"
+    title: "GET /workflow/leave/{id}_不存在的id_返回data为null"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/leave/{id}"
+    description: "传入不存在的请假记录id查询，验证返回操作成功但data为null。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # ============================================================
+  # 21. POST /workflow/leave — 新增请假
+  # ============================================================
+  - id: "TC_WF_TASK_039"
+    title: "POST /workflow/leave_有效请假信息新增请假_返回创建的请假记录"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/leave"
+    description: "提交有效的请假信息新增请假记录（保存为草稿），验证返回新创建的请假记录包含id和leaveType。需要workflow:leave:add权限。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        leaveType: "年假"
+        startDate: "2026-07-14"
+        endDate: "2026-07-16"
+        leaveDays: 3
+        remark: "测试新增请假"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["id", "leaveType"]
+
+  - id: "TC_WF_TASK_040"
+    title: "POST /workflow/leave_leaveType为空_返回请假类型不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/leave"
+    description: "不传请假类型leaveType新增请假，验证AddGroup @NotBlank校验返回请假类型不能为空的错误。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        startDate: "2026-07-14"
+        endDate: "2026-07-16"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 22. POST /workflow/leave/submitAndFlowStart — 提交并启动流程
+  # ============================================================
+  - id: "TC_WF_TASK_041"
+    title: "POST /workflow/leave/submitAndFlowStart_有效请假信息提交并启动流程_返回请假记录"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/leave/submitAndFlowStart"
+    description: "提交有效的请假信息并同时启动工作流审批，验证返回请假记录且流程正常启动。需要workflow:leave:add权限。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        leaveType: "事假"
+        startDate: "2026-07-15"
+        endDate: "2026-07-17"
+        leaveDays: 3
+        remark: "测试提交并启动流程"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["id", "leaveType"]
+
+  - id: "TC_WF_TASK_042"
+    title: "POST /workflow/leave/submitAndFlowStart_startDate为空_返回开始时间不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/leave/submitAndFlowStart"
+    description: "不传开始时间startDate提交并启动流程，验证AddGroup @NotNull校验返回开始时间不能为空的错误。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        leaveType: "事假"
+        endDate: "2026-07-17"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 23. PUT /workflow/leave — 修改请假
+  # ============================================================
+  - id: "TC_WF_TASK_043"
+    title: "PUT /workflow/leave_有效请假信息修改请假_返回更新后的请假记录"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/workflow/leave"
+    description: "提交有效的请假信息修改已有的请假记录，验证返回更新后的请假记录。需要workflow:leave:edit权限。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        id: 1
+        leaveType: "事假"
+        startDate: "2026-07-16"
+        endDate: "2026-07-18"
+        leaveDays: 3
+        remark: "修改请假类型为事假"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["id", "leaveType"]
+
+  - id: "TC_WF_TASK_044"
+    title: "PUT /workflow/leave_id为空_返回主键不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/workflow/leave"
+    description: "不传请假记录id修改请假，验证EditGroup @NotNull校验返回主键不能为空的错误。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        leaveType: "事假"
+        startDate: "2026-07-16"
+        endDate: "2026-07-18"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 24. DELETE /workflow/leave/{ids} — 删除请假
+  # ============================================================
+  - id: "TC_WF_TASK_045"
+    title: "DELETE /workflow/leave/{ids}_有效id删除请假_返回操作成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "DELETE"
+    path: "/workflow/leave/{ids}"
+    description: "使用有效id批量删除请假记录及关联的流程实例，验证返回操作成功。需要workflow:leave:remove权限。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        ids: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_TASK_046"
+    title: "DELETE /workflow/leave/{ids}_ids为空_返回主键不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "DELETE"
+    path: "/workflow/leave/{ids}"
+    description: "不传ids参数删除请假记录，验证@NotEmpty校验返回主键不能为空的错误。"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []

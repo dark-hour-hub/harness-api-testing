@@ -12,19 +12,19 @@
 | `module_name` | 模块概览表 → 模块名 | 直接取值 |
 | `headers_config.public_headers` | 全局默认请求头 → 公开接口表格 | 逐行照抄 name + value |
 | `headers_config.auth_headers` | 全局默认请求头 → 认证接口表格 | 逐行照抄，Token 值用 `${auth.token_prefix} ${auth.token}` |
-| `global_variables` | 项目信息 + 响应包装 | 提取默认分页大小、默认 tenantId 等常量 |
+| `global_variables` | 项目信息 + 响应包装 | 提取默认分页大小、默认 ID 等常量 |
 
 ---
 
 ## auth-analysis.md → auth_setup
 
-| YAML 字段 | auth-analysis.md 来源 |
-|-----------|----------------------|
-| `type` | 认证方式表 → 认证类型 |
-| `login_endpoint` | 登录接口表 → 接口路径 |
-| `token_prefix` | 认证方式表 → Token 名前缀 |
-| `extracts` | 登录响应字段表 → JSON key 列 |
-| `params` | 测试建议区的 clientId、tenantId |
+| YAML 字段 | auth-analysis.md 来源             |
+|-----------|---------------------------------|
+| `type` | 认证方式表 → 认证类型                    |
+| `login_endpoint` | 登录接口表 → 接口路径                    |
+| `token_prefix` | 认证方式表 → Token 名前缀               |
+| `extracts` | 登录响应字段表 → JSON key 列            |
+| `params` | 登录请求体实体文档的「JSON 键名」列 | key 名以实体文档为准，值从 manifest test_accounts 获取 |
 | `accounts` | 测试建议区 → 登录示例的 username、password |
 
 ---
@@ -102,3 +102,31 @@ manifest 的 `modules[].routes[]` 提供每个接口的基本元数据：
 | `list` (R\<List\<T\>\>) | `data_exists` 断言数组字段 |
 | `null` (R\<Void\>) | 不填 `data_exists`（data 为 null） |
 | `void` (无响应体/文件下载) | `response_type: html` 或不填 |
+
+---
+
+## 业务规则 → 用例
+
+模块文档中「业务规则」表的字段映射：
+
+| YAML 字段 | 业务规则来源 | 提取方式 |
+|-----------|------------|---------|
+| 反向用例 `title` | 规则描述 | 提取规则名作为条件，如 `{METHOD} {路径}_{违反规则描述}_返回错误` |
+| 反向用例 `request.body` / `request.query` | 规则的触发条件 | 构造触发违规的数据 |
+| 反向用例 `expected.business_code` | 规则的错误码 | 若规则声明了错误码，使用该值 |
+| 反向用例 `expected.business_message` | 规则的错误提示 | 若规则声明了提示信息，可断言 body_contains |
+| 正向用例 `request.body` | 规则的约束范围 | 确保数据在合法范围内 |
+
+---
+
+## 文档断言 → YAML expected（diff 模式）
+
+diff 文档中接口预期断言的映射：
+
+| YAML 字段 | 文档断言来源 | 提取方式 |
+|-----------|------------|---------|
+| `expected.status_code` | 预期响应 → HTTP 状态码 | 直接取值 |
+| `expected.business_code` | 预期响应 → 业务码 / R.code | 直接取值 |
+| `expected.data_exists` | 预期响应 → 返回字段列表 | 选取 1-2 个关键字段 |
+| `expected.business_message` | 预期响应 → 提示信息 | 可选，文档有明确值时才填 |
+| `expected.body_contains` | 预期响应 → 页面内容（html 类型） | 直接取值 |

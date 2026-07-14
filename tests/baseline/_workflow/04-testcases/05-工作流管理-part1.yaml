@@ -1,0 +1,831 @@
+module: "workflow-category-definition"
+module_name: "工作流管理-流程分类+流程定义"
+base_url: "http://localhost:8080"
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    test:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    test:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+testcases:
+  # ============================================================
+  # 1. GET /workflow/category/list — 查询流程分类列表
+  # ============================================================
+  - id: "TC_WF_CATEGORY_001"
+    title: "GET /workflow/category/list_无条件查询_返回流程分类列表"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/workflow/category/list"
+    description: "不传任何查询条件，验证返回全部流程分类列表，响应中data为数组且包含categoryId、categoryName等核心字段。"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_CATEGORY_002"
+    title: "GET /workflow/category/list_查询不存在的分类名称_返回空列表"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/category/list"
+    description: "传入一个数据库中不存在的分类名称进行模糊匹配，验证接口正常返回200但data为空列表。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        categoryName: "不存在的分类名称_XyZ999"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # ============================================================
+  # 2. POST /workflow/category/export — 导出流程分类列表 [SKIP: file export]
+  # ============================================================
+
+  # ============================================================
+  # 3. GET /workflow/category/{categoryId} — 获取流程分类详细信息
+  # ============================================================
+  - id: "TC_WF_CATEGORY_003"
+    title: "GET /workflow/category/{categoryId}_已存在的分类ID_返回分类详细信息"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/workflow/category/{categoryId}"
+    description: "传入系统预置的顶级分类ID=1，验证返回该分类的完整信息，包含categoryId、parentId、categoryName、ancestors、orderNum等字段。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        categoryId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["categoryId", "categoryName"]
+
+  - id: "TC_WF_CATEGORY_004"
+    title: "GET /workflow/category/{categoryId}_传入不存在的分类ID_返回查询失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/category/{categoryId}"
+    description: "传入数据库中不存在的分类ID=99999，验证系统返回业务错误码500并提示分类不存在。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        categoryId: 99999
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  # ============================================================
+  # 4. POST /workflow/category — 新增流程分类
+  # ============================================================
+  - id: "TC_WF_CATEGORY_005"
+    title: "POST /workflow/category_有效分类名称和父级ID_返回新增成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/category"
+    description: "传入有效的parentId=0（顶级分类）和唯一的分类名称，验证新增流程分类成功并返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        parentId: 0
+        categoryName: "测试分类_自动化"
+        orderNum: 99
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_CATEGORY_006"
+    title: "POST /workflow/category_分类名称为空_返回校验失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/category"
+    description: "传入parentId=0但不传categoryName（或传空字符串），验证@NotBlank校验触发并返回业务错误码500及错误消息'流程分类名称不能为空'。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        parentId: 0
+        categoryName: ""
+        orderNum: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 5. PUT /workflow/category — 修改流程分类
+  # ============================================================
+  - id: "TC_WF_CATEGORY_007"
+    title: "PUT /workflow/category_修改分类名称和排序_返回修改成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/workflow/category"
+    description: "传入已存在的categoryId=1，更新其分类名称和显示顺序，验证修改成功并返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        categoryId: 1
+        parentId: 0
+        categoryName: "人事审批"
+        orderNum: 2
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_CATEGORY_008"
+    title: "PUT /workflow/category_缺少categoryId_返回校验失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/workflow/category"
+    description: "请求体不传categoryId字段，验证EditGroup的@NotNull校验触发并返回业务错误码500及错误消息'流程分类ID不能为空'。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        parentId: 0
+        categoryName: "测试修改"
+        orderNum: 1
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  # ============================================================
+  # 6. DELETE /workflow/category/{categoryId} — 删除流程分类
+  # ============================================================
+  - id: "TC_WF_CATEGORY_009"
+    title: "DELETE /workflow/category/{categoryId}_已存在的可删除分类_返回删除成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "DELETE"
+    path: "/workflow/category/{categoryId}"
+    description: "传入一个存在且无子节点、无关联流程定义的叶子分类ID，验证删除成功并返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        categoryId: 2
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_CATEGORY_010"
+    title: "DELETE /workflow/category/{categoryId}_删除默认分类_返回不允许删除"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "DELETE"
+    path: "/workflow/category/{categoryId}"
+    description: "传入系统默认流程分类ID=100（不允许删除），验证返回业务错误码601并提示'默认流程分类,不允许删除'。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        categoryId: 100
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 601
+
+  # ============================================================
+  # 7. GET /workflow/category/categoryTree — 获取流程分类树列表
+  # ============================================================
+  - id: "TC_WF_CATEGORY_011"
+    title: "GET /workflow/category/categoryTree_无条件查询_返回分类树结构"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/workflow/category/categoryTree"
+    description: "不传查询条件获取流程分类树形结构，验证返回包含id、parentId、name、weight及children字段的多级树结构数据。"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_CATEGORY_012"
+    title: "GET /workflow/category/categoryTree_查询不存在的分类ID_返回空树列表"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/category/categoryTree"
+    description: "传入数据库中不存在的父级分类ID=99999进行精确匹配筛选，验证接口正常返回200但data为空列表。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        parentId: 99999
+        categoryId: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  # ============================================================
+  # 8. GET /workflow/definition/list — 查询流程定义列表
+  # ============================================================
+  - id: "TC_WF_CATEGORY_013"
+    title: "GET /workflow/definition/list_无条件分页查询_返回已发布流程定义列表"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/workflow/definition/list"
+    description: "不传查询条件，分页查询已发布的流程定义列表，验证返回分页结构rows和total，rows包含FlowDefinitionVo核心字段。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_WF_CATEGORY_014"
+    title: "GET /workflow/definition/list_查询不存在的流程编码_返回空分页结果"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/definition/list"
+    description: "传入不存在的流程编码flowCode进行模糊匹配，验证接口正常返回200但rows为空列表、total为0。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        flowCode: "non_existent_code_xyz"
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  # ============================================================
+  # 9. GET /workflow/definition/unPublishList — 查询未发布的流程定义列表
+  # ============================================================
+  - id: "TC_WF_CATEGORY_015"
+    title: "GET /workflow/definition/unPublishList_无条件分页查询_返回未发布流程定义列表"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/workflow/definition/unPublishList"
+    description: "不传查询条件，分页查询未发布或已失效的流程定义列表，验证返回分页结构rows和total。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_WF_CATEGORY_016"
+    title: "GET /workflow/definition/unPublishList_查询不存在的流程名称_返回空分页结果"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/definition/unPublishList"
+    description: "传入不存在的流程名称flowName进行模糊匹配，验证接口正常返回200但rows为空列表、total为0。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        flowName: "不存在的流程名称XYZ"
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  # ============================================================
+  # 10. GET /workflow/definition/{id} — 获取流程定义详细信息
+  # ============================================================
+  - id: "TC_WF_CATEGORY_017"
+    title: "GET /workflow/definition/{id}_已存在的流程定义ID_返回流程定义详情"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/workflow/definition/{id}"
+    description: "传入系统预置的流程定义ID=100，验证返回该流程定义的完整详细信息，包含id、flowCode、flowName、version、category、isPublish等核心字段。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["id", "flowCode", "flowName"]
+
+  - id: "TC_WF_CATEGORY_018"
+    title: "GET /workflow/definition/{id}_不存在的流程定义ID_返回查询失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/definition/{id}"
+    description: "传入数据库中不存在的流程定义ID=99999，验证系统返回业务错误码500（warm-flow未找到流程定义）。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 99999
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  # ============================================================
+  # 11. POST /workflow/definition — 新增流程定义
+  # ============================================================
+  - id: "TC_WF_CATEGORY_019"
+    title: "POST /workflow/definition_有效流程定义信息_返回新增成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/definition"
+    description: "传入完整的FlowDefinition请求体（flowCode、flowName、category、version等必填字段），验证新增流程定义成功并返回data=true。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        flowCode: "test_flow_auto"
+        flowName: "自动化测试流程"
+        category: "1"
+        version: "1"
+        isPublish: 0
+        formCustom: "N"
+        formPath: ""
+        activityStatus: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_WF_CATEGORY_020"
+    title: "POST /workflow/definition_流程名称为空_返回warm-flow校验失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/definition"
+    description: "请求体不传flowName字段（或传空字符串），验证warm-flow内置校验触发并返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        flowCode: "test_flow_empty_name"
+        flowName: ""
+        category: "1"
+        version: "1"
+        isPublish: 0
+        formCustom: "N"
+        formPath: ""
+        activityStatus: 1
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  # ============================================================
+  # 12. PUT /workflow/definition — 修改流程定义
+  # ============================================================
+  - id: "TC_WF_CATEGORY_021"
+    title: "PUT /workflow/definition_修改流程定义名称_返回修改成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/workflow/definition"
+    description: "传入已存在的流程定义ID=100及修改后的流程名称，验证修改成功并返回data=true。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        id: 100
+        flowCode: "leave_apply"
+        flowName: "请假申请流程V2"
+        category: "1"
+        version: "2"
+        isPublish: 0
+        formCustom: "Y"
+        formPath: "/workflow/form/leave_v2"
+        activityStatus: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_WF_CATEGORY_022"
+    title: "PUT /workflow/definition_不存在的流程定义ID_返回warm-flow修改失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/workflow/definition"
+    description: "传入数据库中不存在的流程定义ID=99999，验证warm-flow updateById触发错误并返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        id: 99999
+        flowCode: "non_existent"
+        flowName: "不存在的流程"
+        category: "1"
+        version: "1"
+        isPublish: 0
+        formCustom: "N"
+        formPath: ""
+        activityStatus: 1
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  # ============================================================
+  # 13. PUT /workflow/definition/publish/{id} — 发布流程定义
+  # ============================================================
+  - id: "TC_WF_CATEGORY_023"
+    title: "PUT /workflow/definition/publish/{id}_已存在的未发布流程定义_返回发布成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/workflow/definition/publish/{id}"
+    description: "传入一个已存在且所有BETWEEN类型节点均已配置办理人的流程定义ID，验证发布成功并返回data=true。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_WF_CATEGORY_024"
+    title: "PUT /workflow/definition/publish/{id}_不存在的流程定义ID_返回发布失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/workflow/definition/publish/{id}"
+    description: "传入数据库中不存在的流程定义ID=99999尝试发布，验证warm-flow发布失败并返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 99999
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  # ============================================================
+  # 14. PUT /workflow/definition/unPublish/{id} — 取消发布流程定义
+  # ============================================================
+  - id: "TC_WF_CATEGORY_025"
+    title: "PUT /workflow/definition/unPublish/{id}_已发布的流程定义_返回取消发布成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/workflow/definition/unPublish/{id}"
+    description: "传入一个已发布的流程定义ID，验证取消发布成功并返回data=true。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_WF_CATEGORY_026"
+    title: "PUT /workflow/definition/unPublish/{id}_不存在的流程定义ID_返回取消发布失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/workflow/definition/unPublish/{id}"
+    description: "传入数据库中不存在的流程定义ID=99999尝试取消发布，验证warm-flow取消发布失败并返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 99999
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  # ============================================================
+  # 15. DELETE /workflow/definition/{ids} — 删除流程定义
+  # ============================================================
+  - id: "TC_WF_CATEGORY_027"
+    title: "DELETE /workflow/definition/{ids}_未被使用的流程定义_返回删除成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "DELETE"
+    path: "/workflow/definition/{ids}"
+    description: "传入一个未被任何流程实例使用的流程定义ID，验证删除成功并返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        ids: 101
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_WF_CATEGORY_028"
+    title: "DELETE /workflow/definition/{ids}_不存在的流程定义ID_返回删除失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "DELETE"
+    path: "/workflow/definition/{ids}"
+    description: "传入数据库中不存在的流程定义ID列表=99999,99998，验证系统返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        ids: "99999,99998"
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  # ============================================================
+  # 16. POST /workflow/definition/copy/{id} — 复制流程定义
+  # ============================================================
+  - id: "TC_WF_CATEGORY_029"
+    title: "POST /workflow/definition/copy/{id}_已存在的流程定义_返回复制成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/definition/copy/{id}"
+    description: "传入一个已存在的流程定义ID=100作为复制源，验证复制成功生成新的流程定义副本并返回data=true。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_WF_CATEGORY_030"
+    title: "POST /workflow/definition/copy/{id}_不存在的流程定义ID_返回复制失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/definition/copy/{id}"
+    description: "传入数据库中不存在的流程定义ID=99999作为复制源，验证warm-flow复制失败并返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 99999
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  # ============================================================
+  # 17. POST /workflow/definition/importDef — 导入流程定义
+  # ============================================================
+  - id: "TC_WF_CATEGORY_031"
+    title: "POST /workflow/definition/importDef_上传有效JSON文件和分类ID_返回导入成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/workflow/definition/importDef"
+    description: "上传包含有效流程定义JSON内容的文件并传入有效的目标分类ID=1，验证导入成功并返回data=true。请求Content-Type为multipart/form-data。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      headers:
+        - name: "Content-Type"
+          value: "multipart/form-data"
+      form_data:
+        file: "@definition_import.json"
+        category: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_WF_CATEGORY_032"
+    title: "POST /workflow/definition/importDef_未上传文件_返回文件读取失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/workflow/definition/importDef"
+    description: "不传file参数（或传空文件），验证系统返回业务错误码500并提示'文件读取失败，请检查文件内容'。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      headers:
+        - name: "Content-Type"
+          value: "multipart/form-data"
+      form_data:
+        category: "1"
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  # ============================================================
+  # 18. POST /workflow/definition/exportDef/{id} — 导出流程定义 [SKIP: file export]
+  # ============================================================
+
+  # ============================================================
+  # 19. GET /workflow/definition/xmlString/{id} — 获取流程定义JSON字符串
+  # ============================================================
+  - id: "TC_WF_CATEGORY_033"
+    title: "GET /workflow/definition/xmlString/{id}_已存在的流程定义ID_返回JSON字符串"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/workflow/definition/xmlString/{id}"
+    description: "传入已存在的流程定义ID=100，验证返回该流程定义的完整JSON字符串（包含nodes、edges等设计器所需数据）。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_WF_CATEGORY_034"
+    title: "GET /workflow/definition/xmlString/{id}_不存在的流程定义ID_返回查询失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/workflow/definition/xmlString/{id}"
+    description: "传入数据库中不存在的流程定义ID=99999，验证warm-flow查询失败并返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 99999
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  # ============================================================
+  # 20. PUT /workflow/definition/active/{id} — 激活/挂起流程定义
+  # ============================================================
+  - id: "TC_WF_CATEGORY_035"
+    title: "PUT /workflow/definition/active/{id}_active为true激活流程_返回激活成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/workflow/definition/active/{id}"
+    description: "传入已存在的流程定义ID=100及active=true，验证流程被成功激活并返回data=true。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 100
+      query:
+        active: true
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_WF_CATEGORY_036"
+    title: "PUT /workflow/definition/active/{id}_缺少active参数_返回参数校验失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/workflow/definition/active/{id}"
+    description: "传入流程定义ID但不传必填的active查询参数，验证系统返回参数校验错误或业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        id: 100
+    expected:
+      data_exists: []
+      status_code: 200
+      response_type: "json"
+      business_code: 500

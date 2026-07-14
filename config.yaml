@@ -3,8 +3,8 @@
 # ============================================================
 source:
   backend:
-    - name: "spring-petclinic"
-      path: 'D:\java\project\spring-petclinic'
+    - name: "RuoYi-Vue-Plus"
+      path: 'D:/java/project/RuoYi-Vue-Plus'
       enabled: true
       git:
         repo: ""
@@ -29,9 +29,41 @@ environments:
         url: ""
 
     backend:
-      - name: "spring-petclinic"
+      - name: "ruoyi-admin"
         url: "http://localhost:8080"
         description: "主应用服务"
+        accounts:
+          - role: "admin"
+            description: "超级管理员，拥有所有权限"
+            username: "admin"
+            password: "admin123"
+            clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+            grantType: "password"
+            tenantId: "000000"
+          - role: "visitor"
+            description: "普通用户"
+            username: "test"
+            password: "666666"
+            clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+            grantType: "password"
+            tenantId: "000000"
+      - name: "ruoyi-snailjob-server"
+        url: "http://localhost:9090"
+        description: "Admin 监控服务"
+        accounts:
+          - role: "admin"
+            description: "管理员"
+            username: "ruoyi"
+            password: "123456"
+      - name: "ruoyi-monitor-admin"
+        url: "http://localhost:8800"
+        description: "任务调度中心服务"
+        accounts:
+          - role: "admin"
+            description: "管理员"
+            username: "admin"
+            password: "admin"
+
   test:
     frontend:
       - name: "mall-admin-web"

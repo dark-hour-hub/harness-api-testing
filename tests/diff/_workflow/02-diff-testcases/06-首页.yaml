@@ -1,0 +1,67 @@
+module: "index"
+module_name: "首页"
+base_url: "http://localhost:8080"
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    test:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    test:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+testcases:
+  - id: "TC_INDEX_001"
+    title: "GET /new_无Token_返回新增欢迎文本"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    description: "无认证访问新增的首页欢迎接口，验证返回纯文本欢迎信息。"
+    method: "GET"
+    path: "/new"
+    auth:
+      required: false
+    expected:
+      status_code: 200
+      response_type: "html"
+      body_contains:
+        - "RuoYi-Vue-Plus"
+        - "新增接口"
+
+  - id: "TC_INDEX_002"
+    title: "GET /new_携带Token_验证未被拦截_返回欢迎文本"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    description: "携带有效Token访问新增的首页欢迎接口（类级@SaIgnore），验证认证拦截器未拦截该请求，正常返回欢迎文本。"
+    method: "GET"
+    path: "/new"
+    auth:
+      required: true
+    expected:
+      status_code: 200
+      response_type: "html"
+      body_contains:
+        - "RuoYi-Vue-Plus"

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="3" skipped="0" tests="6" time="3.446" timestamp="2026-07-14T15:13:23.409002+08:00" hostname="旅行者"><testcase classname="tests.diff.generated.api-test.test_workflow_task" name="test_TC_WFTASK_001" time="1.739"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/task/getNextNodeList&#10;  请求体: {&#10;  &quot;taskId&quot;: 1,&#10;  &quot;variables&quot;: {&#10;    &quot;businessStatus&quot;: &quot;approved&quot;&#10;  }&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;任务不存在！&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\diff\generated\api-test\test_workflow_task.py:46: in test_TC_WFTASK_001
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\diff\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\diff\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/task/getNextNodeList
+E     请求体: {
+E     "taskId": 1,
+E     "variables": {
+E       "businessStatus": "approved"
+E     }
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "任务不存在！",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.diff.generated.api-test.test_workflow_task" name="test_TC_WFTASK_002" time="0.196" /><testcase classname="tests.diff.generated.api-test.test_workflow_task" name="test_TC_WFTASK_003" time="0.588"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/task/completeTask&#10;  请求体: {&#10;  &quot;taskId&quot;: 1,&#10;  &quot;message&quot;: &quot;同意&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;流程任务不存在或任务已审批！&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\diff\generated\api-test\test_workflow_task.py:60: in test_TC_WFTASK_003
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\diff\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\diff\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/task/completeTask
+E     请求体: {
+E     "taskId": 1,
+E     "message": "同意"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "流程任务不存在或任务已审批！",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.diff.generated.api-test.test_workflow_task" name="test_TC_WFTASK_004" time="0.128" /><testcase classname="tests.diff.generated.api-test.test_workflow_task" name="test_TC_WFTASK_005" time="0.397"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/task/backProcess&#10;  请求体: {&#10;  &quot;taskId&quot;: 1,&#10;  &quot;message&quot;: &quot;需补充材料，驳回重填&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;任务不存在！&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\diff\generated\api-test\test_workflow_task.py:74: in test_TC_WFTASK_005
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\diff\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\diff\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/task/backProcess
+E     请求体: {
+E     "taskId": 1,
+E     "message": "需补充材料，驳回重填"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "任务不存在！",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.diff.generated.api-test.test_workflow_task" name="test_TC_WFTASK_006" time="0.105" /></testsuite></testsuites>

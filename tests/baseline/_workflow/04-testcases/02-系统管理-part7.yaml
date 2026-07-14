@@ -1,0 +1,481 @@
+module: "sys-oss"
+module_name: "系统管理-OSS对象存储+OSS配置"
+base_url: "http://localhost:8080"
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    test:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    test:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+testcases:
+  # ============================================================
+  # 1. GET /resource/oss/list — 查询OSS对象存储列表
+  # ============================================================
+  - id: "TC_OSS_001"
+    title: "GET /resource/oss/list_默认分页查询_返回OSS文件列表"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/resource/oss/list"
+    description: "使用默认分页参数查询OSS对象存储列表，验证返回分页格式的TableDataInfo包含rows数组和total总数。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_OSS_002"
+    title: "GET /resource/oss/list_传入非数值pageNum_返回参数绑定异常"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/resource/oss/list"
+    description: "传入非数值类型的pageNum参数'abc'，触发Spring参数类型转换异常，验证系统返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: "abc"
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 2. GET /resource/oss/listByIds/{ossIds} — 查询OSS对象基于ID串
+  # ============================================================
+  - id: "TC_OSS_003"
+    title: "GET /resource/oss/listByIds/{ossIds}_传入有效ID数组_返回对应OSS文件列表"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/resource/oss/listByIds/{ossIds}"
+    description: "传入有效的OSS对象ID数组（逗号分隔），验证返回对应文件信息列表，列表元素包含ossId、fileName、url等字段。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        ossIds: "1,2"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_OSS_004"
+    title: "GET /resource/oss/listByIds/{ossIds}_传入空ossIds_返回主键不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/resource/oss/listByIds/{ossIds}"
+    description: "传入空字符串作为ossIds路径参数，触发@NotEmpty校验，验证系统返回业务错误码500并提示主键不能为空。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        ossIds: ""
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 3. POST /resource/oss/upload — 上传OSS对象存储
+  # ============================================================
+  - id: "TC_OSS_005"
+    title: "POST /resource/oss/upload_上传有效文件_返回文件URL和OSS对象信息"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/resource/oss/upload"
+    description: "通过multipart/form-data方式上传一个有效文件，验证系统保存文件信息并返回url、fileName和ossId。Content-Type使用multipart/form-data。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      multipart:
+        file: "@test_upload_file.png"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["url", "fileName", "ossId"]
+
+  - id: "TC_OSS_006"
+    title: "POST /resource/oss/upload_未上传文件_返回上传文件不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/resource/oss/upload"
+    description: "发送multipart/form-data请求但不附带file字段，触发Service层文件非空校验，验证系统返回业务错误码500并提示上传文件不能为空。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      multipart: {}
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 4. DELETE /resource/oss/{ossIds} — 删除OSS对象存储
+  # ============================================================
+  - id: "TC_OSS_007"
+    title: "DELETE /resource/oss/{ossIds}_删除存在的OSS对象_返回操作成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "DELETE"
+    path: "/resource/oss/{ossIds}"
+    description: "传入有效的OSS对象ID数组进行批量删除，验证系统删除数据库记录及OSS服务文件，返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        ossIds: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_OSS_008"
+    title: "DELETE /resource/oss/{ossIds}_传入空ossIds_返回主键不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "DELETE"
+    path: "/resource/oss/{ossIds}"
+    description: "传入空字符串作为ossIds路径参数，触发@NotEmpty校验，验证系统返回业务错误码500并提示主键不能为空。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        ossIds: ""
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 5. GET /resource/oss/config/list — 查询对象存储配置列表
+  # ============================================================
+  - id: "TC_OSS_009"
+    title: "GET /resource/oss/config/list_默认分页查询_返回配置列表"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/resource/oss/config/list"
+    description: "使用默认分页参数查询OSS对象存储配置列表，验证返回分页格式的TableDataInfo包含rows数组和total总数。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_OSS_010"
+    title: "GET /resource/oss/config/list_传入非数值pageNum_返回参数绑定异常"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/resource/oss/config/list"
+    description: "传入非数值类型的pageNum参数'abc'，触发Spring参数类型转换异常，验证系统返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: "abc"
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 6. GET /resource/oss/config/{ossConfigId} — 获取对象存储配置详细信息
+  # ============================================================
+  - id: "TC_OSS_011"
+    title: "GET /resource/oss/config/{ossConfigId}_查询存在的配置_返回配置详情"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/resource/oss/config/{ossConfigId}"
+    description: "传入有效的配置ID查询OSS配置详情，验证返回的配置对象包含ossConfigId、configKey、accessKey、bucketName、endpoint等字段。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        ossConfigId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["ossConfigId", "configKey"]
+
+  - id: "TC_OSS_012"
+    title: "GET /resource/oss/config/{ossConfigId}_传入非数值ossConfigId_返回参数类型转换异常"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/resource/oss/config/{ossConfigId}"
+    description: "传入非数值类型的ossConfigId路径参数'abc'，触发Spring路径参数类型转换异常，验证系统返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        ossConfigId: "abc"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 7. POST /resource/oss/config — 新增对象存储配置
+  # ============================================================
+  - id: "TC_OSS_013"
+    title: "POST /resource/oss/config_有效完整字段新增配置_返回操作成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/resource/oss/config"
+    description: "传入所有必填字段和可选字段新增OSS对象存储配置，验证configKey唯一性校验通过后插入成功，返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        configKey: "test-minio-001"
+        accessKey: "testAccessKey"
+        secretKey: "testSecretKey"
+        bucketName: "test-bucket"
+        prefix: "test/"
+        endpoint: "http://test-oss:9000"
+        domain: "https://test-oss.example.com"
+        isHttps: "N"
+        status: "1"
+        region: "cn-north-1"
+        ext1: ""
+        remark: "测试用配置"
+        accessPolicy: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_OSS_014"
+    title: "POST /resource/oss/config_缺少必填字段configKey_返回配置key不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/resource/oss/config"
+    description: "新增配置时不传configKey字段，触发@NotBlank校验，验证系统返回业务错误码500并提示配置key不能为空。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        accessKey: "testAccessKey"
+        secretKey: "testSecretKey"
+        bucketName: "test-bucket"
+        endpoint: "http://test-oss:9000"
+        accessPolicy: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 8. PUT /resource/oss/config — 修改对象存储配置
+  # ============================================================
+  - id: "TC_OSS_015"
+    title: "PUT /resource/oss/config_有效字段修改配置_返回操作成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/resource/oss/config"
+    description: "传入有效的ossConfigId和修改后的字段更新OSS配置，验证configKey唯一性校验通过后更新成功，返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        ossConfigId: 1
+        configKey: "minio"
+        accessKey: "minioadmin"
+        secretKey: "minioadmin"
+        bucketName: "ruoyi"
+        prefix: "prod/"
+        endpoint: "http://localhost:9000"
+        accessPolicy: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_OSS_016"
+    title: "PUT /resource/oss/config_缺少ossConfigId_返回主键不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/resource/oss/config"
+    description: "修改配置时不传ossConfigId字段，触发EditGroup的@NotNull校验，验证系统返回业务错误码500并提示主键不能为空。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        configKey: "minio"
+        accessKey: "minioadmin"
+        secretKey: "minioadmin"
+        bucketName: "ruoyi"
+        endpoint: "http://localhost:9000"
+        accessPolicy: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 9. PUT /resource/oss/config/changeStatus — 修改对象存储配置状态
+  # ============================================================
+  - id: "TC_OSS_017"
+    title: "PUT /resource/oss/config/changeStatus_修改配置为默认状态_返回操作成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/resource/oss/config/changeStatus"
+    description: "传入有效的ossConfigId将指定配置设为默认状态（status=0），验证系统使用事务先将所有配置设为非默认，再将目标配置设为默认，返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        ossConfigId: 1
+        configKey: "minio"
+        status: "0"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_OSS_018"
+    title: "PUT /resource/oss/config/changeStatus_传入不存在的ossConfigId_返回操作失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/resource/oss/config/changeStatus"
+    description: "传入不存在的ossConfigId修改状态，验证系统更新影响行数为0，返回业务错误码500并提示操作失败。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        ossConfigId: 99999
+        configKey: "nonexistent"
+        status: "0"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 10. DELETE /resource/oss/config/{ossConfigIds} — 删除对象存储配置
+  # ============================================================
+  - id: "TC_OSS_019"
+    title: "DELETE /resource/oss/config/{ossConfigIds}_删除非系统内置配置_返回操作成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "DELETE"
+    path: "/resource/oss/config/{ossConfigIds}"
+    description: "传入非系统内置的OSS配置ID进行批量删除，验证系统删除数据库记录并清理缓存，返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        ossConfigIds: "2"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_OSS_020"
+    title: "DELETE /resource/oss/config/{ossConfigIds}_传入空ossConfigIds_返回主键不能为空"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "DELETE"
+    path: "/resource/oss/config/{ossConfigIds}"
+    description: "传入空字符串作为ossConfigIds路径参数，触发@NotEmpty校验，验证系统返回业务错误码500并提示主键不能为空。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        ossConfigIds: ""
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []

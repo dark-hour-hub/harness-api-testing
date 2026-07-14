@@ -1,0 +1,115 @@
+module: "system_user"
+module_name: "用户管理"
+base_url: "http://localhost:8080"
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    test:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    test:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+testcases:
+  # ============================================================
+  # 1. GET /system/user/getInfo -- 获取当前用户信息 [修改]
+  # ============================================================
+  - id: "TC_USER_001"
+    title: "GET /system/user/getInfo_有效登录态获取管理员信息_返回用户权限及角色集"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/system/user/getInfo"
+    description: "管理员登录后获取当前用户完整信息，验证返回user对象、permissions权限集和roles角色集。本次变更间接影响：SysPostVo新增address字段影响嵌套岗位数据。"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["user", "permissions", "roles"]
+
+  - id: "TC_USER_002"
+    title: "GET /system/user/getInfo_携带多余查询参数_系统忽略并正常返回当前用户信息"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/user/getInfo"
+    description: "调用getInfo接口时携带多余的查询参数，验证系统忽略无关参数并正常返回当前用户信息，接口容错性符合预期。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        unknown_param: "ignored_value"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["user", "permissions", "roles"]
+
+  # ============================================================
+  # 2. GET /system/user/{userId} -- 根据用户编号获取详细信息 [修改]
+  # ============================================================
+  - id: "TC_USER_003"
+    title: "GET /system/user/{userId}_传入有效管理员用户ID_返回用户详情及岗位address字段"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/system/user/{userId}"
+    description: "传入管理员用户ID查询用户详细信息，验证返回user对象、角色列表及岗位列表，且posts[*].address字段存在（本次变更SysPostVo新增字段）。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        userId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["user", "roles", "postIds", "posts"]
+
+  - id: "TC_USER_004"
+    title: "GET /system/user/{userId}_传入不存在的用户ID_返回数据权限校验失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/user/{userId}"
+    description: "传入系统中不存在的用户ID（99999）查询详情，验证系统触发checkUserDataScope数据权限校验失败返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        userId: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []

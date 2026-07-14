@@ -1,0 +1,138 @@
+# 增量 _manifest — 仅含受影响模块
+system:
+  name: "RuoYi-Vue-Plus"
+  base_url: "http://localhost:8080"
+  framework: "Spring Boot 3.5.15 / Java 21 / Sa-Token 1.45.0 + JWT"
+  auth_type: "Sa-Token JWT Simple"
+  auth_header: "Authorization: Bearer {token}"
+
+response_wrapper:
+  class: R
+  code_field: code
+  msg_field: msg
+  success_code: 200
+  fail_code: 500
+  page_class: TableDataInfo
+  page_rows_field: rows
+  page_total_field: total
+
+modules:
+  - name: 首页
+    prefix: /
+    file: "06-首页.md"
+    interface_count: 1
+    controllers:
+      - class: IndexController
+        package: org.dromara.web.controller
+    routes:
+      - method: GET
+        path: /new
+        summary: 新增首页欢迎接口
+        request_body: null
+        response_type: String (纯文本)
+        response_structure: plain_text
+        auth: false
+        permission: null
+        change_type: added
+
+  - name: 系统管理-岗位管理
+    prefix: /system/post
+    file: "02-系统管理-part4.md"
+    interface_count: 4
+    controllers:
+      - class: SysPostController
+        package: org.dromara.system.controller.system
+    routes:
+      - method: GET
+        path: /system/post/list
+        summary: 获取岗位列表
+        response_type: TableDataInfo<SysPostVo>
+        response_structure: page
+        auth: true
+        permission: "system:post:list"
+        change_type: modified
+        change_desc: "响应体新增 address 字段"
+      - method: GET
+        path: /system/post/{postId}
+        summary: 根据岗位编号获取详细信息
+        response_type: R<SysPostVo>
+        response_structure: single
+        auth: true
+        permission: "system:post:query"
+        change_type: modified
+        change_desc: "响应体新增 address 字段"
+      - method: GET
+        path: /system/post/optionselect
+        summary: 获取岗位选择框列表
+        response_type: R<List<SysPostVo>>
+        response_structure: list
+        auth: true
+        permission: "system:post:query"
+        change_type: modified
+        change_desc: "响应体新增 address 字段"
+      - method: POST
+        path: /system/post/export
+        summary: 导出岗位列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "system:post:export"
+        change_type: modified
+        change_desc: "导出文件包含 address 列"
+
+  - name: 系统管理-用户管理
+    prefix: /system/user
+    file: "02-系统管理-part1.md"
+    interface_count: 1
+    controllers:
+      - class: SysUserController
+        package: org.dromara.system.controller.system
+    routes:
+      - method: GET
+        path: /system/user/getInfo
+        summary: 获取当前用户信息
+        response_type: R<UserInfoVo>
+        response_structure: single
+        auth: true
+        permission: null
+        change_type: modified
+        change_desc: "响应中 posts[].address 字段存在"
+
+  - name: 工作流管理-任务管理
+    prefix: /workflow/task
+    file: "05-工作流管理-part3.md"
+    interface_count: 3
+    controllers:
+      - class: FlwTaskController
+        package: org.dromara.workflow.controller
+    routes:
+      - method: POST
+        path: /workflow/task/getNextNodeList
+        summary: 获取下一节点信息
+        request_body: FlowNextNodeBo
+        response_type: R<List<FlowNode>>
+        response_structure: list
+        auth: true
+        permission: null
+        change_type: modified
+        change_desc: "异常跳过条件扩展：新增 NULL_SKIP_TYPE 匹配"
+      - method: POST
+        path: /workflow/task/completeTask
+        summary: 办理任务
+        request_body: CompleteTaskBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+        change_type: modified
+        change_desc: "间接影响：内部调用 getNextNodeList"
+      - method: POST
+        path: /workflow/task/backProcess
+        summary: 驳回审批
+        request_body: BackProcessBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+        change_type: modified
+        change_desc: "间接影响：内部调用 getNextNodeList"

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="34" time="8.389" timestamp="2026-07-14T14:10:58.993448+08:00" hostname="旅行者"><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_001" time="1.292" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_002" time="0.186" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_003" time="0.245" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_004" time="0.187" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_005" time="0.175" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_006" time="0.169" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_007" time="0.182" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_008" time="0.174" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_009" time="0.271" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_010" time="0.219"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/menu/roleMenuTreeselect/99999&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part3.py:109: in test_TC_MENU_010
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/menu/roleMenuTreeselect/99999
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_011" time="0.228"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/menu/tenantPackageMenuTreeselect/1&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part3.py:116: in test_TC_MENU_011
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/menu/tenantPackageMenuTreeselect/1
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_012" time="0.191" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_013" time="0.235"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/system/menu&#10;  请求体: {&#10;  &quot;parentId&quot;: 0,&#10;  &quot;menuName&quot;: &quot;测试菜单001&quot;,&#10;  &quot;orderNum&quot;: 99,&#10;  &quot;path&quot;: &quot;/test001&quot;,&#10;  &quot;component&quot;: &quot;test001/index&quot;,&#10;  &quot;isFrame&quot;: &quot;1&quot;,&#10;  &quot;isCache&quot;: &quot;0&quot;,&#10;  &quot;menuType&quot;: &quot;C&quot;,&#10;  &quot;visible&quot;: &quot;0&quot;,&#10;  &quot;status&quot;: &quot;0&quot;,&#10;  &quot;perms&quot;: &quot;system:test:list&quot;,&#10;  &quot;icon&quot;: &quot;build&quot;,&#10;  &quot;remark&quot;: &quot;自动化测试用菜单&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;新增菜单'测试菜单001'失败，菜单名称已存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part3.py:130: in test_TC_MENU_013
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/system/menu
+E     请求体: {
+E     "parentId": 0,
+E     "menuName": "测试菜单001",
+E     "orderNum": 99,
+E     "path": "/test001",
+E     "component": "test001/index",
+E     "isFrame": "1",
+E     "isCache": "0",
+E     "menuType": "C",
+E     "visible": "0",
+E     "status": "0",
+E     "perms": "system:test:list",
+E     "icon": "build",
+E     "remark": "自动化测试用菜单"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "新增菜单'测试菜单001'失败，菜单名称已存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_014" time="0.101" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_015" time="0.314" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_016" time="0.107" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_017" time="0.271"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/system/menu/9999&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part3.py:158: in test_TC_MENU_017
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/system/menu/9999
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_018" time="0.182" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_019" time="0.414" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_020" time="0.173" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_021" time="0.182" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_022" time="0.182" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_023" time="0.218" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_024" time="0.191" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_025" time="0.268" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_026" time="0.356" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_027" time="0.111"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/system/dept&#10;  请求体: {&#10;  &quot;parentId&quot;: 0,&#10;  &quot;deptName&quot;: &quot;测试部门001&quot;,&#10;  &quot;deptCategory&quot;: &quot;DEPT_TEST&quot;,&#10;  &quot;orderNum&quot;: 99,&#10;  &quot;leader&quot;: 1,&#10;  &quot;phone&quot;: &quot;010-88888888&quot;,&#10;  &quot;email&quot;: &quot;test001@example.com&quot;,&#10;  &quot;status&quot;: &quot;0&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;联系电话长度不能超过11个字符&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part3.py:228: in test_TC_MENU_027
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/system/dept
+E     请求体: {
+E     "parentId": 0,
+E     "deptName": "测试部门001",
+E     "deptCategory": "DEPT_TEST",
+E     "orderNum": 99,
+E     "leader": 1,
+E     "phone": "010-88888888",
+E     "email": "test001@example.com",
+E     "status": "0"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "联系电话长度不能超过11个字符",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_028" time="0.122" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_029" time="0.103"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/system/dept&#10;  请求体: {&#10;  &quot;deptId&quot;: 100,&#10;  &quot;parentId&quot;: 0,&#10;  &quot;deptName&quot;: &quot;研发部-测试修改&quot;,&#10;  &quot;deptCategory&quot;: &quot;DEPT_RD&quot;,&#10;  &quot;orderNum&quot;: 1,&#10;  &quot;leader&quot;: 1,&#10;  &quot;phone&quot;: &quot;010-88888888&quot;,&#10;  &quot;email&quot;: &quot;rd@example.com&quot;,&#10;  &quot;status&quot;: &quot;0&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;联系电话长度不能超过11个字符&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part3.py:242: in test_TC_MENU_029
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/system/dept
+E     请求体: {
+E     "deptId": 100,
+E     "parentId": 0,
+E     "deptName": "研发部-测试修改",
+E     "deptCategory": "DEPT_RD",
+E     "orderNum": 1,
+E     "leader": 1,
+E     "phone": "010-88888888",
+E     "email": "rd@example.com",
+E     "status": "0"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "联系电话长度不能超过11个字符",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_030" time="0.116" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_031" time="0.452"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/system/dept/9999&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part3.py:256: in test_TC_MENU_031
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/system/dept/9999
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_032" time="0.118" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_033" time="0.192" /><testcase classname="tests.baseline.generated.api-test.test_system-part3" name="test_TC_MENU_034" time="0.185" /></testsuite></testsuites>

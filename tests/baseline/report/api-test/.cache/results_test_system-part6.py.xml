@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="12" skipped="0" tests="36" time="10.338" timestamp="2026-07-14T14:11:17.598815+08:00" hostname="旅行者"><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_001" time="1.382" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_002" time="0.211" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_003" time="0.170" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_004" time="0.189" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_005" time="0.636"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/system/tenant&#10;  请求体: {&#10;  &quot;contactUserName&quot;: &quot;李四&quot;,&#10;  &quot;contactPhone&quot;: &quot;13900139001&quot;,&#10;  &quot;companyName&quot;: &quot;测试科技有限公司&quot;,&#10;  &quot;username&quot;: &quot;admin_test_co&quot;,&#10;  &quot;password&quot;: &quot;Test@12345&quot;,&#10;  &quot;packageId&quot;: 1,&#10;  &quot;licenseNumber&quot;: &quot;91110000MA12345678&quot;,&#10;  &quot;address&quot;: &quot;广东省深圳市南山区科技园&quot;,&#10;  &quot;domain&quot;: &quot;test-co.ruoyi.com&quot;,&#10;  &quot;intro&quot;: &quot;专注于测试服务&quot;,&#10;  &quot;remark&quot;: &quot;自动化测试租户&quot;,&#10;  &quot;status&quot;: &quot;0&quot;,&#10;  &quot;accountCount&quot;: 50,&#10;  &quot;expireTime&quot;: &quot;2027-12-31 23:59:59&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;套餐不存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part6.py:74: in test_TC_TENANT_005
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/system/tenant
+E     请求体: {
+E     "contactUserName": "李四",
+E     "contactPhone": "13900139001",
+E     "companyName": "测试科技有限公司",
+E     "username": "admin_test_co",
+E     "password": "Test@12345",
+E     "packageId": 1,
+E     "licenseNumber": "91110000MA12345678",
+E     "address": "广东省深圳市南山区科技园",
+E     "domain": "test-co.ruoyi.com",
+E     "intro": "专注于测试服务",
+E     "remark": "自动化测试租户",
+E     "status": "0",
+E     "accountCount": 50,
+E     "expireTime": "2027-12-31 23:59:59"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "套餐不存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_006" time="0.110" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_007" time="0.342"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/system/tenant&#10;  请求体: {&#10;  &quot;id&quot;: 2,&#10;  &quot;tenantId&quot;: &quot;T0002&quot;,&#10;  &quot;contactUserName&quot;: &quot;赵六&quot;,&#10;  &quot;contactPhone&quot;: &quot;13900139003&quot;,&#10;  &quot;companyName&quot;: &quot;已有租户公司&quot;,&#10;  &quot;domain&quot;: &quot;existing.ruoyi.com&quot;,&#10;  &quot;status&quot;: &quot;0&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part6.py:88: in test_TC_TENANT_007
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/system/tenant
+E     请求体: {
+E     "id": 2,
+E     "tenantId": "T0002",
+E     "contactUserName": "赵六",
+E     "contactPhone": "13900139003",
+E     "companyName": "已有租户公司",
+E     "domain": "existing.ruoyi.com",
+E     "status": "0"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_008" time="0.174" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_009" time="0.294"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/system/tenant/changeStatus&#10;  请求体: {&#10;  &quot;id&quot;: 2,&#10;  &quot;tenantId&quot;: &quot;T0002&quot;,&#10;  &quot;status&quot;: &quot;1&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part6.py:102: in test_TC_TENANT_009
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/system/tenant/changeStatus
+E     请求体: {
+E     "id": 2,
+E     "tenantId": "T0002",
+E     "status": "1"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_010" time="0.176" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_011" time="0.233"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/system/tenant/2&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part6.py:116: in test_TC_TENANT_011
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/system/tenant/2
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_012" time="0.117" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_013" time="0.144" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_014" time="0.137"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/tenant/dynamic/T9999&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;操作成功&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part6.py:137: in test_TC_TENANT_014
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/tenant/dynamic/T9999
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "操作成功",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_015" time="0.145" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_016" time="0.145" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_017" time="0.407"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/tenant/syncTenantPackage&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part6.py:158: in test_TC_TENANT_017
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/tenant/syncTenantPackage
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_018" time="0.231" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_019" time="0.456" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_020" time="0.457"><failure message="AssertionError: 业务状态码不匹配: 期望 403, 实际 200&#10;assert 200 == 403&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/tenant/syncTenantDict&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;同步租户字典成功&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part6.py:179: in test_TC_TENANT_020
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 403, 实际 200
+E   assert 200 == 403
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/tenant/syncTenantDict
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "同步租户字典成功",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_021" time="0.446" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_022" time="0.389"><failure message="AssertionError: 业务状态码不匹配: 期望 403, 实际 200&#10;assert 200 == 403&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/tenant/syncTenantConfig&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;同步租户参数配置成功&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part6.py:193: in test_TC_TENANT_022
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 403, 实际 200
+E   assert 200 == 403
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/tenant/syncTenantConfig
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "同步租户参数配置成功",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_023" time="0.210" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_024" time="0.186" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_025" time="0.180" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_026" time="0.173"><failure message="AssertionError: 业务状态码不匹配: 期望 403, 实际 200&#10;assert 200 == 403&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/tenant/package/selectList&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;操作成功&quot;,&#10;  &quot;data&quot;: [&#10;    {&#10;      &quot;packageId&quot;: &quot;2070396428174856193&quot;,&#10;      &quot;packageName&quot;: &quot;测试套餐_1782455948983&quot;,&#10;      &quot;menuIds&quot;: &quot;1,100,1000&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;&#10;    },&#10;    {&#10;      &quot;packageId&quot;: &quot;2072240525919461377&quot;,&#10;      &quot;packageName&quot;: &quot;测试套餐_1782895616149&quot;,&#10;      &quot;menuIds&quot;: &quot;1,2,3&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;&#10;    },&#10;    {&#10;      &quot;packageId&quot;: &quot;2072240527538462722&quot;,&#10;      &quot;packageName&quot;: &quot;测试套餐_1782895616561&quot;,&#10;      &quot;menuIds&quot;: &quot;1,2,3&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;&#10;    },&#10;    {&#10;      &quot;packageId&quot;: &quot;2072240529509785602&quot;,&#10;      &quot;packageName&quot;: &quot;测试套餐_1782895617058&quot;,&#10;      &quot;menuIds&quot;: &quot;1,2,3&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;&#10;    },&#10;    {&#10;      &quot;packageId&quot;: &quot;2075121296279691265&quot;,&#10;      &quot;packageName&quot;: &quot;测试套餐&quot;,&#10;      &quot;menuIds&quot;: &quot;1,2,3,4,5&quot;,&#10;      &quot;remark&quot;: &quot;测试用套餐&quot;,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;&#10;    },&#10;    {&#10;      &quot;packageId&quot;: &quot;2075477298757824513&quot;,&#10;      &quot;packageName&quot;: &quot;TC_PKG_ADD_TEST&quot;,&#10;      &quot;menuIds&quot;: &quot;1,2&quot;,&#10;      &quot;remark&quot;: &quot;自动化测试新增套餐&quot;,&#10;      &quot;menuCheckStrictly&quot;: false,&#10;      &quot;status&quot;: &quot;0&quot;&#10;    },&#10;    {&#10;      &quot;packageId&quot;: &quot;2076910294178201602&quot;,&#10;      &quot;packageName&quot;: &quot;自动化测试套餐&quot;,&#10;      &quot;menuIds&quot;: &quot;1,2,3,100&quot;,&#10;      &quot;remark&quot;: &quot;自动化测试创建的套餐&quot;,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;&#10;    }&#10;  ]&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part6.py:221: in test_TC_TENANT_026
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 403, 实际 200
+E   assert 200 == 403
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/tenant/package/selectList
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "操作成功",
+E     "data": [
+E       {
+E         "packageId": "2070396428174856193",
+E         "packageName": "测试套餐_1782455948983",
+E         "menuIds": "1,100,1000",
+E         "remark": null,
+E         "menuCheckStrictly": true,
+E         "status": "0"
+E       },
+E       {
+E         "packageId": "2072240525919461377",
+E         "packageName": "测试套餐_1782895616149",
+E         "menuIds": "1,2,3",
+E         "remark": null,
+E         "menuCheckStrictly": true,
+E         "status": "0"
+E       },
+E       {
+E         "packageId": "2072240527538462722",
+E         "packageName": "测试套餐_1782895616561",
+E         "menuIds": "1,2,3",
+E         "remark": null,
+E         "menuCheckStrictly": true,
+E         "status": "0"
+E       },
+E       {
+E         "packageId": "2072240529509785602",
+E         "packageName": "测试套餐_1782895617058",
+E         "menuIds": "1,2,3",
+E         "remark": null,
+E         "menuCheckStrictly": true,
+E         "status": "0"
+E       },
+E       {
+E         "packageId": "2075121296279691265",
+E         "packageName": "测试套餐",
+E         "menuIds": "1,2,3,4,5",
+E         "remark": "测试用套餐",
+E         "menuCheckStrictly": true,
+E         "status": "0"
+E       },
+E       {
+E         "packageId": "2075477298757824513",
+E         "packageName": "TC_PKG_ADD_TEST",
+E         "menuIds": "1,2",
+E         "remark": "自动化测试新增套餐",
+E         "menuCheckStrictly": false,
+E         "status": "0"
+E       },
+E       {
+E         "packageId": "2076910294178201602",
+E         "packageName": "自动化测试套餐",
+E         "menuIds": "1,2,3,100",
+E         "remark": "自动化测试创建的套餐",
+E         "menuCheckStrictly": true,
+E         "status": "0"
+E       }
+E     ]
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_027" time="0.174" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_028" time="0.183" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_029" time="0.260"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/system/tenant/package&#10;  请求体: {&#10;  &quot;packageName&quot;: &quot;自动化测试套餐&quot;,&#10;  &quot;menuIds&quot;: [&#10;    1,&#10;    2,&#10;    3,&#10;    100&#10;  ],&#10;  &quot;remark&quot;: &quot;自动化测试创建的套餐&quot;,&#10;  &quot;menuCheckStrictly&quot;: true,&#10;  &quot;status&quot;: &quot;0&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;新增套餐'自动化测试套餐'失败，套餐名称已存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part6.py:242: in test_TC_TENANT_029
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/system/tenant/package
+E     请求体: {
+E     "packageName": "自动化测试套餐",
+E     "menuIds": [
+E       1,
+E       2,
+E       3,
+E       100
+E     ],
+E     "remark": "自动化测试创建的套餐",
+E     "menuCheckStrictly": true,
+E     "status": "0"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "新增套餐'自动化测试套餐'失败，套餐名称已存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_030" time="0.112" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_031" time="0.393"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/system/tenant/package&#10;  请求体: {&#10;  &quot;packageId&quot;: 1,&#10;  &quot;packageName&quot;: &quot;企业标准版-更新&quot;,&#10;  &quot;menuIds&quot;: [&#10;    1,&#10;    2,&#10;    3,&#10;    100,&#10;    200&#10;  ],&#10;  &quot;remark&quot;: &quot;更新后的套餐描述&quot;,&#10;  &quot;menuCheckStrictly&quot;: false,&#10;  &quot;status&quot;: &quot;0&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part6.py:256: in test_TC_TENANT_031
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/system/tenant/package
+E     请求体: {
+E     "packageId": 1,
+E     "packageName": "企业标准版-更新",
+E     "menuIds": [
+E       1,
+E       2,
+E       3,
+E       100,
+E       200
+E     ],
+E     "remark": "更新后的套餐描述",
+E     "menuCheckStrictly": false,
+E     "status": "0"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_032" time="0.117" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_033" time="0.331"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/system/tenant/package/2&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-part6.py:270: in test_TC_TENANT_033
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/system/tenant/package/2
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_034" time="0.355" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_035" time="0.192" /><testcase classname="tests.baseline.generated.api-test.test_system-part6" name="test_TC_TENANT_036" time="0.173" /></testsuite></testsuites>

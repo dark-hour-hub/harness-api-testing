@@ -1,296 +1,1942 @@
 system:
-  name: "Spring PetClinic"
+  name: "RuoYi-Vue-Plus"
   base_url: "http://localhost:8080"
-  framework: "Spring Boot 4.1.0 / Java 17 / Spring MVC (WebMVC)"
-  database: "H2 (默认) / MySQL / PostgreSQL + Spring Data JPA"
-  cache: "Caffeine 本地缓存 + Spring Cache"
-  api_doc: "无（无 Swagger/Knife4j 依赖）"
-  auth_type: "无认证（none）"
-  auth_header: "无"
-  encryption: "无"
+  framework: "Spring Boot 3.5.15 / Java 21 / Sa-Token 1.45.0 + JWT"
+  database: "MySQL 8.0 + MyBatis-Plus 3.5.16 + HikariCP/Druid"
+  cache: "Redis + Caffeine (Sa-Token 二级缓存)"
+  api_doc: "SpringDoc OpenAPI 2.8.17"
+  auth_type: "Sa-Token JWT Simple"
+  auth_header: "Authorization: Bearer {token}"
+  encryption: "登录/注册接口 @ApiEncrypt (全局 API 加解密关闭)"
 
 response_wrapper:
-  class: null
-  code_field: null
-  msg_field: null
-  success_code: null
-  page_class: null
-  page_rows_field: null
-  page_total_field: null
-  note: "该项目无统一响应包装类。大部分接口返回 Thymeleaf 视图（HTML），仅 GET /vets 返回 JSON（@ResponseBody）。成功通过 HTTP 2xx + 视图渲染或 JSON 数据表示，错误通过 HTTP 错误状态 + 错误视图或 redirect flash attribute 表示。"
+  class: R
+  code_field: code
+  msg_field: msg
+  success_code: 200
+  fail_code: 500
+  warn_code: 601
+  page_class: TableDataInfo
+  page_rows_field: rows
+  page_total_field: total
 
 test_accounts:
-  - role: "无认证机制，无需测试账号"
-    username: "N/A"
-    password: "N/A"
-    description: "所有接口无需登录即可访问"
+  - role: admin
+    username: admin
+    password: admin123
+    clientId: e5cd7e4891bf95d1d19206ce24a7b32e
+    grantType: password
+    tenantId: "000000"
+    description: 超级管理员，拥有所有权限
 
 auth:
-  white_list: []
+  white_list:
+    - "/*.html"
+    - "/**/*.html"
+    - "/**/*.css"
+    - "/**/*.js"
+    - "/favicon.ico"
+    - "/error"
+    - "/*/api-docs"
+    - "/*/api-docs/**"
+    - "/warm-flow-ui/config"
+    - "/resource/sse"
+    - "/auth/**"
   public_headers:
     - name: Content-Type
       type: String
       required: true
-      example: "application/x-www-form-urlencoded (表单提交) / application/json (GET /vets)"
-  auth_headers: []
+      example: application/json
+  auth_headers:
+    - name: Authorization
+      type: String
+      required: true
+      example: "Bearer eyJhbG..."
+    - name: clientid
+      type: String
+      required: true
+      example: e5cd7e4891bf95d1d19206ce24a7b32e
 
 permission_model:
-  type: "无权限控制"
-  super_admin: "N/A"
-  format: "N/A"
-  data_permission: "N/A"
+  type: RBAC
+  super_admin: "admin (userId=1, role: super_admin)"
+  format: "{模块}:{资源}:{操作}"
+  data_permission: 按部门数据权限 (5级: 全部/自定义/本部门/本部门及以下/仅本人)
 
 modules:
-  - name: 首页
-    prefix: /
-    file: "01-首页.md"
-    interface_count: 1
+  - name: 认证模块
+    prefix: /auth
+    file: "01-认证模块.md"
+    interface_count: 10
     controllers:
-      - class: WelcomeController
-        package: org.springframework.samples.petclinic.system
-    services: []
-    dtos: []
-    vos: []
+      - class: AuthController
+        package: org.dromara.web.controller
+      - class: CaptchaController
+        package: org.dromara.web.controller
+    services:
+      - class: SysLoginService
+        package: org.dromara.system.service.impl
+      - class: SysRegisterService
+        package: org.dromara.system.service.impl
+    dtos: [LoginBody, PasswordLoginBody, SmsLoginBody, EmailLoginBody, XcxLoginBody, SocialLoginBody, RegisterBody]
+    vos: [LoginVo, CaptchaVo, LoginTenantVo, TenantListVo]
     routes:
-      - method: GET
-        path: /
-        summary: 欢迎页
-        request_body: null
-        response_type: "String (视图名: welcome)"
-        response_structure: html
+      - method: POST
+        path: /auth/login
+        summary: 用户登录
+        request_body: LoginBody (加密)
+        response_type: R<LoginVo>
+        response_structure: single
         auth: false
         permission: null
-        special: []
+        special: ["@ApiEncrypt"]
+      - method: GET
+        path: /auth/binding/{source}
+        summary: 获取第三方登录跳转URL
+        request_body: null
+        response_type: R<String>
+        response_structure: single
+        auth: false
+        permission: null
+      - method: POST
+        path: /auth/social/callback
+        summary: 第三方登录回调绑定
+        request_body: SocialLoginBody
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: DELETE
+        path: /auth/unlock/{socialId}
+        summary: 取消第三方授权
+        request_body: null
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: POST
+        path: /auth/logout
+        summary: 退出登录
+        request_body: null
+        response_type: R<Void>
+        response_structure: single
+        auth: false
+        permission: null
+      - method: POST
+        path: /auth/register
+        summary: 用户注册
+        request_body: RegisterBody (加密)
+        response_type: R<Void>
+        response_structure: single
+        auth: false
+        permission: null
+        special: ["@ApiEncrypt"]
+      - method: GET
+        path: /auth/tenant/list
+        summary: 获取租户列表
+        request_body: null
+        response_type: R<LoginTenantVo>
+        response_structure: single
+        auth: false
+        permission: null
+        special: ["@RateLimiter(60s/20次/IP)"]
+      - method: GET
+        path: /auth/code
+        summary: 生成验证码
+        request_body: null
+        response_type: R<CaptchaVo>
+        response_structure: single
+        auth: false
+        permission: null
+      - method: GET
+        path: /resource/sms/code
+        summary: 短信验证码
+        request_body: null
+        response_type: R<Void>
+        response_structure: single
+        auth: false
+        permission: null
+        special: ["@RateLimiter(60s/1次/手机号)"]
+      - method: GET
+        path: /resource/email/code
+        summary: 邮箱验证码
+        request_body: null
+        response_type: R<Void>
+        response_structure: single
+        auth: false
+        permission: null
+        special: ["@RateLimiter(60s/1次/邮箱)"]
     split_plan: null
 
-  - name: 兽医管理
-    prefix: /vets
-    file: "02-兽医管理.md"
-    interface_count: 1
+  - name: 系统管理
+    prefix: /system
+    file: "02-系统管理.md"
+    interface_count: 125
     controllers:
-      - class: VetController
-        package: org.springframework.samples.petclinic.vet
-    services: []
-    dtos: []
-    vos:
-      - org.springframework.samples.petclinic.vet.Vets
-      - org.springframework.samples.petclinic.vet.Vet
+      - class: SysUserController
+        package: org.dromara.system.controller.system
+      - class: SysProfileController
+        package: org.dromara.system.controller.system
+      - class: SysRoleController
+        package: org.dromara.system.controller.system
+      - class: SysMenuController
+        package: org.dromara.system.controller.system
+      - class: SysDeptController
+        package: org.dromara.system.controller.system
+      - class: SysPostController
+        package: org.dromara.system.controller.system
+      - class: SysDictTypeController
+        package: org.dromara.system.controller.system
+      - class: SysDictDataController
+        package: org.dromara.system.controller.system
+      - class: SysNoticeController
+        package: org.dromara.system.controller.system
+      - class: SysConfigController
+        package: org.dromara.system.controller.system
+      - class: SysClientController
+        package: org.dromara.system.controller.system
+      - class: SysTenantController
+        package: org.dromara.system.controller.system
+      - class: SysTenantPackageController
+        package: org.dromara.system.controller.system
+      - class: SysSocialController
+        package: org.dromara.system.controller.system
+      - class: SysOssController
+        package: org.dromara.system.controller.system
+      - class: SysOssConfigController
+        package: org.dromara.system.controller.system
+    services:
+      - class: SysUserServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysRoleServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysMenuServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysDeptServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysPostServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysDictTypeServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysDictDataServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysNoticeServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysConfigServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysClientServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysTenantServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysTenantPackageServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysSocialServiceImpl
+        package: org.dromara.system.service.impl
+      - class: SysOssServiceImpl
+        package: org.dromara.system.service.impl
     routes:
+      # === /system/user ===
       - method: GET
-        path: /vets
-        summary: 获取兽医列表（JSON API）
-        request_body: null
-        response_type: "Vets (JSON: { vetList: [...] })"
+        path: /system/user/list
+        summary: 获取用户列表
+        response_type: TableDataInfo<SysUserVo>
+        response_structure: page
+        auth: true
+        permission: "system:user:list"
+      - method: POST
+        path: /system/user/export
+        summary: 导出用户列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "system:user:export"
+      - method: POST
+        path: /system/user/importData
+        summary: 导入用户数据
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:user:import"
+      - method: POST
+        path: /system/user/importTemplate
+        summary: 获取导入模板
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: null
+      - method: GET
+        path: /system/user/getInfo
+        summary: 获取当前用户信息
+        response_type: R<UserInfoVo>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: GET
+        path: /system/user/{userId}
+        summary: 根据用户编号获取详细信息
+        response_type: R<SysUserInfoVo>
+        response_structure: single
+        auth: true
+        permission: "system:user:query"
+      - method: POST
+        path: /system/user
+        summary: 新增用户
+        request_body: SysUserBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:user:add"
+      - method: PUT
+        path: /system/user
+        summary: 修改用户
+        request_body: SysUserBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:user:edit"
+      - method: DELETE
+        path: /system/user/{userIds}
+        summary: 删除用户
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:user:remove"
+      - method: PUT
+        path: /system/user/resetPwd
+        summary: 重置密码
+        request_body: SysUserBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:user:edit"
+        special: ["@ApiEncrypt"]
+      - method: PUT
+        path: /system/user/changeStatus
+        summary: 修改用户状态
+        request_body: SysUserBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:user:edit"
+      - method: GET
+        path: /system/user/authRole/{userId}
+        summary: 获取用户授权角色
+        response_type: R<SysUserInfoVo>
+        response_structure: single
+        auth: true
+        permission: "system:user:query"
+      - method: PUT
+        path: /system/user/authRole
+        summary: 用户授权角色
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:user:edit"
+      - method: GET
+        path: /system/user/deptTree
+        summary: 获取部门树列表
+        response_type: R<List<Tree<Long>>>
         response_structure: list
-        auth: false
+        auth: true
+        permission: "system:user:list"
+      # === /system/user/profile ===
+      - method: GET
+        path: /system/user/profile
+        summary: 获取个人信息
+        response_type: R<ProfileVo>
+        response_structure: single
+        auth: true
         permission: null
-        special: ["@ResponseBody"]
+      - method: PUT
+        path: /system/user/profile
+        summary: 修改个人信息
+        request_body: SysUserProfileBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: PUT
+        path: /system/user/profile/updatePwd
+        summary: 修改个人密码
+        request_body: SysUserPasswordBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+        special: ["@ApiEncrypt"]
+      - method: POST
+        path: /system/user/profile/avatar
+        summary: 头像上传
+        request_body: MultipartFile
+        response_type: R<AvatarVo>
+        response_structure: single
+        auth: true
+        permission: null
+      # === /system/role ===
+      - method: GET
+        path: /system/role/list
+        summary: 获取角色信息列表
+        response_type: TableDataInfo<SysRoleVo>
+        response_structure: page
+        auth: true
+        permission: "system:role:list"
+      - method: POST
+        path: /system/role/export
+        summary: 导出角色信息列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "system:role:export"
+      - method: GET
+        path: /system/role/{roleId}
+        summary: 根据角色编号获取详细信息
+        response_type: R<SysRoleVo>
+        response_structure: single
+        auth: true
+        permission: "system:role:query"
+      - method: POST
+        path: /system/role
+        summary: 新增角色
+        request_body: SysRoleBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:role:add"
+      - method: PUT
+        path: /system/role
+        summary: 修改保存角色
+        request_body: SysRoleBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:role:edit"
+      - method: PUT
+        path: /system/role/dataScope
+        summary: 修改数据权限
+        request_body: SysRoleBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:role:edit"
+      - method: PUT
+        path: /system/role/changeStatus
+        summary: 修改角色状态
+        request_body: SysRoleBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:role:edit"
+      - method: DELETE
+        path: /system/role/{roleIds}
+        summary: 删除角色
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:role:remove"
+      - method: GET
+        path: /system/role/optionselect
+        summary: 获取角色选择框列表
+        response_type: R<List<SysRoleVo>>
+        response_structure: list
+        auth: true
+        permission: "system:role:query"
+      - method: GET
+        path: /system/role/authUser/allocatedList
+        summary: 查询已分配用户角色列表
+        response_type: TableDataInfo<SysUserVo>
+        response_structure: page
+        auth: true
+        permission: "system:role:list"
+      - method: GET
+        path: /system/role/authUser/unallocatedList
+        summary: 查询未分配用户角色列表
+        response_type: TableDataInfo<SysUserVo>
+        response_structure: page
+        auth: true
+        permission: "system:role:list"
+      - method: PUT
+        path: /system/role/authUser/cancel
+        summary: 取消授权用户
+        request_body: SysUserRole
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:role:edit"
+      - method: PUT
+        path: /system/role/authUser/cancelAll
+        summary: 批量取消授权用户
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:role:edit"
+      - method: PUT
+        path: /system/role/authUser/selectAll
+        summary: 批量选择用户授权
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:role:edit"
+      - method: GET
+        path: /system/role/deptTree/{roleId}
+        summary: 获取对应角色部门树列表
+        response_type: R<MenuTreeSelectVo>
+        response_structure: single
+        auth: true
+        permission: "system:role:query"
+      # === /system/menu ===
+      - method: GET
+        path: /system/menu/getRouters
+        summary: 获取路由信息
+        response_type: R<List<RouterVo>>
+        response_structure: list
+        auth: true
+        permission: null
+      - method: GET
+        path: /system/menu/list
+        summary: 获取菜单列表
+        response_type: R<List<SysMenuVo>>
+        response_structure: list
+        auth: true
+        permission: "system:menu:list"
+      - method: GET
+        path: /system/menu/{menuId}
+        summary: 根据菜单编号获取详细信息
+        response_type: R<SysMenuVo>
+        response_structure: single
+        auth: true
+        permission: "system:menu:query"
+      - method: GET
+        path: /system/menu/treeselect
+        summary: 获取菜单下拉树列表
+        response_type: R<List<Tree<Long>>>
+        response_structure: list
+        auth: true
+        permission: "system:menu:query"
+      - method: GET
+        path: /system/menu/roleMenuTreeselect/{roleId}
+        summary: 加载对应角色菜单列表树
+        response_type: R<MenuTreeSelectVo>
+        response_structure: single
+        auth: true
+        permission: "system:menu:query"
+      - method: GET
+        path: /system/menu/tenantPackageMenuTreeselect/{packageId}
+        summary: 加载对应租户套餐菜单列表树
+        response_type: R<MenuTreeSelectVo>
+        response_structure: single
+        auth: true
+        permission: "system:menu:query"
+      - method: POST
+        path: /system/menu
+        summary: 新增菜单
+        request_body: SysMenuBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:menu:add"
+      - method: PUT
+        path: /system/menu
+        summary: 修改菜单
+        request_body: SysMenuBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:menu:edit"
+      - method: DELETE
+        path: /system/menu/{menuId}
+        summary: 删除菜单
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:menu:remove"
+      - method: DELETE
+        path: /system/menu/cascade/{menuIds}
+        summary: 批量级联删除菜单
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:menu:remove"
+      # === /system/dept ===
+      - method: GET
+        path: /system/dept/list
+        summary: 获取部门列表
+        response_type: R<List<SysDeptVo>>
+        response_structure: list
+        auth: true
+        permission: "system:dept:list"
+      - method: GET
+        path: /system/dept/list/exclude/{deptId}
+        summary: 查询部门列表（排除节点）
+        response_type: R<List<SysDeptVo>>
+        response_structure: list
+        auth: true
+        permission: "system:dept:list"
+      - method: GET
+        path: /system/dept/{deptId}
+        summary: 根据部门编号获取详细信息
+        response_type: R<SysDeptVo>
+        response_structure: single
+        auth: true
+        permission: "system:dept:query"
+      - method: POST
+        path: /system/dept
+        summary: 新增部门
+        request_body: SysDeptBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:dept:add"
+      - method: PUT
+        path: /system/dept
+        summary: 修改部门
+        request_body: SysDeptBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:dept:edit"
+      - method: DELETE
+        path: /system/dept/{deptId}
+        summary: 删除部门
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:dept:remove"
+      - method: GET
+        path: /system/dept/optionselect
+        summary: 获取部门选择框列表
+        response_type: R<List<SysDeptVo>>
+        response_structure: list
+        auth: true
+        permission: "system:dept:query"
+      # === /system/post ===
+      - method: GET
+        path: /system/post/list
+        summary: 获取岗位列表
+        response_type: TableDataInfo<SysPostVo>
+        response_structure: page
+        auth: true
+        permission: "system:post:list"
+      - method: POST
+        path: /system/post/export
+        summary: 导出岗位列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "system:post:export"
+      - method: GET
+        path: /system/post/{postId}
+        summary: 根据岗位编号获取详细信息
+        response_type: R<SysPostVo>
+        response_structure: single
+        auth: true
+        permission: "system:post:query"
+      - method: POST
+        path: /system/post
+        summary: 新增岗位
+        request_body: SysPostBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:post:add"
+      - method: PUT
+        path: /system/post
+        summary: 修改岗位
+        request_body: SysPostBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:post:edit"
+      - method: DELETE
+        path: /system/post/{postIds}
+        summary: 删除岗位
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:post:remove"
+      - method: GET
+        path: /system/post/optionselect
+        summary: 获取岗位选择框列表
+        response_type: R<List<SysPostVo>>
+        response_structure: list
+        auth: true
+        permission: "system:post:query"
+      - method: GET
+        path: /system/post/deptTree
+        summary: 获取部门树列表
+        response_type: R<List<Tree<Long>>>
+        response_structure: list
+        auth: true
+        permission: "system:post:list"
+      # === /system/dict/type ===
+      - method: GET
+        path: /system/dict/type/list
+        summary: 查询字典类型列表
+        response_type: TableDataInfo<SysDictTypeVo>
+        response_structure: page
+        auth: true
+        permission: "system:dict:list"
+      - method: POST
+        path: /system/dict/type/export
+        summary: 导出字典类型列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "system:dict:export"
+      - method: GET
+        path: /system/dict/type/{dictId}
+        summary: 查询字典类型详细
+        response_type: R<SysDictTypeVo>
+        response_structure: single
+        auth: true
+        permission: "system:dict:query"
+      - method: POST
+        path: /system/dict/type
+        summary: 新增字典类型
+        request_body: SysDictTypeBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:dict:add"
+      - method: PUT
+        path: /system/dict/type
+        summary: 修改字典类型
+        request_body: SysDictTypeBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:dict:edit"
+      - method: DELETE
+        path: /system/dict/type/{dictIds}
+        summary: 删除字典类型
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:dict:remove"
+      - method: DELETE
+        path: /system/dict/type/refreshCache
+        summary: 刷新字典缓存
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:dict:remove"
+      - method: GET
+        path: /system/dict/type/optionselect
+        summary: 获取字典选择框列表
+        response_type: R<List<SysDictTypeVo>>
+        response_structure: list
+        auth: true
+        permission: null
+      # === /system/dict/data ===
+      - method: GET
+        path: /system/dict/data/list
+        summary: 查询字典数据列表
+        response_type: TableDataInfo<SysDictDataVo>
+        response_structure: page
+        auth: true
+        permission: "system:dict:list"
+      - method: POST
+        path: /system/dict/data/export
+        summary: 导出字典数据列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "system:dict:export"
+      - method: GET
+        path: /system/dict/data/{dictCode}
+        summary: 查询字典数据详细
+        response_type: R<SysDictDataVo>
+        response_structure: single
+        auth: true
+        permission: "system:dict:query"
+      - method: GET
+        path: /system/dict/data/type/{dictType}
+        summary: 根据字典类型查询字典数据
+        response_type: R<List<SysDictDataVo>>
+        response_structure: list
+        auth: true
+        permission: null
+      - method: POST
+        path: /system/dict/data
+        summary: 新增字典数据
+        request_body: SysDictDataBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:dict:add"
+      - method: PUT
+        path: /system/dict/data
+        summary: 修改字典数据
+        request_body: SysDictDataBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:dict:edit"
+      - method: DELETE
+        path: /system/dict/data/{dictCodes}
+        summary: 删除字典数据
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:dict:remove"
+      # === /system/notice ===
+      - method: GET
+        path: /system/notice/list
+        summary: 获取通知公告列表
+        response_type: TableDataInfo<SysNoticeVo>
+        response_structure: page
+        auth: true
+        permission: "system:notice:list"
+      - method: GET
+        path: /system/notice/{noticeId}
+        summary: 根据通知公告编号获取详细信息
+        response_type: R<SysNoticeVo>
+        response_structure: single
+        auth: true
+        permission: "system:notice:query"
+      - method: POST
+        path: /system/notice
+        summary: 新增通知公告
+        request_body: SysNoticeBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:notice:add"
+      - method: PUT
+        path: /system/notice
+        summary: 修改通知公告
+        request_body: SysNoticeBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:notice:edit"
+      - method: DELETE
+        path: /system/notice/{noticeIds}
+        summary: 删除通知公告
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:notice:remove"
+      # === /system/config ===
+      - method: GET
+        path: /system/config/list
+        summary: 获取参数配置列表
+        response_type: TableDataInfo<SysConfigVo>
+        response_structure: page
+        auth: true
+        permission: "system:config:list"
+      - method: POST
+        path: /system/config/export
+        summary: 导出参数配置列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "system:config:export"
+      - method: GET
+        path: /system/config/{configId}
+        summary: 根据参数编号获取详细信息
+        response_type: R<SysConfigVo>
+        response_structure: single
+        auth: true
+        permission: "system:config:query"
+      - method: GET
+        path: /system/config/configKey/{configKey}
+        summary: 根据参数键名查询参数值
+        response_type: R<String>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: POST
+        path: /system/config
+        summary: 新增参数配置
+        request_body: SysConfigBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:config:add"
+      - method: PUT
+        path: /system/config
+        summary: 修改参数配置
+        request_body: SysConfigBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:config:edit"
+      - method: PUT
+        path: /system/config/updateByKey
+        summary: 根据参数键名修改参数配置
+        request_body: SysConfigBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:config:edit"
+      - method: DELETE
+        path: /system/config/{configIds}
+        summary: 删除参数配置
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:config:remove"
+      - method: DELETE
+        path: /system/config/refreshCache
+        summary: 刷新参数缓存
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:config:remove"
+      # === /system/client ===
+      - method: GET
+        path: /system/client/list
+        summary: 查询客户端管理列表
+        response_type: TableDataInfo<SysClientVo>
+        response_structure: page
+        auth: true
+        permission: "system:client:list"
+      - method: POST
+        path: /system/client/export
+        summary: 导出客户端管理列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "system:client:export"
+      - method: GET
+        path: /system/client/{id}
+        summary: 获取客户端管理详细信息
+        response_type: R<SysClientVo>
+        response_structure: single
+        auth: true
+        permission: "system:client:query"
+      - method: POST
+        path: /system/client
+        summary: 新增客户端管理
+        request_body: SysClientBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:client:add"
+      - method: PUT
+        path: /system/client
+        summary: 修改客户端管理
+        request_body: SysClientBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:client:edit"
+      - method: PUT
+        path: /system/client/changeStatus
+        summary: 修改客户端状态
+        request_body: SysClientBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:client:edit"
+      - method: DELETE
+        path: /system/client/{ids}
+        summary: 删除客户端管理
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:client:remove"
+      # === /system/tenant ===
+      - method: GET
+        path: /system/tenant/list
+        summary: 查询租户列表
+        response_type: TableDataInfo<SysTenantVo>
+        response_structure: page
+        auth: true
+        permission: "system:tenant:list"
+      - method: POST
+        path: /system/tenant/export
+        summary: 导出租户列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "system:tenant:export"
+      - method: GET
+        path: /system/tenant/{id}
+        summary: 获取租户详细信息
+        response_type: R<SysTenantVo>
+        response_structure: single
+        auth: true
+        permission: "system:tenant:query"
+      - method: POST
+        path: /system/tenant
+        summary: 新增租户
+        request_body: SysTenantBo (加密)
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:tenant:add"
+        special: ["@ApiEncrypt", "@Lock4j"]
+      - method: PUT
+        path: /system/tenant
+        summary: 修改租户
+        request_body: SysTenantBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:tenant:edit"
+      - method: PUT
+        path: /system/tenant/changeStatus
+        summary: 修改租户状态
+        request_body: SysTenantBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:tenant:edit"
+      - method: DELETE
+        path: /system/tenant/{ids}
+        summary: 删除租户
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:tenant:remove"
+      - method: GET
+        path: /system/tenant/dynamic/{tenantId}
+        summary: 动态切换租户
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: GET
+        path: /system/tenant/dynamic/clear
+        summary: 清除动态租户
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: GET
+        path: /system/tenant/syncTenantPackage
+        summary: 同步租户套餐
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:tenant:edit"
+      - method: GET
+        path: /system/tenant/syncTenantDict
+        summary: 同步租户字典
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: GET
+        path: /system/tenant/syncTenantConfig
+        summary: 同步租户参数配置
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+      # === /system/tenant/package ===
+      - method: GET
+        path: /system/tenant/package/list
+        summary: 查询租户套餐列表
+        response_type: TableDataInfo<SysTenantPackageVo>
+        response_structure: page
+        auth: true
+        permission: "system:tenantPackage:list"
+      - method: GET
+        path: /system/tenant/package/selectList
+        summary: 查询租户套餐下拉选列表
+        response_type: R<List<SysTenantPackageVo>>
+        response_structure: list
+        auth: true
+        permission: "system:tenantPackage:list"
+      - method: POST
+        path: /system/tenant/package/export
+        summary: 导出租户套餐列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "system:tenantPackage:export"
+      - method: GET
+        path: /system/tenant/package/{packageId}
+        summary: 获取租户套餐详细信息
+        response_type: R<SysTenantPackageVo>
+        response_structure: single
+        auth: true
+        permission: "system:tenantPackage:query"
+      - method: POST
+        path: /system/tenant/package
+        summary: 新增租户套餐
+        request_body: SysTenantPackageBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:tenantPackage:add"
+      - method: PUT
+        path: /system/tenant/package
+        summary: 修改租户套餐
+        request_body: SysTenantPackageBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:tenantPackage:edit"
+      - method: DELETE
+        path: /system/tenant/package/{packageIds}
+        summary: 删除租户套餐
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:tenantPackage:remove"
+      # === /system/social ===
+      - method: GET
+        path: /system/social/list
+        summary: 查询社会化关系列表
+        response_type: R<List<SysSocialVo>>
+        response_structure: list
+        auth: true
+        permission: null
+      # === /resource/oss ===
+      - method: GET
+        path: /resource/oss/list
+        summary: 查询OSS对象存储列表
+        response_type: TableDataInfo<SysOssVo>
+        response_structure: page
+        auth: true
+        permission: "system:oss:list"
+      - method: GET
+        path: /resource/oss/listByIds/{ossIds}
+        summary: 查询OSS对象基于id串
+        response_type: R<List<SysOssVo>>
+        response_structure: list
+        auth: true
+        permission: "system:oss:query"
+      - method: POST
+        path: /resource/oss/upload
+        summary: 上传OSS对象存储
+        request_body: MultipartFile
+        response_type: R<SysOssUploadVo>
+        response_structure: single
+        auth: true
+        permission: "system:oss:upload"
+      - method: GET
+        path: /resource/oss/download/{ossId}
+        summary: 下载OSS对象
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "system:oss:download"
+      - method: DELETE
+        path: /resource/oss/{ossIds}
+        summary: 删除OSS对象存储
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:oss:remove"
+      # === /resource/oss/config ===
+      - method: GET
+        path: /resource/oss/config/list
+        summary: 查询对象存储配置列表
+        response_type: TableDataInfo<SysOssConfigVo>
+        response_structure: page
+        auth: true
+        permission: "system:oss:list"
+      - method: GET
+        path: /resource/oss/config/{ossConfigId}
+        summary: 获取对象存储配置详细信息
+        response_type: R<SysOssConfigVo>
+        response_structure: single
+        auth: true
+        permission: "system:oss:query"
+      - method: POST
+        path: /resource/oss/config
+        summary: 新增对象存储配置
+        request_body: SysOssConfigBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:oss:add"
+      - method: PUT
+        path: /resource/oss/config
+        summary: 修改对象存储配置
+        request_body: SysOssConfigBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:oss:edit"
+      - method: PUT
+        path: /resource/oss/config/changeStatus
+        summary: 修改对象存储配置状态
+        request_body: SysOssConfigBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:oss:edit"
+      - method: DELETE
+        path: /resource/oss/config/{ossConfigIds}
+        summary: 删除对象存储配置
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "system:oss:remove"
+    split_plan:
+      - part: 1
+        file: "02-系统管理-part1.md"
+        description: "用户管理 + 个人中心"
+        route_prefixes: ["/system/user", "/system/user/profile"]
+        interface_count: 18
+      - part: 2
+        file: "02-系统管理-part2.md"
+        description: "角色管理"
+        route_prefixes: ["/system/role"]
+        interface_count: 15
+      - part: 3
+        file: "02-系统管理-part3.md"
+        description: "菜单管理 + 部门管理"
+        route_prefixes: ["/system/menu", "/system/dept"]
+        interface_count: 17
+      - part: 4
+        file: "02-系统管理-part4.md"
+        description: "岗位管理 + 字典管理"
+        route_prefixes: ["/system/post", "/system/dict/type", "/system/dict/data"]
+        interface_count: 23
+      - part: 5
+        file: "02-系统管理-part5.md"
+        description: "通知公告 + 参数配置 + 客户端管理"
+        route_prefixes: ["/system/notice", "/system/config", "/system/client"]
+        interface_count: 21
+      - part: 6
+        file: "02-系统管理-part6.md"
+        description: "租户管理 + 租户套餐 + 社会化关系"
+        route_prefixes: ["/system/tenant", "/system/tenant/package", "/system/social"]
+        interface_count: 20
+      - part: 7
+        file: "02-系统管理-part7.md"
+        description: "OSS对象存储 + OSS配置"
+        route_prefixes: ["/resource/oss"]
+        interface_count: 11
+
+  - name: 监控管理
+    prefix: /monitor
+    file: "03-监控管理.md"
+    interface_count: 14
+    controllers:
+      - class: SysLogininforController
+        package: org.dromara.system.controller.monitor
+      - class: SysOperlogController
+        package: org.dromara.system.controller.monitor
+      - class: SysUserOnlineController
+        package: org.dromara.system.controller.monitor
+      - class: CacheController
+        package: org.dromara.system.controller.monitor
+    services:
+      - class: ISysLogininforService
+        package: org.dromara.system.service
+      - class: ISysOperLogService
+        package: org.dromara.system.service
+    routes:
+      # === /monitor/logininfor ===
+      - method: GET
+        path: /monitor/logininfor/list
+        summary: 获取系统访问记录列表
+        response_type: TableDataInfo<SysLogininforVo>
+        response_structure: page
+        auth: true
+        permission: "monitor:logininfor:list"
+      - method: POST
+        path: /monitor/logininfor/export
+        summary: 导出系统访问记录列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "monitor:logininfor:export"
+      - method: DELETE
+        path: /monitor/logininfor/{infoIds}
+        summary: 批量删除登录日志
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "monitor:logininfor:remove"
+      - method: DELETE
+        path: /monitor/logininfor/clean
+        summary: 清理系统访问记录
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "monitor:logininfor:remove"
+        special: ["@Lock4j"]
+      - method: GET
+        path: /monitor/logininfor/unlock/{userName}
+        summary: 账户解锁
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "monitor:logininfor:unlock"
+      # === /monitor/operlog ===
+      - method: GET
+        path: /monitor/operlog/list
+        summary: 获取操作日志记录列表
+        response_type: TableDataInfo<SysOperLogVo>
+        response_structure: page
+        auth: true
+        permission: "monitor:operlog:list"
+      - method: POST
+        path: /monitor/operlog/export
+        summary: 导出操作日志记录列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "monitor:operlog:export"
+      - method: DELETE
+        path: /monitor/operlog/{operIds}
+        summary: 批量删除操作日志记录
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "monitor:operlog:remove"
+      - method: DELETE
+        path: /monitor/operlog/clean
+        summary: 清理操作日志记录
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "monitor:operlog:remove"
+        special: ["@Lock4j"]
+      # === /monitor/online ===
+      - method: GET
+        path: /monitor/online/list
+        summary: 获取在线用户监控列表
+        response_type: TableDataInfo<SysUserOnline>
+        response_structure: page
+        auth: true
+        permission: "monitor:online:list"
+      - method: DELETE
+        path: /monitor/online/{tokenId}
+        summary: 强退用户
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "monitor:online:forceLogout"
+      - method: GET
+        path: /monitor/online
+        summary: 获取当前用户登录在线设备
+        response_type: TableDataInfo<SysUserOnline>
+        response_structure: page
+        auth: true
+        permission: null
+      - method: DELETE
+        path: /monitor/online/myself/{tokenId}
+        summary: 强退当前在线设备
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+      # === /monitor/cache ===
+      - method: GET
+        path: /monitor/cache
+        summary: 获取缓存监控信息
+        response_type: R<CacheListInfoVo>
+        response_structure: single
+        auth: true
+        permission: "monitor:cache:list"
     split_plan: null
 
-  - name: 客户管理
-    prefix: /owners
-    file: "03-客户管理.md"
-    interface_count: 13
+  - name: 代码生成
+    prefix: /tool
+    file: "04-代码生成.md"
+    interface_count: 12
     controllers:
-      - class: OwnerController
-        package: org.springframework.samples.petclinic.owner
-      - class: PetController
-        package: org.springframework.samples.petclinic.owner
-      - class: VisitController
-        package: org.springframework.samples.petclinic.owner
-    services: []
-    dtos: []
-    vos:
-      - org.springframework.samples.petclinic.owner.Owner
-      - org.springframework.samples.petclinic.owner.Pet
-      - org.springframework.samples.petclinic.owner.Visit
-      - org.springframework.samples.petclinic.owner.PetType
+      - class: GenController
+        package: org.dromara.generator.controller
+    services:
+      - class: IGenTableService
+        package: org.dromara.generator.service
     routes:
       - method: GET
-        path: /owners
-        summary: 查询客户列表（按姓氏分页搜索）
-        request_body: null
-        query_params:
-          - name: page
-            type: int
-            required: false
-            default: "1"
-            description: 页码
-        response_type: "String (视图名: owners/ownersList 或 owners/findOwners)"
-        response_structure: html
-        auth: false
-        permission: null
-        special: []
+        path: /tool/gen/list
+        summary: 查询代码生成列表
+        response_type: TableDataInfo<GenTable>
+        response_structure: page
+        auth: true
+        permission: "tool:gen:list"
       - method: GET
-        path: /owners/find
-        summary: 查找客户表单
-        request_body: null
-        response_type: "String (视图名: owners/findOwners)"
-        response_structure: html
-        auth: false
-        permission: null
-        special: []
+        path: /tool/gen/{tableId}
+        summary: 查询代码生成业务详情
+        response_type: R<Map<String,Object>>
+        response_structure: single
+        auth: true
+        permission: "tool:gen:query"
+        special: ["@RepeatSubmit"]
       - method: GET
-        path: /owners/new
-        summary: 新增客户表单
-        request_body: null
-        response_type: "String (视图名: owners/createOrUpdateOwnerForm)"
-        response_structure: html
-        auth: false
-        permission: null
-        special: []
+        path: /tool/gen/db/list
+        summary: 查询数据库列表
+        response_type: TableDataInfo<GenTable>
+        response_structure: page
+        auth: true
+        permission: "tool:gen:list"
+      - method: GET
+        path: /tool/gen/column/{tableId}
+        summary: 查询数据表字段列表
+        response_type: TableDataInfo<GenTableColumn>
+        response_structure: page
+        auth: true
+        permission: "tool:gen:list"
       - method: POST
-        path: /owners/new
-        summary: 新增客户
-        request_body: "Owner (表单绑定: firstName, lastName, address, city, telephone)"
-        response_type: "String (redirect: /owners/{id})"
-        response_structure: html
-        auth: false
-        permission: null
-        special: ["@Valid 校验", "flash attribute: message / error"]
+        path: /tool/gen/importTable
+        summary: 导入表结构
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "tool:gen:import"
+        special: ["@Lock4j", "@RepeatSubmit"]
+      - method: PUT
+        path: /tool/gen
+        summary: 修改保存代码生成业务
+        request_body: GenTable
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "tool:gen:edit"
+        special: ["@RepeatSubmit"]
+      - method: DELETE
+        path: /tool/gen/{tableIds}
+        summary: 删除代码生成
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "tool:gen:remove"
       - method: GET
-        path: /owners/{ownerId}
-        summary: 查看客户详情（含宠物和就诊记录）
-        request_body: null
-        path_params:
-          - name: ownerId
-            type: int
-            required: true
-            description: 客户ID
-        response_type: "ModelAndView (视图名: owners/ownerDetails)"
-        response_structure: html
-        auth: false
-        permission: null
-        special: []
+        path: /tool/gen/preview/{tableId}
+        summary: 预览代码
+        response_type: R<Map<String,String>>
+        response_structure: single
+        auth: true
+        permission: "tool:gen:preview"
       - method: GET
-        path: /owners/{ownerId}/edit
-        summary: 编辑客户表单
-        request_body: null
-        path_params:
-          - name: ownerId
-            type: int
-            required: true
-            description: 客户ID
-        response_type: "String (视图名: owners/createOrUpdateOwnerForm)"
-        response_structure: html
-        auth: false
-        permission: null
-        special: ["@ModelAttribute findOwner 预加载"]
-      - method: POST
-        path: /owners/{ownerId}/edit
-        summary: 更新客户信息
-        request_body: "Owner (表单绑定: firstName, lastName, address, city, telephone)"
-        path_params:
-          - name: ownerId
-            type: int
-            required: true
-            description: 客户ID
-        response_type: "String (redirect: /owners/{ownerId})"
-        response_structure: html
-        auth: false
-        permission: null
-        special: ["@Valid 校验", "flash attribute: message / error"]
+        path: /tool/gen/download/{tableId}
+        summary: 生成代码（下载方式）
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "tool:gen:code"
       - method: GET
-        path: /owners/{ownerId}/pets/new
-        summary: 新增宠物表单
-        request_body: null
-        path_params:
-          - name: ownerId
-            type: int
-            required: true
-            description: 客户ID
-        response_type: "String (视图名: pets/createOrUpdatePetForm)"
-        response_structure: html
-        auth: false
-        permission: null
-        special: ["@ModelAttribute 预加载 petTypes"]
-      - method: POST
-        path: /owners/{ownerId}/pets/new
-        summary: 新增宠物
-        request_body: "Pet (表单绑定: name, birthDate, type)"
-        path_params:
-          - name: ownerId
-            type: int
-            required: true
-            description: 客户ID
-        response_type: "String (redirect: /owners/{ownerId})"
-        response_structure: html
-        auth: false
-        permission: null
-        special: ["@Valid 校验 + PetValidator", "flash attribute: message"]
+        path: /tool/gen/synchDb/{tableId}
+        summary: 同步数据库
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "tool:gen:edit"
+        special: ["@Lock4j"]
       - method: GET
-        path: /owners/{ownerId}/pets/{petId}/edit
-        summary: 编辑宠物表单
-        request_body: null
-        path_params:
-          - name: ownerId
-            type: int
-            required: true
-            description: 客户ID
-          - name: petId
-            type: int
-            required: true
-            description: 宠物ID
-        response_type: "String (视图名: pets/createOrUpdatePetForm)"
-        response_structure: html
-        auth: false
-        permission: null
-        special: ["@ModelAttribute 预加载 pet + petTypes"]
-      - method: POST
-        path: /owners/{ownerId}/pets/{petId}/edit
-        summary: 更新宠物信息
-        request_body: "Pet (表单绑定: name, birthDate, type)"
-        path_params:
-          - name: ownerId
-            type: int
-            required: true
-            description: 客户ID
-          - name: petId
-            type: int
-            required: true
-            description: 宠物ID
-        response_type: "String (redirect: /owners/{ownerId})"
-        response_structure: html
-        auth: false
-        permission: null
-        special: ["@Valid 校验 + PetValidator", "flash attribute: message"]
+        path: /tool/gen/batchGenCode
+        summary: 批量生成代码
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "tool:gen:code"
       - method: GET
-        path: /owners/{ownerId}/pets/{petId}/visits/new
-        summary: 新增就诊记录表单
-        request_body: null
-        path_params:
-          - name: ownerId
-            type: int
-            required: true
-            description: 客户ID
-          - name: petId
-            type: int
-            required: true
-            description: 宠物ID
-        response_type: "String (视图名: pets/createOrUpdateVisitForm)"
-        response_structure: html
-        auth: false
-        permission: null
-        special: ["@ModelAttribute 预加载 pet + owner + minVisitDate"]
-      - method: POST
-        path: /owners/{ownerId}/pets/{petId}/visits/new
-        summary: 新增就诊记录
-        request_body: "Visit (表单绑定: date, description)"
-        path_params:
-          - name: ownerId
-            type: int
-            required: true
-            description: 客户ID
-          - name: petId
-            type: int
-            required: true
-            description: 宠物ID
-        response_type: "String (redirect: /owners/{ownerId})"
-        response_structure: html
-        auth: false
-        permission: null
-        special: ["@Valid 校验", "flash attribute: message"]
+        path: /tool/gen/getDataNames
+        summary: 查询数据源名称列表
+        response_type: R<Object>
+        response_structure: single
+        auth: true
+        permission: "tool:gen:list"
+    split_plan: null
 
-  # 排除的路由（不在任何模块中）
-  # GET /vets.html — 静态 HTML 页面
-  # GET /oups — 崩溃测试页
+  - name: 工作流管理
+    prefix: /workflow
+    file: "05-工作流管理.md"
+    interface_count: 62
+    controllers:
+      - class: FlwCategoryController
+        package: org.dromara.workflow.controller
+      - class: FlwDefinitionController
+        package: org.dromara.workflow.controller
+      - class: FlwInstanceController
+        package: org.dromara.workflow.controller
+      - class: FlwTaskController
+        package: org.dromara.workflow.controller
+      - class: FlwSpelController
+        package: org.dromara.workflow.controller
+      - class: TestLeaveController
+        package: org.dromara.workflow.controller
+    services:
+      - class: IFlwCategoryService
+        package: org.dromara.workflow.service
+      - class: IFlwDefinitionService
+        package: org.dromara.workflow.service
+      - class: IFlwInstanceService
+        package: org.dromara.workflow.service
+      - class: IFlwTaskService
+        package: org.dromara.workflow.service
+      - class: IFlwSpelService
+        package: org.dromara.workflow.service
+      - class: ITestLeaveService
+        package: org.dromara.workflow.service
+    routes:
+      # === /workflow/category ===
+      - method: GET
+        path: /workflow/category/list
+        summary: 查询流程分类列表
+        response_type: R<List<FlowCategoryVo>>
+        response_structure: list
+        auth: true
+        permission: "workflow:category:list"
+      - method: POST
+        path: /workflow/category/export
+        summary: 导出流程分类列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "workflow:category:export"
+      - method: GET
+        path: /workflow/category/{categoryId}
+        summary: 获取流程分类详细信息
+        response_type: R<FlowCategoryVo>
+        response_structure: single
+        auth: true
+        permission: "workflow:category:query"
+      - method: POST
+        path: /workflow/category
+        summary: 新增流程分类
+        request_body: FlowCategoryBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:category:add"
+      - method: PUT
+        path: /workflow/category
+        summary: 修改流程分类
+        request_body: FlowCategoryBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:category:edit"
+      - method: DELETE
+        path: /workflow/category/{categoryId}
+        summary: 删除流程分类
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:category:remove"
+      - method: GET
+        path: /workflow/category/categoryTree
+        summary: 获取流程分类树列表
+        response_type: R<List<Tree<String>>>
+        response_structure: list
+        auth: true
+        permission: null
+      # === /workflow/definition ===
+      - method: GET
+        path: /workflow/definition/list
+        summary: 查询流程定义列表
+        response_type: TableDataInfo<FlowDefinitionVo>
+        response_structure: page
+        auth: true
+        permission: "workflow:definition:list"
+      - method: GET
+        path: /workflow/definition/unPublishList
+        summary: 查询未发布的流程定义列表
+        response_type: TableDataInfo<FlowDefinitionVo>
+        response_structure: page
+        auth: true
+        permission: "workflow:definition:list"
+      - method: GET
+        path: /workflow/definition/{id}
+        summary: 获取流程定义详细信息
+        response_type: R<Definition>
+        response_structure: single
+        auth: true
+        permission: "workflow:definition:query"
+      - method: POST
+        path: /workflow/definition
+        summary: 新增流程定义
+        request_body: FlowDefinition
+        response_type: R<Boolean>
+        response_structure: single
+        auth: true
+        permission: "workflow:definition:add"
+      - method: PUT
+        path: /workflow/definition
+        summary: 修改流程定义
+        request_body: FlowDefinition
+        response_type: R<Boolean>
+        response_structure: single
+        auth: true
+        permission: "workflow:definition:edit"
+      - method: PUT
+        path: /workflow/definition/publish/{id}
+        summary: 发布流程定义
+        response_type: R<Boolean>
+        response_structure: single
+        auth: true
+        permission: "workflow:definition:publish"
+      - method: PUT
+        path: /workflow/definition/unPublish/{id}
+        summary: 取消发布流程定义
+        response_type: R<Boolean>
+        response_structure: single
+        auth: true
+        permission: "workflow:definition:publish"
+      - method: DELETE
+        path: /workflow/definition/{ids}
+        summary: 删除流程定义
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:definition:remove"
+      - method: POST
+        path: /workflow/definition/copy/{id}
+        summary: 复制流程定义
+        response_type: R<Boolean>
+        response_structure: single
+        auth: true
+        permission: "workflow:definition:copy"
+      - method: POST
+        path: /workflow/definition/importDef
+        summary: 导入流程定义
+        request_body: MultipartFile
+        response_type: R<Boolean>
+        response_structure: single
+        auth: true
+        permission: "workflow:definition:import"
+      - method: POST
+        path: /workflow/definition/exportDef/{id}
+        summary: 导出流程定义
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "workflow:definition:export"
+      - method: GET
+        path: /workflow/definition/xmlString/{id}
+        summary: 获取流程定义JSON字符串
+        response_type: R<String>
+        response_structure: single
+        auth: true
+        permission: "workflow:definition:query"
+      - method: PUT
+        path: /workflow/definition/active/{id}
+        summary: 激活/挂起流程定义
+        response_type: R<Boolean>
+        response_structure: single
+        auth: true
+        permission: "workflow:definition:active"
+      # === /workflow/instance ===
+      - method: GET
+        path: /workflow/instance/pageByRunning
+        summary: 查询正在运行的流程实例列表
+        response_type: TableDataInfo<FlowInstanceVo>
+        response_structure: page
+        auth: true
+        permission: "workflow:instance:list"
+      - method: GET
+        path: /workflow/instance/pageByFinish
+        summary: 查询已结束的流程实例列表
+        response_type: TableDataInfo<FlowInstanceVo>
+        response_structure: page
+        auth: true
+        permission: "workflow:instance:list"
+      - method: GET
+        path: /workflow/instance/getInfo/{businessId}
+        summary: 根据业务id查询流程实例详细信息
+        response_type: R<FlowInstanceVo>
+        response_structure: single
+        auth: true
+        permission: "workflow:instance:query"
+      - method: DELETE
+        path: /workflow/instance/deleteByBusinessIds/{businessIds}
+        summary: 按照业务id删除流程实例
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:instance:remove"
+      - method: DELETE
+        path: /workflow/instance/deleteByInstanceIds/{instanceIds}
+        summary: 按照实例id删除流程实例
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:instance:remove"
+      - method: DELETE
+        path: /workflow/instance/deleteHisByInstanceIds/{instanceIds}
+        summary: 按照实例id删除已完成流程实例
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:instance:remove"
+      - method: PUT
+        path: /workflow/instance/cancelProcessApply
+        summary: 撤销流程
+        request_body: FlowCancelBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:instance:cancel"
+      - method: PUT
+        path: /workflow/instance/active/{id}
+        summary: 激活/挂起流程实例
+        response_type: R<Boolean>
+        response_structure: single
+        auth: true
+        permission: "workflow:instance:active"
+      - method: GET
+        path: /workflow/instance/pageByCurrent
+        summary: 获取当前登陆人发起的流程实例
+        response_type: TableDataInfo<FlowInstanceVo>
+        response_structure: page
+        auth: true
+        permission: "workflow:instance:currentList"
+      - method: GET
+        path: /workflow/instance/flowHisTaskList/{businessId}
+        summary: 获取流程图和流程记录
+        response_type: R<Map<String,Object>>
+        response_structure: single
+        auth: true
+        permission: "workflow:instance:query"
+      - method: GET
+        path: /workflow/instance/instanceVariable/{instanceId}
+        summary: 获取流程变量
+        response_type: R<Map<String,Object>>
+        response_structure: single
+        auth: true
+        permission: "workflow:instance:variableQuery"
+      - method: PUT
+        path: /workflow/instance/updateVariable
+        summary: 修改流程变量
+        request_body: FlowVariableBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:instance:variable"
+      - method: POST
+        path: /workflow/instance/invalid
+        summary: 作废流程
+        request_body: FlowInvalidBo
+        response_type: R<Boolean>
+        response_structure: single
+        auth: true
+        permission: "workflow:instance:invalid"
+      # === /workflow/task ===
+      - method: POST
+        path: /workflow/task/startWorkFlow
+        summary: 启动任务
+        request_body: StartProcessBo
+        response_type: R<StartProcessReturnDTO>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: POST
+        path: /workflow/task/completeTask
+        summary: 办理任务
+        request_body: CompleteTaskBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: GET
+        path: /workflow/task/pageByTaskWait
+        summary: 查询当前用户的待办任务
+        response_type: TableDataInfo<FlowTaskVo>
+        response_structure: page
+        auth: true
+        permission: null
+      - method: GET
+        path: /workflow/task/pageByTaskFinish
+        summary: 查询当前用户的已办任务
+        response_type: TableDataInfo<FlowHisTaskVo>
+        response_structure: page
+        auth: true
+        permission: null
+      - method: GET
+        path: /workflow/task/pageByAllTaskWait
+        summary: 查询所有待办任务
+        response_type: TableDataInfo<FlowTaskVo>
+        response_structure: page
+        auth: true
+        permission: "workflow:task:list"
+      - method: GET
+        path: /workflow/task/pageByAllTaskFinish
+        summary: 查询所有已办任务
+        response_type: TableDataInfo<FlowHisTaskVo>
+        response_structure: page
+        auth: true
+        permission: "workflow:task:list"
+      - method: GET
+        path: /workflow/task/pageByTaskCopy
+        summary: 查询当前用户的抄送
+        response_type: TableDataInfo<FlowTaskVo>
+        response_structure: page
+        auth: true
+        permission: null
+      - method: GET
+        path: /workflow/task/getTask/{taskId}
+        summary: 根据taskId查询任务
+        response_type: R<FlowTaskVo>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: POST
+        path: /workflow/task/getNextNodeList
+        summary: 获取下一节点信息
+        request_body: FlowNextNodeBo
+        response_type: R<List<FlowNode>>
+        response_structure: list
+        auth: true
+        permission: null
+      - method: POST
+        path: /workflow/task/terminationTask
+        summary: 终止任务
+        request_body: FlowTerminationBo
+        response_type: R<Boolean>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: POST
+        path: /workflow/task/taskOperation/{taskOperation}
+        summary: 任务操作（委派/转办/加签/减签）
+        request_body: TaskOperationBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: PUT
+        path: /workflow/task/updateAssignee/{userId}
+        summary: 修改任务办理人
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:task:edit"
+      - method: POST
+        path: /workflow/task/backProcess
+        summary: 驳回审批
+        request_body: BackProcessBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+      - method: GET
+        path: /workflow/task/getBackTaskNode/{taskId}/{nowNodeCode}
+        summary: 获取可驳回的前置节点
+        response_type: R<List<Node>>
+        response_structure: list
+        auth: true
+        permission: null
+      - method: GET
+        path: /workflow/task/currentTaskAllUser/{taskId}
+        summary: 获取当前任务的所有办理人
+        response_type: R<List<UserDTO>>
+        response_structure: list
+        auth: true
+        permission: null
+      - method: POST
+        path: /workflow/task/urgeTask
+        summary: 催办任务
+        request_body: FlowUrgeTaskBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:task:edit"
+      - method: POST
+        path: /workflow/task/copyTask
+        summary: 流程任务抄送
+        request_body: FlowCopyBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: null
+      # === /workflow/spel ===
+      - method: GET
+        path: /workflow/spel/list
+        summary: 查询流程spel表达式定义列表
+        response_type: TableDataInfo<FlowSpelVo>
+        response_structure: page
+        auth: true
+        permission: "workflow:spel:list"
+      - method: GET
+        path: /workflow/spel/{id}
+        summary: 获取流程spel表达式定义详细信息
+        response_type: R<FlowSpelVo>
+        response_structure: single
+        auth: true
+        permission: "workflow:spel:query"
+      - method: POST
+        path: /workflow/spel
+        summary: 新增流程spel表达式定义
+        request_body: FlowSpelBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:spel:add"
+      - method: PUT
+        path: /workflow/spel
+        summary: 修改流程spel表达式定义
+        request_body: FlowSpelBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:spel:edit"
+      - method: DELETE
+        path: /workflow/spel/{ids}
+        summary: 删除流程spel表达式定义
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:spel:remove"
+      # === /workflow/leave ===
+      - method: GET
+        path: /workflow/leave/list
+        summary: 查询请假列表
+        response_type: TableDataInfo<TestLeaveVo>
+        response_structure: page
+        auth: true
+        permission: "workflow:leave:list"
+      - method: POST
+        path: /workflow/leave/export
+        summary: 导出请假列表
+        response_type: void (文件下载)
+        response_structure: file
+        auth: true
+        permission: "workflow:leave:export"
+      - method: GET
+        path: /workflow/leave/{id}
+        summary: 获取请假详细信息
+        response_type: R<TestLeaveVo>
+        response_structure: single
+        auth: true
+        permission: "workflow:leave:query"
+      - method: POST
+        path: /workflow/leave
+        summary: 新增请假
+        request_body: TestLeaveBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:leave:add"
+      - method: POST
+        path: /workflow/leave/submitAndFlowStart
+        summary: 提交并启动流程
+        request_body: TestLeaveBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:leave:add"
+      - method: PUT
+        path: /workflow/leave
+        summary: 修改请假
+        request_body: TestLeaveBo
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:leave:edit"
+      - method: DELETE
+        path: /workflow/leave/{ids}
+        summary: 删除请假
+        response_type: R<Void>
+        response_structure: single
+        auth: true
+        permission: "workflow:leave:remove"
+    split_plan:
+      - part: 1
+        file: "05-工作流管理-part1.md"
+        description: "流程分类 + 流程定义"
+        route_prefixes: ["/workflow/category", "/workflow/definition"]
+        interface_count: 20
+      - part: 2
+        file: "05-工作流管理-part2.md"
+        description: "流程实例 + Spel表达式"
+        route_prefixes: ["/workflow/instance", "/workflow/spel"]
+        interface_count: 18
+      - part: 3
+        file: "05-工作流管理-part3.md"
+        description: "任务管理 + 请假示例"
+        route_prefixes: ["/workflow/task", "/workflow/leave"]
+        interface_count: 24

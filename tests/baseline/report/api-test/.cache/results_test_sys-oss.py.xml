@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="20" time="4.932" timestamp="2026-07-14T14:10:53.549203+08:00" hostname="旅行者"><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_001" time="1.246" /><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_002" time="0.114" /><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_003" time="0.338" /><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_004" time="0.022"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 404&#10;assert 404 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/resource/oss/listByIds/&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 404,&#10;  &quot;msg&quot;: &quot;请求地址不存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_sys-oss.py:67: in test_TC_OSS_004
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 404
+E   assert 404 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/resource/oss/listByIds/
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 404,
+E     "msg": "请求地址不存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_005" time="0.028"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/resource/oss/upload&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_sys-oss.py:74: in test_TC_OSS_005
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/resource/oss/upload
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_006" time="0.018" /><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_007" time="0.373"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/resource/oss/1&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_sys-oss.py:88: in test_TC_OSS_007
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/resource/oss/1
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_008" time="0.026"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 404&#10;assert 404 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/resource/oss/&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 404,&#10;  &quot;msg&quot;: &quot;请求地址不存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_sys-oss.py:95: in test_TC_OSS_008
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 404
+E   assert 404 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/resource/oss/
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 404,
+E     "msg": "请求地址不存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_009" time="0.233" /><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_010" time="0.110" /><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_011" time="0.190" /><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_012" time="0.114" /><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_013" time="0.243"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/resource/oss/config&#10;  请求体: {&#10;  &quot;configKey&quot;: &quot;test-minio-001&quot;,&#10;  &quot;accessKey&quot;: &quot;testAccessKey&quot;,&#10;  &quot;secretKey&quot;: &quot;testSecretKey&quot;,&#10;  &quot;bucketName&quot;: &quot;test-bucket&quot;,&#10;  &quot;prefix&quot;: &quot;test/&quot;,&#10;  &quot;endpoint&quot;: &quot;http://test-oss:9000&quot;,&#10;  &quot;domain&quot;: &quot;https://test-oss.example.com&quot;,&#10;  &quot;isHttps&quot;: &quot;N&quot;,&#10;  &quot;status&quot;: &quot;1&quot;,&#10;  &quot;region&quot;: &quot;cn-north-1&quot;,&#10;  &quot;ext1&quot;: &quot;&quot;,&#10;  &quot;remark&quot;: &quot;测试用配置&quot;,&#10;  &quot;accessPolicy&quot;: &quot;1&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作配置'test-minio-001'失败, 配置key已存在!&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_sys-oss.py:130: in test_TC_OSS_013
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/resource/oss/config
+E     请求体: {
+E     "configKey": "test-minio-001",
+E     "accessKey": "testAccessKey",
+E     "secretKey": "testSecretKey",
+E     "bucketName": "test-bucket",
+E     "prefix": "test/",
+E     "endpoint": "http://test-oss:9000",
+E     "domain": "https://test-oss.example.com",
+E     "isHttps": "N",
+E     "status": "1",
+E     "region": "cn-north-1",
+E     "ext1": "",
+E     "remark": "测试用配置",
+E     "accessPolicy": "1"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作配置'test-minio-001'失败, 配置key已存在!",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_014" time="0.094" /><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_015" time="0.371" /><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_016" time="0.125" /><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_017" time="0.447" /><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_018" time="0.457"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/resource/oss/config/changeStatus&#10;  请求体: {&#10;  &quot;ossConfigId&quot;: 99999,&#10;  &quot;configKey&quot;: &quot;nonexistent&quot;,&#10;  &quot;status&quot;: &quot;0&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;操作成功&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_sys-oss.py:165: in test_TC_OSS_018
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/resource/oss/config/changeStatus
+E     请求体: {
+E     "ossConfigId": 99999,
+E     "configKey": "nonexistent",
+E     "status": "0"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "操作成功",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_019" time="0.120"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/resource/oss/config/2&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;系统内置, 不可删除!&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_sys-oss.py:172: in test_TC_OSS_019
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/resource/oss/config/2
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "系统内置, 不可删除!",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_sys-oss" name="test_TC_OSS_020" time="0.020"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 404&#10;assert 404 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/resource/oss/config/&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 404,&#10;  &quot;msg&quot;: &quot;请求地址不存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_sys-oss.py:179: in test_TC_OSS_020
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 404
+E   assert 404 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/resource/oss/config/
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 404,
+E     "msg": "请求地址不存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase></testsuite></testsuites>

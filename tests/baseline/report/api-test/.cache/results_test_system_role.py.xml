@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="28" time="8.694" timestamp="2026-07-14T14:11:48.592487+08:00" hostname="旅行者"><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_001" time="1.462" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_002" time="0.242"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/role/list&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;total&quot;: 15,&#10;  &quot;rows&quot;: [&#10;    {&#10;      &quot;roleId&quot;: 1,&#10;      &quot;roleName&quot;: &quot;超级管理员&quot;,&#10;      &quot;roleKey&quot;: &quot;superadmin&quot;,&#10;      &quot;roleSort&quot;: 1,&#10;      &quot;dataScope&quot;: &quot;1&quot;,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;deptCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: &quot;超级管理员&quot;,&#10;      &quot;createTime&quot;: &quot;2026-06-26 14:32:24&quot;,&#10;      &quot;flag&quot;: false,&#10;      &quot;superAdmin&quot;: true&#10;    },&#10;    {&#10;      &quot;roleId&quot;: &quot;2071851225159593986&quot;,&#10;      &quot;roleName&quot;: &quot;测试角色_1782802799349&quot;,&#10;      &quot;roleKey&quot;: &quot;test_role_1782802799349&quot;,&#10;      &quot;roleSort&quot;: 1,&#10;      &quot;dataScope&quot;: &quot;1&quot;,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;deptCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;createTime&quot;: &quot;2026-06-30 15:00:00&quot;,&#10;      &quot;flag&quot;: false,&#10;      &quot;superAdmin&quot;: false&#10;    },&#10;    {&#10;      &quot;roleId&quot;: &quot;2071851232629649409&quot;,&#10;      &quot;roleName&quot;: &quot;测试角色_1782802800999&quot;,&#10;      &quot;roleKey&quot;: &quot;test_role_1782802800999&quot;,&#10;      &quot;roleSort&quot;: 1,&#10;      &quot;dataScope&quot;: &quot;1&quot;,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;deptCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;createTime&quot;: &quot;2026-06-30 15:00:02&quot;,&#10;      &quot;flag&quot;: false,&#10;      &quot;superAdmin&quot;: false&#10;    },&#10;    {&#10;      &quot;roleId&quot;: &quot;2071851238187102210&quot;,&#10;      &quot;roleName&quot;: &quot;测试角色_1782802802518&quot;,&#10;      &quot;roleKey&quot;: &quot;test_role_1782802802518&quot;,&#10;      &quot;roleSort&quot;: 1,&#10;      &quot;dataScope&quot;: &quot;1&quot;,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;deptCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;createTime&quot;: &quot;2026-06-30 15:00:03&quot;,&#10;      &quot;flag&quot;: false,&#10;      &quot;superAdmin&quot;: false&#10;    },&#10;    {&#10;      &quot;roleId&quot;: &quot;2071851245065760769&quot;,&#10;      &quot;roleName&quot;: &quot;测试角色_1782802804064&quot;,&#10;      &quot;roleKey&quot;: &quot;test_role_1782802804064&quot;,&#10;      &quot;roleSort&quot;: 1,&#10;      &quot;dataScope&quot;: &quot;1&quot;,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;deptCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;createTime&quot;: &quot;2026-06-30 15:00:05&quot;,&#10;      &quot;flag&quot;: false,&#10;      &quot;superAdmin&quot;: false&#10;    },&#10;    {&#10;      &quot;roleId&quot;: &quot;2072240485738029058&quot;,&#10;      &quot;roleName&quot;: &quot;测试角色_1782895606525&quot;,&#10;      &quot;roleKey&quot;: &quot;test_role_1782895606525&quot;,&#10;      &quot;roleSort&quot;: 1,&#10;      &quot;dataScope&quot;: &quot;1&quot;,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;deptCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;createTime&quot;: &quot;2026-07-01 16:46:47&quot;,&#10;      &quot;flag&quot;: false,&#10;      &quot;superAdmin&quot;: false&#10;    },&#10;    {&#10;      &quot;roleId&quot;: &quot;2072240489001197569&quot;,&#10;      &quot;roleName&quot;: &quot;测试角色_1782895607318&quot;,&#10;      &quot;roleKey&quot;: &quot;test_role_1782895607318&quot;,&#10;      &quot;roleSort&quot;: 1,&#10;      &quot;dataScope&quot;: &quot;1&quot;,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;deptCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;createTime&quot;: &quot;2026-07-01 16:46:48&quot;,&#10;      &quot;flag&quot;: false,&#10;      &quot;superAdmin&quot;: false&#10;    },&#10;    {&#10;      &quot;roleId&quot;: &quot;2072240492536995841&quot;,&#10;      &quot;roleName&quot;: &quot;测试角色_1782895608169&quot;,&#10;      &quot;roleKey&quot;: &quot;test_role_1782895608169&quot;,&#10;      &quot;roleSort&quot;: 1,&#10;      &quot;dataScope&quot;: &quot;1&quot;,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;deptCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: null,&#10;      &quot;createTime&quot;: &quot;2026-07-01 16:46:48&quot;,&#10;      &quot;flag&quot;: false,&#10;      &quot;superAdmin&quot;: false&#10;    },&#10;    {&#10;      &quot;roleId&quot;: 3,&#10;      &quot;roleName&quot;: &quot;本部门及以下&quot;,&#10;      &quot;roleKey&quot;: &quot;test1&quot;,&#10;      &quot;roleSort&quot;: 3,&#10;      &quot;dataScope&quot;: &quot;4&quot;,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;deptCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: &quot;&quot;,&#10;      &quot;createTime&quot;: &quot;2026-06-26 14:32:24&quot;,&#10;      &quot;flag&quot;: false,&#10;      &quot;superAdmin&quot;: false&#10;    },&#10;    {&#10;      &quot;roleId&quot;: 4,&#10;      &quot;roleName&quot;: &quot;仅本人&quot;,&#10;      &quot;roleKey&quot;: &quot;test2&quot;,&#10;      &quot;roleSort&quot;: 4,&#10;      &quot;dataScope&quot;: &quot;5&quot;,&#10;      &quot;menuCheckStrictly&quot;: true,&#10;      &quot;deptCheckStrictly&quot;: true,&#10;      &quot;status&quot;: &quot;0&quot;,&#10;      &quot;remark&quot;: &quot;&quot;,&#10;      &quot;createTime&quot;: &quot;2026-06-26 14:32:24&quot;,&#10;      &quot;flag&quot;: false,&#10;      &quot;superAdmin&quot;: false&#10;    }&#10;  ],&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;查询成功&quot;&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system_role.py:53: in test_TC_ROLE_002
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/role/list
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "total": 15,
+E     "rows": [
+E       {
+E         "roleId": 1,
+E         "roleName": "超级管理员",
+E         "roleKey": "superadmin",
+E         "roleSort": 1,
+E         "dataScope": "1",
+E         "menuCheckStrictly": true,
+E         "deptCheckStrictly": true,
+E         "status": "0",
+E         "remark": "超级管理员",
+E         "createTime": "2026-06-26 14:32:24",
+E         "flag": false,
+E         "superAdmin": true
+E       },
+E       {
+E         "roleId": "2071851225159593986",
+E         "roleName": "测试角色_1782802799349",
+E         "roleKey": "test_role_1782802799349",
+E         "roleSort": 1,
+E         "dataScope": "1",
+E         "menuCheckStrictly": true,
+E         "deptCheckStrictly": true,
+E         "status": "0",
+E         "remark": null,
+E         "createTime": "2026-06-30 15:00:00",
+E         "flag": false,
+E         "superAdmin": false
+E       },
+E       {
+E         "roleId": "2071851232629649409",
+E         "roleName": "测试角色_1782802800999",
+E         "roleKey": "test_role_1782802800999",
+E         "roleSort": 1,
+E         "dataScope": "1",
+E         "menuCheckStrictly": true,
+E         "deptCheckStrictly": true,
+E         "status": "0",
+E         "remark": null,
+E         "createTime": "2026-06-30 15:00:02",
+E         "flag": false,
+E         "superAdmin": false
+E       },
+E       {
+E         "roleId": "2071851238187102210",
+E         "roleName": "测试角色_1782802802518",
+E         "roleKey": "test_role_1782802802518",
+E         "roleSort": 1,
+E         "dataScope": "1",
+E         "menuCheckStrictly": true,
+E         "deptCheckStrictly": true,
+E         "status": "0",
+E         "remark": null,
+E         "createTime": "2026-06-30 15:00:03",
+E         "flag": false,
+E         "superAdmin": false
+E       },
+E       {
+E         "roleId": "2071851245065760769",
+E         "roleName": "测试角色_1782802804064",
+E         "roleKey": "test_role_1782802804064",
+E         "roleSort": 1,
+E         "dataScope": "1",
+E         "menuCheckStrictly": true,
+E         "deptCheckStrictly": true,
+E         "status": "0",
+E         "remark": null,
+E         "createTime": "2026-06-30 15:00:05",
+E         "flag": false,
+E         "superAdmin": false
+E       },
+E       {
+E         "roleId": "2072240485738029058",
+E         "roleName": "测试角色_1782895606525",
+E         "roleKey": "test_role_1782895606525",
+E         "roleSort": 1,
+E         "dataScope": "1",
+E         "menuCheckStrictly": true,
+E         "deptCheckStrictly": true,
+E         "status": "0",
+E         "remark": null,
+E         "createTime": "2026-07-01 16:46:47",
+E         "flag": false,
+E         "superAdmin": false
+E       },
+E       {
+E         "roleId": "2072240489001197569",
+E         "roleName": "测试角色_1782895607318",
+E         "roleKey": "test_role_1782895607318",
+E         "roleSort": 1,
+E         "dataScope": "1",
+E         "menuCheckStrictly": true,
+E         "deptCheckStrictly": true,
+E         "status": "0",
+E         "remark": null,
+E         "createTime": "2026-07-01 16:46:48",
+E         "flag": false,
+E         "superAdmin": false
+E       },
+E       {
+E         "roleId": "2072240492536995841",
+E         "roleName": "测试角色_1782895608169",
+E         "roleKey": "test_role_1782895608169",
+E         "roleSort": 1,
+E         "dataScope": "1",
+E         "menuCheckStrictly": true,
+E         "deptCheckStrictly": true,
+E         "status": "0",
+E         "remark": null,
+E         "createTime": "2026-07-01 16:46:48",
+E         "flag": false,
+E         "superAdmin": false
+E       },
+E       {
+E         "roleId": 3,
+E         "roleName": "本部门及以下",
+E         "roleKey": "test1",
+E         "roleSort": 3,
+E         "dataScope": "4",
+E         "menuCheckStrictly": true,
+E         "deptCheckStrictly": true,
+E         "status": "0",
+E         "remark": "",
+E         "createTime": "2026-06-26 14:32:24",
+E         "flag": false,
+E         "superAdmin": false
+E       },
+E       {
+E         "roleId": 4,
+E         "roleName": "仅本人",
+E         "roleKey": "test2",
+E         "roleSort": 4,
+E         "dataScope": "5",
+E         "menuCheckStrictly": true,
+E         "deptCheckStrictly": true,
+E         "status": "0",
+E         "remark": "",
+E         "createTime": "2026-06-26 14:32:24",
+E         "flag": false,
+E         "superAdmin": false
+E       }
+E     ],
+E     "code": 200,
+E     "msg": "查询成功"
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_003" time="0.204" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_004" time="0.185" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_005" time="0.492"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/system/role&#10;  请求体: {&#10;  &quot;roleName&quot;: &quot;自动化测试角色&quot;,&#10;  &quot;roleKey&quot;: &quot;auto_test_role&quot;,&#10;  &quot;roleSort&quot;: 99,&#10;  &quot;status&quot;: &quot;0&quot;,&#10;  &quot;menuCheckStrictly&quot;: false,&#10;  &quot;deptCheckStrictly&quot;: false,&#10;  &quot;remark&quot;: &quot;自动化测试用角色&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system_role.py:74: in test_TC_ROLE_005
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/system/role
+E     请求体: {
+E     "roleName": "自动化测试角色",
+E     "roleKey": "auto_test_role",
+E     "roleSort": 99,
+E     "status": "0",
+E     "menuCheckStrictly": false,
+E     "deptCheckStrictly": false,
+E     "remark": "自动化测试用角色"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_006" time="0.244" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_007" time="0.243"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/system/role&#10;  请求体: {&#10;  &quot;roleId&quot;: 2,&#10;  &quot;roleName&quot;: &quot;普通角色_测试修改&quot;,&#10;  &quot;roleKey&quot;: &quot;common_test_edit&quot;,&#10;  &quot;roleSort&quot;: 2,&#10;  &quot;status&quot;: &quot;0&quot;,&#10;  &quot;menuCheckStrictly&quot;: false,&#10;  &quot;deptCheckStrictly&quot;: false,&#10;  &quot;remark&quot;: &quot;测试修改后的角色&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system_role.py:88: in test_TC_ROLE_007
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/system/role
+E     请求体: {
+E     "roleId": 2,
+E     "roleName": "普通角色_测试修改",
+E     "roleKey": "common_test_edit",
+E     "roleSort": 2,
+E     "status": "0",
+E     "menuCheckStrictly": false,
+E     "deptCheckStrictly": false,
+E     "remark": "测试修改后的角色"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_008" time="0.171" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_009" time="0.242"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/system/role/dataScope&#10;  请求体: {&#10;  &quot;roleId&quot;: 2,&#10;  &quot;dataScope&quot;: &quot;2&quot;,&#10;  &quot;deptIds&quot;: [&#10;    100,&#10;    101&#10;  ]&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system_role.py:102: in test_TC_ROLE_009
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/system/role/dataScope
+E     请求体: {
+E     "roleId": 2,
+E     "dataScope": "2",
+E     "deptIds": [
+E       100,
+E       101
+E     ]
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_010" time="0.181" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_011" time="0.244"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/system/role/changeStatus&#10;  请求体: {&#10;  &quot;roleId&quot;: 2,&#10;  &quot;status&quot;: &quot;0&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system_role.py:116: in test_TC_ROLE_011
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/system/role/changeStatus
+E     请求体: {
+E     "roleId": 2,
+E     "status": "0"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_012" time="0.184" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_013" time="0.397"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/system/role/3&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;本部门及以下已分配，不能删除!&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system_role.py:130: in test_TC_ROLE_013
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/system/role/3
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "本部门及以下已分配，不能删除!",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_014" time="0.291" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_015" time="0.194" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_016" time="0.179" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_017" time="0.230" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_018" time="0.198" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_019" time="0.338" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_020" time="0.272" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_021" time="0.491" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_022" time="0.173" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_023" time="0.313"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/system/role/authUser/cancelAll&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system_role.py:200: in test_TC_ROLE_023
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/system/role/authUser/cancelAll
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_024" time="0.215" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_025" time="0.333" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_026" time="0.182" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_027" time="0.312" /><testcase classname="tests.baseline.generated.api-test.test_system_role" name="test_TC_ROLE_028" time="0.223"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/role/deptTree/99999&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system_role.py:235: in test_TC_ROLE_028
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/role/deptTree/99999
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase></testsuite></testsuites>

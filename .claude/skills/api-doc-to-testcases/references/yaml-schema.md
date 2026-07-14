@@ -25,7 +25,7 @@
 ```yaml
 global_variables:
   default_page_size: 10
-  default_tenant_id: "000000"
+  default_id: "000000"
 ```
 
 - key 为合法标识符（字母/数字/下划线）
@@ -61,8 +61,8 @@ headers_config:
   auth_headers:
     - name: "Authorization"
       value: "${auth.token_prefix} ${auth.token}"
-    - name: "clientid"
-      value: "${auth.params.admin.client_id}"
+    - name: "xx"
+      value: "${auth.params.admin.xx}"
 ```
 
 > **禁止**在 `request.headers` 中手写此处已声明的头。
@@ -96,18 +96,16 @@ Token 前缀，无则填空字符串 `""`。示例：`"Bearer "`（注意尾部�
 
 ### `auth_setup.params`
 
-其他认证参数（如 clientId、tenantId 等），格式灵活，与 `auth_headers` 中的引用对齐。
+其他认证参数，格式灵活，与 `auth_headers` 中的引用对齐。
 
 ```yaml
 params:
   admin:
-    client_id: "e5cd7e4891bf95d1d19206ce24a7b32e"
-    tenant_id: "000000"
+    param_key: "<value>"
 ```
-
 - 结构可自定义，不强制 `params.admin.xx`
-- direct `params.xx` 也是合法的（如 `params.client_id`）
-- 引用时写全路径：`${auth.params.admin.client_id}` 或 `${auth.params.client_id}`
+- direct `params.xx` 也是合法的（如 `params.param_key`）
+- 引用时写全路径：`${auth.params.admin.param_key}` 或 `${auth.params.param_key}`
 
 ### `auth_setup.accounts`
 
@@ -123,16 +121,15 @@ accounts:
     password: "666666"
 ```
 
-每个账号至少包含登录所需字段（通常为 `username` + `password`）。可扩展更多字段（如 `clientId`）供 `auth_headers` 引用。
+每个账号至少包含登录所需字段（通常为 `username` + `password`）。可扩展更多字段`供 `auth_headers` 引用。
 
 ### `auth_setup.extracts`
 
-从登录响应中提取的变量，供 `auth_headers` 通过 `${auth.xxx}` 引用。字段名必须使用 **JSON key**（从 auth-analysis.md 的 LoginVo 表确认）。
+从登录响应中提取的变量，供 `auth_headers` 通过 `${auth.xxx}` 引用。字段名必须使用 **JSON key**（从登录响应体实体文档的「注解转义说明」表或「字段定义」表的「JSON 键名」列确认）。
 
 ```yaml
 extracts:
-  token: "$.data.access_token"       # JSON key 是 access_token，不是 accessToken
-  refresh_token: "$.data.refresh_token"
+  token: "$.data.<json_key>"       # 用响应体实体的 JSON 键名，不是 Java 字段名
 ```
 
 **跳过规则**：`extracts` 中定义的变量，引用时写 `${auth.变量名}`，**跳过 `extracts` 层级**。

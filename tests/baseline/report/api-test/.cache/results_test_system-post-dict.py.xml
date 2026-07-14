@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="40" time="10.041" timestamp="2026-07-14T14:11:28.442231+08:00" hostname="旅行者"><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_001" time="1.844" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_002" time="0.111" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_003" time="0.183" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_004" time="0.183"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/post/99999&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;操作成功&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-post-dict.py:67: in test_TC_POST_004
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/post/99999
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "操作成功",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_005" time="0.259"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/system/post&#10;  请求体: {&#10;  &quot;deptId&quot;: 103,&#10;  &quot;postCode&quot;: &quot;test_post_auto&quot;,&#10;  &quot;postName&quot;: &quot;测试岗位&quot;,&#10;  &quot;postCategory&quot;: &quot;tech&quot;,&#10;  &quot;postSort&quot;: 99,&#10;  &quot;status&quot;: &quot;0&quot;,&#10;  &quot;remark&quot;: &quot;自动化测试新增的岗位&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;新增岗位'测试岗位'失败，岗位名称已存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-post-dict.py:74: in test_TC_POST_005
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/system/post
+E     请求体: {
+E     "deptId": 103,
+E     "postCode": "test_post_auto",
+E     "postName": "测试岗位",
+E     "postCategory": "tech",
+E     "postSort": 99,
+E     "status": "0",
+E     "remark": "自动化测试新增的岗位"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "新增岗位'测试岗位'失败，岗位名称已存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_006" time="0.118" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_007" time="0.338" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_008" time="0.119" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_009" time="0.247"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/system/post/5&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-post-dict.py:102: in test_TC_POST_009
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/system/post/5
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_010" time="0.129" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_011" time="0.199" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_012" time="0.187" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_013" time="0.192" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_014" time="0.184" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_015" time="0.227" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_016" time="0.115" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_017" time="0.175" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_018" time="0.186"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/dict/type/99999&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;操作成功&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-post-dict.py:165: in test_TC_POST_018
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/dict/type/99999
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "操作成功",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_019" time="0.242"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/system/dict/type&#10;  请求体: {&#10;  &quot;dictName&quot;: &quot;测试字典类型&quot;,&#10;  &quot;dictType&quot;: &quot;test_dict_type&quot;,&#10;  &quot;remark&quot;: &quot;自动化测试新增的字典类型&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;新增字典'测试字典类型'失败，字典类型已存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-post-dict.py:172: in test_TC_POST_019
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/system/dict/type
+E     请求体: {
+E     "dictName": "测试字典类型",
+E     "dictType": "test_dict_type",
+E     "remark": "自动化测试新增的字典类型"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "新增字典'测试字典类型'失败，字典类型已存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_020" time="0.120" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_021" time="0.658" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_022" time="0.151" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_023" time="0.291" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_024" time="0.114" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_025" time="0.329" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_026" time="0.327" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_027" time="0.212" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_028" time="0.178" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_029" time="0.204" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_030" time="0.114" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_031" time="0.175" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_032" time="0.170"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/system/dict/data/99999&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;操作成功&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-post-dict.py:263: in test_TC_POST_032
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/system/dict/data/99999
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "操作成功",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_033" time="0.234" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_034" time="0.216" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_035" time="0.246"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/system/dict/data&#10;  请求体: {&#10;  &quot;dictSort&quot;: 99,&#10;  &quot;dictLabel&quot;: &quot;测试值&quot;,&#10;  &quot;dictValue&quot;: &quot;test_val&quot;,&#10;  &quot;dictType&quot;: &quot;sys_user_sex&quot;,&#10;  &quot;cssClass&quot;: &quot;&quot;,&#10;  &quot;listClass&quot;: &quot;default&quot;,&#10;  &quot;isDefault&quot;: &quot;N&quot;,&#10;  &quot;remark&quot;: &quot;自动化测试新增的字典数据&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;新增字典数据'test_val'失败，字典键值已存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-post-dict.py:284: in test_TC_POST_035
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/system/dict/data
+E     请求体: {
+E     "dictSort": 99,
+E     "dictLabel": "测试值",
+E     "dictValue": "test_val",
+E     "dictType": "sys_user_sex",
+E     "cssClass": "",
+E     "listClass": "default",
+E     "isDefault": "N",
+E     "remark": "自动化测试新增的字典数据"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "新增字典数据'test_val'失败，字典键值已存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_036" time="0.114" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_037" time="0.231"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/system/dict/data&#10;  请求体: {&#10;  &quot;dictCode&quot;: 1,&#10;  &quot;dictSort&quot;: 0,&#10;  &quot;dictLabel&quot;: &quot;男&quot;,&#10;  &quot;dictValue&quot;: &quot;0&quot;,&#10;  &quot;dictType&quot;: &quot;sys_user_sex&quot;,&#10;  &quot;cssClass&quot;: &quot;&quot;,&#10;  &quot;listClass&quot;: &quot;success&quot;,&#10;  &quot;isDefault&quot;: &quot;N&quot;,&#10;  &quot;remark&quot;: &quot;更新后的备注&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;修改字典数据'0'失败，字典键值已存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_system-post-dict.py:298: in test_TC_POST_037
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/system/dict/data
+E     请求体: {
+E     "dictCode": 1,
+E     "dictSort": 0,
+E     "dictLabel": "男",
+E     "dictValue": "0",
+E     "dictType": "sys_user_sex",
+E     "cssClass": "",
+E     "listClass": "success",
+E     "isDefault": "N",
+E     "remark": "更新后的备注"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "修改字典数据'0'失败，字典键值已存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_038" time="0.112" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_039" time="0.234" /><testcase classname="tests.baseline.generated.api-test.test_system-post-dict" name="test_TC_POST_040" time="0.091" /></testsuite></testsuites>

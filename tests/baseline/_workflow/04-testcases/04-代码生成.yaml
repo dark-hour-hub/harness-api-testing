@@ -1,0 +1,474 @@
+module: gen
+module_name: 代码生成
+base_url: http://localhost:8080
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+  - name: Content-Type
+    value: application/json
+  auth_headers:
+  - name: Authorization
+    value: ${auth.token_prefix} ${auth.token}
+  - name: clientid
+    value: ${auth.params.admin.clientId}
+auth_setup:
+  type: bearer_token
+  login_endpoint: /auth/login
+  token_prefix: 'Bearer '
+  params:
+    admin:
+      clientId: e5cd7e4891bf95d1d19206ce24a7b32e
+      grantType: password
+      tenantId: '000000'
+    test:
+      clientId: e5cd7e4891bf95d1d19206ce24a7b32e
+      grantType: password
+      tenantId: '000000'
+  accounts:
+    admin:
+      username: admin
+      password: admin123
+    test:
+      username: test
+      password: '666666'
+  extracts:
+    token: $.data.access_token
+testcases:
+- id: TC_GEN_001
+  title: GET /tool/gen/list_分页查询已导入表配置_返回代码生成列表
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  - 冒烟
+  method: GET
+  path: /tool/gen/list
+  description: 使用admin账号分页查询已导入的代码生成配置列表，验证返回正确的分页数据和代码生成表配置信息。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - total
+    - rows
+- id: TC_GEN_002
+  title: GET /tool/gen/list_传入非法排序参数_返回排序参数有误
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /tool/gen/list
+  description: 传入非法的排序参数验证系统返回业务错误码500并提示排序参数有误。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+      orderByColumn: nonExistentColumn
+      isAsc: invalid
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_GEN_003
+  title: GET /tool/gen/{tableId}_查询已导入表配置详情_返回表信息和字段列表
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: GET
+  path: /tool/gen/{tableId}
+  description: 传入有效tableId查询代码生成业务详情，验证返回表配置信息(info)、字段列表(rows)和全部表信息(tables)。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tableId: 1
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - info
+    - rows
+    - tables
+- id: TC_GEN_004
+  title: GET /tool/gen/{tableId}_传入不存在的tableId_返回未知异常
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /tool/gen/{tableId}
+  description: 传入数据库中不存在的tableId查询代码生成业务详情，验证系统返回业务错误码500并提示发生未知异常。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tableId: 99999
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_GEN_005
+  title: GET /tool/gen/db/list_分页查询未导入数据库表_返回数据库表列表
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  - 冒烟
+  method: GET
+  path: /tool/gen/db/list
+  description: 使用admin账号分页查询数据库中尚未导入代码生成配置的表列表，验证返回正确的分页数据及表基本信息。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - total
+    - rows
+- id: TC_GEN_006
+  title: GET /tool/gen/db/list_传入非法排序参数_返回排序参数有误
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /tool/gen/db/list
+  description: 传入非法的排序参数验证系统返回业务错误码500并提示排序参数有误。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      pageNum: 1
+      pageSize: 10
+      orderByColumn: nonExistentColumn
+      isAsc: invalid
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_GEN_007
+  title: GET /tool/gen/column/{tableId}_查询表字段列表_返回字段配置信息
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: GET
+  path: /tool/gen/column/{tableId}
+  description: 传入有效tableId查询该表的字段列配置信息，验证返回正确的分页数据及字段详细信息（列名、Java类型、控件类型等）。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tableId: 1
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists:
+    - total
+    - rows
+- id: TC_GEN_008
+  title: GET /tool/gen/column/{tableId}_tableId传入非数字字符串_返回参数类型不匹配
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /tool/gen/column/{tableId}
+  description: tableId路径参数传入非数字字符串验证系统返回参数类型不匹配错误。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tableId: abc
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_GEN_009
+  title: POST /tool/gen/importTable_导入有效表结构_返回导入成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: POST
+  path: /tool/gen/importTable
+  description: 传入有效的表名和数据源名称导入表结构到代码生成配置中，验证返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      dataName: master
+      tables: sys_dept,sys_post
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_GEN_010
+  title: POST /tool/gen/importTable_tables参数为空_返回导入失败
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: POST
+  path: /tool/gen/importTable
+  description: 不传tables参数（或传空字符串）调用导入表结构接口，验证系统返回业务错误码500并提示发生未知异常。
+  auth:
+    required: true
+    account: admin
+  request:
+    query:
+      dataName: master
+      tables: ''
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_GEN_011
+  title: PUT /tool/gen_修改代码生成配置_返回修改成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: PUT
+  path: /tool/gen
+  description: 传入完整的GenTable配置信息修改代码生成业务配置，验证返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    body:
+      tableId: 1
+      dataName: master
+      tableName: sys_dept
+      tableComment: 部门表
+      className: SysDept
+      tplCategory: crud
+      packageName: org.dromara.system
+      moduleName: ruoyi-system
+      businessName: dept
+      functionName: 部门
+      functionAuthor: Lion Li
+      genType: '0'
+      genPath: /
+      remark: ''
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_GEN_012
+  title: PUT /tool/gen_dataName字段为空_返回数据源名称不能为空
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: PUT
+  path: /tool/gen
+  description: 请求体中dataName字段为空字符串触发@NotBlank校验，验证系统返回业务错误码500并提示数据源名称不能为空。
+  auth:
+    required: true
+    account: admin
+  request:
+    body:
+      tableId: 1
+      dataName: ''
+      tableName: sys_dept
+      tableComment: 部门表
+      className: SysDept
+      tplCategory: crud
+      packageName: org.dromara.system
+      moduleName: ruoyi-system
+      businessName: dept
+      functionName: 部门
+      functionAuthor: Lion Li
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_GEN_013
+  title: DELETE /tool/gen/{tableIds}_删除已导入的代码生成配置_返回删除成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: DELETE
+  path: /tool/gen/{tableIds}
+  description: 传入有效的tableId删除对应的代码生成配置及字段列配置，验证返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tableIds: '1'
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_GEN_014
+  title: DELETE /tool/gen/{tableIds}_tableIds传入非数字字符串_返回参数类型不匹配
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: DELETE
+  path: /tool/gen/{tableIds}
+  description: tableIds路径参数传入非数字字符串验证系统返回参数类型不匹配错误。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tableIds: abc
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_GEN_015
+  title: GET /tool/gen/preview/{tableId}_预览已配置表的生成代码_返回代码内容映射
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: GET
+  path: /tool/gen/preview/{tableId}
+  description: 传入有效tableId预览代码生成结果，验证返回code为200且data包含文件路径到源码内容的映射。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tableId: 1
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_GEN_016
+  title: GET /tool/gen/preview/{tableId}_传入不存在的tableId_返回未知异常
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /tool/gen/preview/{tableId}
+  description: 传入数据库中不存在的tableId预览代码，验证系统返回业务错误码500并提示发生未知异常。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tableId: 99999
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_GEN_017
+  title: GET /tool/gen/synchDb/{tableId}_同步数据库表结构_返回同步成功
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: GET
+  path: /tool/gen/synchDb/{tableId}
+  description: 传入有效tableId从数据库同步最新的表结构信息到代码生成配置中，验证返回操作成功。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tableId: 1
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_GEN_018
+  title: GET /tool/gen/synchDb/{tableId}_传入不存在的tableId_返回未知异常
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /tool/gen/synchDb/{tableId}
+  description: 传入数据库中不存在的tableId同步数据库，验证系统返回业务错误码500并提示发生未知异常。
+  auth:
+    required: true
+    account: admin
+  request:
+    path_params:
+      tableId: 99999
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 500
+    data_exists: []
+- id: TC_GEN_019
+  title: GET /tool/gen/getDataNames_查询可用数据源列表_返回数据源名称数组
+  priority: P0
+  tags:
+  - 正常
+  - 回归
+  method: GET
+  path: /tool/gen/getDataNames
+  description: 查询当前可用的动态数据源名称列表，验证返回code为200且data包含至少master在内的数据源名称数组。
+  auth:
+    required: true
+    account: admin
+  expected:
+    status_code: 200
+    response_type: json
+    business_code: 200
+    data_exists: []
+- id: TC_GEN_020
+  title: GET /tool/gen/getDataNames_未携带认证Token_返回401认证失败
+  priority: P1
+  tags:
+  - 异常
+  - 回归
+  method: GET
+  path: /tool/gen/getDataNames
+  description: 不携带认证Token访问需要权限的接口，验证Sa-Token框架返回401未认证错误。
+  auth:
+    required: false
+  expected:
+    status_code: 401
+    response_type: json
+    business_code: 401
+    data_exists: []

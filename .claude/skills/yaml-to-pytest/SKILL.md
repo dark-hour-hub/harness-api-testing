@@ -1,11 +1,24 @@
 ---
 name: yaml-to-pytest
-description: 从 04-testcases/ 下的 YAML 测试用例文件生成 pytest 脚本到 generated/api-test/。触发：/yaml-to-pytest、YAML转pytest、生成pytest脚本、生成接口测试脚本、yaml to pytest、generate pytest tests。读取所有 YAML 测试用例，每个 YAML 生成一个 test_{module}.py 脚本，同时生成 conftest.py。
+description: 从 YAML 测试用例文件生成 pytest 脚本到 generated/api-test/。触发：/yaml-to-pytest、YAML转pytest、生成pytest脚本、生成接口测试脚本、yaml to pytest、generate pytest tests。读取所有 YAML 测试用例，每个 YAML 生成一个 test_{module}.py 脚本，同时生成 conftest.py。
 ---
 
 # YAML → Pytest 脚本生成器
 
-从 `tests/baseline/_workflow/04-testcases/` 读取 YAML 测试用例定义，生成可执行的 pytest 脚本到 `tests/baseline/generated/api-test/`。
+从 YAML 测试用例定义生成可执行的 pytest 脚本。
+
+## 参数
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|:---:|--------|------|
+| `mode` | enum | 否 | `baseline` | `baseline` = 全量模式；`diff` = 增量模式 |
+
+路径决议（按 mode）：
+
+| 路径变量 | `baseline` | `diff` |
+|---------|----------|--------|
+| `YAML_DIR` | `tests/baseline/_workflow/04-testcases` | `tests/diff/_workflow/02-diff-testcases` |
+| `OUTPUT_DIR` | `tests/baseline/generated/api-test` | `tests/diff/generated/api-test` |
 
 ## 设计原则
 
@@ -19,14 +32,14 @@ description: 从 04-testcases/ 下的 YAML 测试用例文件生成 pytest 脚�
 
 | 来源 | 路径 | 用途 |
 |------|------|------|
-| YAML 用例 | `tests/baseline/_workflow/04-testcases/*.yaml` | 测试用例定义 |
+| YAML 用例 | `${YAML_DIR}/*.yaml` | 测试用例定义 |
 | 字段规范 | `.claude/skills/api-doc-to-testcases/references/yaml-schema.md` | YAML 字段含义 |
 | 变量引用规范 | `.claude/skills/api-doc-to-testcases/references/variable-reference.md` | `${...}` 解析规则 |
 
 ## 输出
 
 ```
-tests/baseline/generated/api-test/
+${OUTPUT_DIR}/
 ├── conftest.py        # 公共 fixtures + 工具函数
 ├── test_auth.py       # 认证模块
 ├── test_resource.py   # 资源管理
@@ -37,12 +50,19 @@ tests/baseline/generated/api-test/
 ## 执行
 
 ```bash
+# 全量模式（默认）
+python .claude/skills/yaml-to-pytest/scripts/generate_pytest.py --mode baseline
+
+# 增量模式
+python .claude/skills/yaml-to-pytest/scripts/generate_pytest.py --mode diff
+
+# 显式指定路径（优先级高于 --mode）
 python .claude/skills/yaml-to-pytest/scripts/generate_pytest.py \
   --yaml-dir tests/baseline/_workflow/04-testcases \
   --output-dir tests/baseline/generated/api-test
 ```
 
-无参数时使用上述默认路径。
+无参数时默认 baseline 模式。
 
 ## 生成内容说明
 

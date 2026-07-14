@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="20" time="8.235" timestamp="2026-07-14T14:10:36.709003+08:00" hostname="旅行者"><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_001" time="1.542" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_002" time="0.119" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_003" time="0.238"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/tool/gen/1&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_gen.py:60: in test_TC_GEN_003
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/tool/gen/1
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_004" time="0.244" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_005" time="0.312" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_006" time="0.283" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_007" time="0.173" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_008" time="0.105" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_009" time="2.244" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_010" time="0.396"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 200&#10;assert 200 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/tool/gen/importTable&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 200,&#10;  &quot;msg&quot;: &quot;操作成功&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_gen.py:109: in test_TC_GEN_010
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 200
+E   assert 200 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/tool/gen/importTable
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 200,
+E     "msg": "操作成功",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_011" time="0.360" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_012" time="0.142" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_013" time="0.451" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_014" time="0.121" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_015" time="0.152"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/tool/gen/preview/1&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_gen.py:144: in test_TC_GEN_015
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/tool/gen/preview/1
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_016" time="0.163" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_017" time="0.428"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/tool/gen/synchDb/1&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_gen.py:158: in test_TC_GEN_017
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/tool/gen/synchDb/1
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_018" time="0.412" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_019" time="0.120" /><testcase classname="tests.baseline.generated.api-test.test_gen" name="test_TC_GEN_020" time="0.014"><failure message="AssertionError: HTTP 状态码不匹配: 期望 401, 实际 200&#10;assert 200 == 401&#10; +  where 200 = &lt;Response [200]&gt;.status_code&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/tool/gen/getDataNames&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 401,&#10;  &quot;msg&quot;: &quot;认证失败，无法访问系统资源&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_gen.py:179: in test_TC_GEN_020
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: HTTP 状态码不匹配: 期望 401, 实际 200
+E   assert 200 == 401
+E    +  where 200 = &lt;Response [200]&gt;.status_code
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/tool/gen/getDataNames
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 401,
+E     "msg": "认证失败，无法访问系统资源",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase></testsuite></testsuites>

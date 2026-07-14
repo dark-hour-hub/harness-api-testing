@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="14" skipped="0" tests="36" time="10.389" timestamp="2026-07-14T14:12:11.494666+08:00" hostname="旅行者"><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_001" time="1.703" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_002" time="0.196" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_003" time="0.178" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_004" time="0.177" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_005" time="0.114"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/workflow/instance/getInfo/BIZ20230721001&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;请求参数类型不匹配，参数[businessId]要求类型为：'java.lang.Long'，但输入值为：'BIZ20230721001'&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:74: in test_TC_WF_INSTANCE_005
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/workflow/instance/getInfo/BIZ20230721001
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "请求参数类型不匹配，参数[businessId]要求类型为：'java.lang.Long'，但输入值为：'BIZ20230721001'",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_006" time="0.114" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_007" time="0.123"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/workflow/instance/deleteByBusinessIds/BIZ20230721001&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;请求参数类型不匹配，参数[businessIds]要求类型为：'java.util.List'，但输入值为：'BIZ20230721001'&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:88: in test_TC_WF_INSTANCE_007
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/workflow/instance/deleteByBusinessIds/BIZ20230721001
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "请求参数类型不匹配，参数[businessIds]要求类型为：'java.util.List'，但输入值为：'BIZ20230721001'",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_008" time="0.335" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_009" time="0.303"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/workflow/instance/deleteByInstanceIds/1001&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:102: in test_TC_WF_INSTANCE_009
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/workflow/instance/deleteByInstanceIds/1001
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_010" time="0.302" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_011" time="0.308"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/workflow/instance/deleteHisByInstanceIds/1002&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:116: in test_TC_WF_INSTANCE_011
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/workflow/instance/deleteHisByInstanceIds/1002
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_012" time="0.309" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_013" time="0.375"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/workflow/instance/cancelProcessApply&#10;  请求体: {&#10;  &quot;businessId&quot;: &quot;BIZ20230721001&quot;,&#10;  &quot;message&quot;: &quot;申请撤销该流程&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;流程实例获取失败!&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:130: in test_TC_WF_INSTANCE_013
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/workflow/instance/cancelProcessApply
+E     请求体: {
+E     "businessId": "BIZ20230721001",
+E     "message": "申请撤销该流程"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "流程实例获取失败!",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_014" time="0.362" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_015" time="0.265"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/workflow/instance/active/1001&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:144: in test_TC_WF_INSTANCE_015
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/workflow/instance/active/1001
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_016" time="0.246" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_017" time="0.193" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_018" time="0.186" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_019" time="0.197"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/workflow/instance/flowHisTaskList/BIZ20230721001&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;流程实例获取失败!&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:172: in test_TC_WF_INSTANCE_019
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/workflow/instance/flowHisTaskList/BIZ20230721001
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "流程实例获取失败!",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_020" time="0.217" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_021" time="0.186"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: GET http://localhost:8080/workflow/instance/instanceVariable/1001&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;流程实例获取失败!&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:186: in test_TC_WF_INSTANCE_021
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: GET http://localhost:8080/workflow/instance/instanceVariable/1001
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "流程实例获取失败!",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_022" time="0.227" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_023" time="0.384"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/workflow/instance/updateVariable&#10;  请求体: {&#10;  &quot;instanceId&quot;: 1001,&#10;  &quot;key&quot;: &quot;leaveDays&quot;,&#10;  &quot;value&quot;: &quot;5&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;流程实例获取失败!&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:200: in test_TC_WF_INSTANCE_023
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/workflow/instance/updateVariable
+E     请求体: {
+E     "instanceId": 1001,
+E     "key": "leaveDays",
+E     "value": "5"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "流程实例获取失败!",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_024" time="0.376" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_025" time="0.432"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/instance/invalid&#10;  请求体: {&#10;  &quot;id&quot;: 1001,&#10;  &quot;comment&quot;: &quot;流程信息有误，予以作废&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;发生未知异常，请联系管理员&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:214: in test_TC_WF_INSTANCE_025
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/instance/invalid
+E     请求体: {
+E     "id": 1001,
+E     "comment": "流程信息有误，予以作废"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "发生未知异常，请联系管理员",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_026" time="0.471" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_027" time="0.258" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_028" time="0.189" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_029" time="0.191" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_030" time="0.113" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_031" time="0.255"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/workflow/spel&#10;  请求体: {&#10;  &quot;componentName&quot;: &quot;SysUserService&quot;,&#10;  &quot;methodName&quot;: &quot;selectUserByDept&quot;,&#10;  &quot;methodParams&quot;: &quot;deptId&quot;,&#10;  &quot;viewSpel&quot;: &quot;@sysUserService.selectUserByDept(deptId)&quot;,&#10;  &quot;status&quot;: &quot;0&quot;,&#10;  &quot;remark&quot;: &quot;按部门查找审批人&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;SpEL表达式已存在，请勿重复添加&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:256: in test_TC_WF_INSTANCE_031
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: POST http://localhost:8080/workflow/spel
+E     请求体: {
+E     "componentName": "SysUserService",
+E     "methodName": "selectUserByDept",
+E     "methodParams": "deptId",
+E     "viewSpel": "@sysUserService.selectUserByDept(deptId)",
+E     "status": "0",
+E     "remark": "按部门查找审批人"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "SpEL表达式已存在，请勿重复添加",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_032" time="0.123" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_033" time="0.269"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/workflow/spel&#10;  请求体: {&#10;  &quot;id&quot;: 1,&#10;  &quot;componentName&quot;: &quot;SysUserService&quot;,&#10;  &quot;methodName&quot;: &quot;selectUserByDept&quot;,&#10;  &quot;methodParams&quot;: &quot;deptId&quot;,&#10;  &quot;viewSpel&quot;: &quot;@sysUserService.selectUserByDept(deptId)&quot;,&#10;  &quot;status&quot;: &quot;0&quot;,&#10;  &quot;remark&quot;: &quot;按部门查找审批人（更新后的备注）&quot;&#10;}&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;SpEL表达式已存在，请勿重复添加&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:270: in test_TC_WF_INSTANCE_033
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: PUT http://localhost:8080/workflow/spel
+E     请求体: {
+E     "id": 1,
+E     "componentName": "SysUserService",
+E     "methodName": "selectUserByDept",
+E     "methodParams": "deptId",
+E     "viewSpel": "@sysUserService.selectUserByDept(deptId)",
+E     "status": "0",
+E     "remark": "按部门查找审批人（更新后的备注）"
+E   }
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "SpEL表达式已存在，请勿重复添加",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_034" time="0.120" /><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_035" time="0.239"><failure message="AssertionError: 业务状态码不匹配: 期望 200, 实际 500&#10;assert 500 == 200&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/workflow/spel/1&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 500,&#10;  &quot;msg&quot;: &quot;操作失败&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:284: in test_TC_WF_INSTANCE_035
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 200, 实际 500
+E   assert 500 == 200
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/workflow/spel/1
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 500,
+E     "msg": "操作失败",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_workflow-instance-spel" name="test_TC_WF_INSTANCE_036" time="0.028"><failure message="AssertionError: 业务状态码不匹配: 期望 500, 实际 404&#10;assert 404 == 500&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: DELETE http://localhost:8080/workflow/spel/&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: 404,&#10;  &quot;msg&quot;: &quot;请求地址不存在&quot;,&#10;  &quot;data&quot;: null&#10;}&#10;------------------------------------------------------------">tests\baseline\generated\api-test\test_workflow-instance-spel.py:291: in test_TC_WF_INSTANCE_036
+    resp, data = request_helper.execute(case)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\baseline\generated\api-test\conftest.py:492: in execute
+    return execute_request(
+tests\baseline\generated\api-test\conftest.py:440: in execute_request
+    raise AssertionError(f"{e}\n{context}") from None
+E   AssertionError: 业务状态码不匹配: 期望 500, 实际 404
+E   assert 404 == 500
+E   
+E   ------------------------------------------------------------
+E   [完整请求/响应上下文]
+E     请求: DELETE http://localhost:8080/workflow/spel/
+E     响应状态码: 200
+E     响应体:
+E   {
+E     "code": 404,
+E     "msg": "请求地址不存在",
+E     "data": null
+E   }
+E   ------------------------------------------------------------</failure></testcase></testsuite></testsuites>

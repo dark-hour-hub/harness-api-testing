@@ -1,0 +1,741 @@
+module: "system-user"
+module_name: "系统管理-用户管理+个人中心"
+base_url: "http://localhost:8080"
+global_variables:
+  default_page_size: 10
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    test:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    test:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+testcases:
+  # ============================================================
+  # 1. GET /system/user/list — 获取用户列表
+  # ============================================================
+  - id: "TC_USER_001"
+    title: "GET /system/user/list_有效分页查询条件_返回用户列表及分页信息"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/system/user/list"
+    description: "使用管理员账号传入默认分页参数查询用户列表，验证分页响应结构包含rows和total字段。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_USER_002"
+    title: "GET /system/user/list_pageSize为0的无效分页参数_系统使用默认分页正常返回"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/user/list"
+    description: "传入pageSize=0的无效分页参数，验证系统使用默认分页大小正常返回，不抛出异常。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        pageNum: 1
+        pageSize: 0
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  # ============================================================
+  # 2. POST /system/user/importData — 导入用户数据
+  # ============================================================
+  - id: "TC_USER_003"
+    title: "POST /system/user/importData_上传有效Excel文件_返回导入成功统计"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/system/user/importData"
+    description: "上传包含有效用户数据的Excel文件并设置updateSupport=false仅新增模式，验证返回导入成功统计信息。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      multipart:
+        - name: "file"
+          value: "@users_import_test.xlsx"
+          content_type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        - name: "updateSupport"
+          value: "false"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["successCount", "failCount"]
+
+  - id: "TC_USER_004"
+    title: "POST /system/user/importData_未上传文件_返回参数校验失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/system/user/importData"
+    description: "不携带file参数调用导入接口，验证系统返回业务错误码500并提示文件校验失败。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      multipart:
+        - name: "updateSupport"
+          value: "false"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 3. GET /system/user/getInfo — 获取当前用户信息
+  # ============================================================
+  - id: "TC_USER_005"
+    title: "GET /system/user/getInfo_获取当前管理员完整信息_返回用户权限角色及菜单权限集"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    method: "GET"
+    path: "/system/user/getInfo"
+    description: "管理员登录后获取当前用户完整信息，验证返回user对象、permissions权限集和roles角色集。"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["user", "permissions", "roles"]
+
+  - id: "TC_USER_006"
+    title: "GET /system/user/getInfo_携带多余查询参数_系统忽略并正常返回用户信息"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/user/getInfo"
+    description: "调用getInfo接口时携带多余的查询参数，验证系统忽略无关参数并正常返回当前用户信息。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        unknown_param: "ignored_value"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["user", "permissions", "roles"]
+
+  # ============================================================
+  # 4. GET /system/user/{userId} — 根据用户编号获取详细信息
+  # ============================================================
+  - id: "TC_USER_007"
+    title: "GET /system/user/{userId}_传入有效用户ID_返回用户详细信息及角色岗位"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/system/user/{userId}"
+    description: "传入系统中存在的用户ID，验证返回该用户的详细信息、已授权角色列表和已分配岗位列表。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        userId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["user", "roles", "postIds"]
+
+  - id: "TC_USER_008"
+    title: "GET /system/user/{userId}_传入不存在的用户ID_返回空用户或业务错误"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/user/{userId}"
+    description: "传入系统中不存在的用户ID查询详情，验证系统返回数据权限校验失败或空数据错误提示。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        userId: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 5. POST /system/user — 新增用户
+  # ============================================================
+  - id: "TC_USER_009"
+    title: "POST /system/user_完整有效的新用户信息_返回新增成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/system/user"
+    description: "提交包含必填字段的完整新用户信息（用户名、昵称、部门、角色等），验证系统创建用户并返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userName: "testuser001"
+        nickName: "测试用户001"
+        deptId: 103
+        phonenumber: "13900139001"
+        email: "testuser001@example.com"
+        sex: "0"
+        password: "TestUser@123"
+        status: "0"
+        roleIds: [2]
+        postIds: [1]
+        remark: "自动化测试创建的用户"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_USER_010"
+    title: "POST /system/user_userName必填字段为空_返回参数校验失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/system/user"
+    description: "提交不包含必填字段userName的请求体，验证系统触发JSR-380校验返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        nickName: "缺少用户名的用户"
+        deptId: 103
+        password: "TestUser@123"
+        status: "0"
+        roleIds: [2]
+        postIds: [1]
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 6. PUT /system/user — 修改用户
+  # ============================================================
+  - id: "TC_USER_011"
+    title: "PUT /system/user_有效修改用户信息_返回修改成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/system/user"
+    description: "修改已创建测试用户的昵称、手机号和邮箱信息，验证系统更新成功并返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 3
+        userName: "testuser001"
+        nickName: "测试用户001_已修改"
+        deptId: 103
+        phonenumber: "13900139002"
+        email: "testuser001_updated@example.com"
+        sex: "0"
+        status: "0"
+        roleIds: [2]
+        postIds: [1]
+        remark: "自动化测试修改备注"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_USER_012"
+    title: "PUT /system/user_email格式不正确_返回邮箱格式校验失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/system/user"
+    description: "提交email字段为非法格式的修改请求，验证系统触发@Email校验返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 3
+        userName: "testuser001"
+        nickName: "测试用户001"
+        deptId: 103
+        email: "invalid-email-format"
+        sex: "0"
+        status: "0"
+        roleIds: [2]
+        postIds: [1]
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 7. DELETE /system/user/{userIds} — 删除用户
+  # ============================================================
+  - id: "TC_USER_013"
+    title: "DELETE /system/user/{userIds}_删除测试用户_返回删除成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "DELETE"
+    path: "/system/user/{userIds}"
+    description: "传入待删除的测试用户ID数组，验证系统删除该用户及其角色岗位关联关系并返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        userIds: "4,5"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_USER_014"
+    title: "DELETE /system/user/{userIds}_删除当前登录用户_返回不允许删除自身"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "DELETE"
+    path: "/system/user/{userIds}"
+    description: "尝试删除当前正在使用的管理员账号自身，验证系统返回业务错误码500并提示当前用户不能删除。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        userIds: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 8. PUT /system/user/resetPwd — 重置密码
+  # ============================================================
+  - id: "TC_USER_015"
+    title: "PUT /system/user/resetPwd_管理员重置普通用户密码_返回重置成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/system/user/resetPwd"
+    description: "管理员重置一个普通测试用户的密码，验证密码被BCrypt加密存储并返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 3
+        password: "NewResetPass@456"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_USER_016"
+    title: "PUT /system/user/resetPwd_尝试重置超级管理员密码_返回不允许操作超管"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/system/user/resetPwd"
+    description: "尝试重置超级管理员用户（userId=1）的密码，验证系统触发checkUserAllowed校验返回不允许操作超管的错误。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 1
+        password: "ResetAdmin@123"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 9. PUT /system/user/changeStatus — 修改用户状态
+  # ============================================================
+  - id: "TC_USER_017"
+    title: "PUT /system/user/changeStatus_停用测试用户_返回状态修改成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/system/user/changeStatus"
+    description: "管理员将测试用户状态由正常改为停用（status=1），验证系统更新用户状态并返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 3
+        status: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_USER_018"
+    title: "PUT /system/user/changeStatus_尝试修改超级管理员状态_返回不允许操作超管"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/system/user/changeStatus"
+    description: "尝试修改超级管理员用户的状态，验证系统触发checkUserAllowed校验返回不允许操作超管的错误。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 1
+        status: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 10. GET /system/user/authRole/{userId} — 获取用户授权角色
+  # ============================================================
+  - id: "TC_USER_019"
+    title: "GET /system/user/authRole/{userId}_查询用户已授权角色_返回用户信息和角色列表"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/system/user/authRole/{userId}"
+    description: "传入有效用户ID查询其已授权角色信息，验证返回用户基本信息和已授权角色列表。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        userId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["user", "roles"]
+
+  - id: "TC_USER_020"
+    title: "GET /system/user/authRole/{userId}_传入不存在用户ID_返回数据权限不足"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/user/authRole/{userId}"
+    description: "传入系统中不存在的用户ID查询授权角色，验证系统返回数据权限校验失败的业务错误。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        userId: 99999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 11. PUT /system/user/authRole — 用户授权角色
+  # ============================================================
+  - id: "TC_USER_021"
+    title: "PUT /system/user/authRole_为用户分配角色列表_返回授权成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/system/user/authRole"
+    description: "为测试用户分配角色ID列表，验证系统替换用户当前角色关联并返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        userId: 3
+        roleIds: "2,3"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_USER_022"
+    title: "PUT /system/user/authRole_传入不存在的用户ID_返回数据权限不足"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/system/user/authRole"
+    description: "为不存在的用户ID分配角色，验证系统返回数据权限校验失败的业务错误。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        userId: 99999
+        roleIds: "2"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 12. GET /system/user/deptTree — 获取部门树列表
+  # ============================================================
+  - id: "TC_USER_023"
+    title: "GET /system/user/deptTree_获取部门树列表_返回树形部门结构"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/system/user/deptTree"
+    description: "管理员获取部门树列表用于前端部门筛选下拉，验证返回包含id、parentId、name、children字段的树形结构。"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: [0]
+
+  - id: "TC_USER_024"
+    title: "GET /system/user/deptTree_传入不存在deptId筛选条件_返回空树或过滤后树结构"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/user/deptTree"
+    description: "传入不存在的deptId查询参数筛选部门树，验证系统过滤后返回空或默认树结构，不抛出异常。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        deptId: 999999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: [0]
+
+  # ============================================================
+  # 13. GET /system/user/profile — 获取个人信息
+  # ============================================================
+  - id: "TC_USER_025"
+    title: "GET /system/user/profile_获取当前用户个人信息_返回明文个人信息及角色岗位组"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "GET"
+    path: "/system/user/profile"
+    description: "获取当前登录用户的个人信息（未经脱敏明文字段），验证返回user对象、roleGroup角色组和postGroup岗位组。"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["user", "roleGroup", "postGroup"]
+
+  - id: "TC_USER_026"
+    title: "GET /system/user/profile_携带无效请求体_系统忽略并正常返回个人信息"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "GET"
+    path: "/system/user/profile"
+    description: "调用个人信息接口时携带多余的查询参数，验证系统忽略无关输入并正常返回当前用户个人信息。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        extra: "unexpected"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["user", "roleGroup", "postGroup"]
+
+  # ============================================================
+  # 14. PUT /system/user/profile — 修改个人信息
+  # ============================================================
+  - id: "TC_USER_027"
+    title: "PUT /system/user/profile_有效修改个人信息_返回修改成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/system/user/profile"
+    description: "当前登录用户修改自己的昵称、邮箱、手机号和性别，验证系统更新个人信息并返回操作成功。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        nickName: "管理员_已修改"
+        email: "admin_updated@example.com"
+        phonenumber: "13900139003"
+        sex: "0"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_USER_028"
+    title: "PUT /system/user/profile_email格式不正确_返回邮箱格式校验失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/system/user/profile"
+    description: "修改个人信息时传入非法格式的邮箱，验证系统触发@Email校验返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        nickName: "管理员"
+        email: "not_a_valid_email"
+        phonenumber: "13800138000"
+        sex: "0"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 15. PUT /system/user/profile/updatePwd — 修改个人密码
+  # ============================================================
+  - id: "TC_USER_029"
+    title: "PUT /system/user/profile/updatePwd_正确旧密码和有效新密码_返回密码修改成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "PUT"
+    path: "/system/user/profile/updatePwd"
+    description: "当前登录用户提供正确的旧密码和符合规则的新密码，验证系统BCrypt校验旧密码后更新为新密码。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        oldPassword: "admin123"
+        newPassword: "AdminNewPass@789"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_USER_030"
+    title: "PUT /system/user/profile/updatePwd_旧密码为空_返回参数校验失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "PUT"
+    path: "/system/user/profile/updatePwd"
+    description: "修改密码时oldPassword字段为空字符串，验证系统触发@NotBlank校验返回业务错误码500。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        oldPassword: ""
+        newPassword: "NewPass@456"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  # ============================================================
+  # 16. POST /system/user/profile/avatar — 头像上传
+  # ============================================================
+  - id: "TC_USER_031"
+    title: "POST /system/user/profile/avatar_上传有效图片文件_返回头像URL"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    method: "POST"
+    path: "/system/user/profile/avatar"
+    description: "上传一张有效的PNG格式头像图片，验证系统存储至OSS并返回imgUrl头像地址。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      multipart:
+        - name: "avatarfile"
+          value: "@test_avatar.png"
+          content_type: "image/png"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["imgUrl"]
+
+  - id: "TC_USER_032"
+    title: "POST /system/user/profile/avatar_上传非图片格式文件_返回文件格式不正确"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    method: "POST"
+    path: "/system/user/profile/avatar"
+    description: "上传一个文本文件（非图片格式），验证系统返回业务错误码500并提示仅支持bmp/gif/jpg/jpeg/png格式。"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      multipart:
+        - name: "avatarfile"
+          value: "@test_document.txt"
+          content_type: "text/plain"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []

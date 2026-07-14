@@ -10,7 +10,7 @@ YAML 中所有变量引用的格式、作用域和校验规则。
 |---------|--------|------|------|
 | `${auth.token}` | auth_setup.extracts | 登录提取的变量，跳过 extracts 层级 | `${auth.token}` |
 | `${auth.token_prefix}` | auth_setup 顶层 | auth_setup 的直接字段 | `${auth.token_prefix}` |
-| `${auth.params.xxx}` | auth_setup.params | 认证参数 | `${auth.params.admin.tenant_id}` |
+| `${auth.params.xxx}` | auth_setup.params | 认证参数 | `${auth.params.admin.param_key}` |
 | `${auth.accounts.xxx}` | auth_setup.accounts | 账号信息 | `${auth.accounts.admin.username}` |
 | `${global_variables.xxx}` | global_variables | 全局变量 | `${global_variables.default_page_size}` |
 | `${TC_XXX.extracts.xxx}` | 前置用例 extracts | 跨用例变量传递 | `${TC_USER_001.extracts.user_id}` |
@@ -25,11 +25,10 @@ YAML 中所有变量引用的格式、作用域和校验规则。
 ```yaml
 auth_setup:
   extracts:
-    token: "$.data.access_token"
-    refresh_token: "$.data.refresh_token"
+    token: "$.data.<json_key>"
 ```
 
-- 正确：`${auth.token}`、`${auth.refresh_token}`
+- 正确：`${auth.token}`
 - 错误：`${auth.extracts.token}`
 
 **为什么**：extracts 是"容器"，引用的目标是容器中的变量，不引用容器本身。这是唯一可以跳过层级的地方。
@@ -37,7 +36,7 @@ auth_setup:
 **其他所有字段必须严格按照层级路径引用**：
 
 - `${auth.accounts.admin.username}` — 不能跳过 accounts
-- `${auth.params.admin.client_id}` — 不能跳过 params
+- `${auth.params.admin.param_key}` — 不能跳过 params
 - `${global_variables.default_page_size}` — 不能跳过 global_variables
 
 ---
@@ -50,8 +49,8 @@ auth_setup:
 auth_headers:
   - name: "Authorization"
     value: "${auth.token_prefix} ${auth.token}"    # 运行时 → "Bearer eyJhbG..."
-  - name: "clientid"
-    value: "${auth.params.admin.client_id}"         # 运行时 → "e5cd7e4891bf95d1d19206ce24a7b32e"
+  - name: "xx"
+    value: "${auth.params.admin.xx}"         # 运行时 → "afdsfasdfafafdasf"
 ```
 
 多个变量可拼接在一个 value 中。
@@ -86,7 +85,7 @@ auth_headers:
 | JSONPath | 含义 |
 |----------|------|
 | `$.data.id` | 响应体 data.id |
-| `$.data.access_token` | 响应体 data.access_token（JSON key） |
+| `$.data.<json_key>` | 响应体 data 中的 JSON key（不是 Java 字段名） |
 | `$.data.list[0].id` | 响应体 data.list 数组第一个元素的 id |
 
 - JSONPath 必须以 `$` 开头

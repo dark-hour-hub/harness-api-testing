@@ -5,13 +5,26 @@ description: 执行 generated/api-test/ 下的 pytest 测试脚本并生成 HTML
 
 # API 测试执行与报告生成
 
-执行 `tests/baseline/generated/api-test/` 下的 pytest 测试脚本，将结果输出为 HTML 报告。
+执行 pytest 测试脚本并生成 HTML 报告。
+
+## 参数
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|:---:|--------|------|
+| `mode` | enum | 否 | `baseline` | `baseline` = 全量模式；`diff` = 增量模式 |
+
+路径决议（按 mode）：
+
+| 路径变量 | `baseline` | `diff` |
+|---------|----------|--------|
+| `TEST_DIR` | `tests/baseline/generated/api-test` | `tests/diff/generated/api-test` |
+| `REPORT_DIR` | `tests/baseline/report/api-test` | `tests/diff/report/api-test` |
 
 ## 范围
 
 此 skill 仅做两件事：**执行** pytest 测试脚本 + **生成** HTML 报告。不分析、不修复、不重跑。
 
-## ⛔ 铁律
+## 铁律
 
 执行结束后，无论通过率多少，**严格禁止**以下行为：
 
@@ -47,7 +60,7 @@ description: 执行 generated/api-test/ 下的 pytest 测试脚本并生成 HTML
 | test_xxx.py | N | N | N | N | Xs |
 
 **合计**: N 通过 / M 总计 (X%)
-**报告**: `tests/baseline/report/api-test/report_<timestamp>.html`
+**报告**: `${REPORT_DIR}/report_<timestamp>.html`
 ```
 
 最后一行"报告"之后不再输出任何内容。存在失败用例时也不追加分析建议。
@@ -67,16 +80,21 @@ description: 执行 generated/api-test/ 下的 pytest 测试脚本并生成 HTML
 直接执行脚本并生成报告：
 
 ```bash
-python .claude/skills/test-runner/scripts/run_tests.py
+# 全量模式（默认）
+python .claude/skills/test-runner/scripts/run_tests.py --mode baseline
+
+# 增量模式
+python .claude/skills/test-runner/scripts/run_tests.py --mode diff
 ```
 
 可选参数：
 ```bash
 python .claude/skills/test-runner/scripts/run_tests.py -m smoke        # 只运行冒烟测试
 python .claude/skills/test-runner/scripts/run_tests.py -k "test_auth"  # 运行特定模块
+python .claude/skills/test-runner/scripts/run_tests.py --test-path <dir> --output <dir>  # 显式指定路径（优先级高于 --mode）
 ```
 
-报告生成到 `tests/baseline/report/api-test/`，命名格式：`report_<YYYYMMDD_HHMMSS>.html`，同时更新 `latest.html` 指向最新报告。
+报告命名格式：`report_<YYYYMMDD_HHMMSS>.html`，同时更新 `latest.html` 指向最新报告。
 
 ## 报告内容
 
@@ -84,10 +102,8 @@ HTML 报告含摘要卡片、失败分类、通过率饼图、耗时分布图、
 
 ## 输出文件
 
-
-| 文件 | 路径                                              | 说明 |
-|------|-------------------------------------------------|------|
-| 测试报告 | `tests/baseline/report/api-test/report_<timestamp>.html` | 带时间戳的聚合报告 |
-| 最新报告 | `tests/baseline/report/api-test/latest.html`    | 始终指向最新报告 |
-| JUnit 缓存 | `tests/baseline/report/api-test/.cache/results_<module>.xml` | 各模块独立 XML（临时） |
-
+| 文件 | 路径 | 说明 |
+|------|------|------|
+| 测试报告 | `${REPORT_DIR}/report_<timestamp>.html` | 带时间戳的聚合报告 |
+| 最新报告 | `${REPORT_DIR}/latest.html` | 始终指向最新报告 |
+| JUnit 缓存 | `${REPORT_DIR}/.cache/results_<module>.xml` | 各模块独立 XML（临时） |
