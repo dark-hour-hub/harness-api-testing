@@ -335,7 +335,7 @@ def execute_request(case, base_url, auth_setup, auth_values, global_vars, ctx,
 
     # 解析变量
     path = resolve_vars(path_tmpl, auth_setup, auth_values, global_vars, ctx)
-    query = resolve_vars(request_def.get("query", {}), auth_setup, auth_values, global_vars, ctx)
+    query = resolve_vars(request_def.get("query_params", {}), auth_setup, auth_values, global_vars, ctx)
     body = resolve_vars(request_def.get("body", {}), auth_setup, auth_values, global_vars, ctx)
     path_params = resolve_vars(request_def.get("path_params", {}), auth_setup, auth_values, global_vars, ctx)
 
