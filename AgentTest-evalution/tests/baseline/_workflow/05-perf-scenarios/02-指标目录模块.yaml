@@ -1,0 +1,81 @@
+module: indicator
+module_name: "指标目录模块"
+base_url: "http://localhost:8080"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+
+scenarios:
+  - id: PERF_INDICATOR_001
+    title: "GET /api/indicators_100并发_60s"
+    priority: P0
+    method: GET
+    path: "/api/indicators"
+    description: "验证指标分页列表查询在 100 并发下的响应时间与吞吐"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+        pageSize: 10
+    load:
+      users: 100
+      ramp_up: 10
+      duration: 60
+    thresholds:
+      p95: 800
+      error_rate: 0.01
+      min_rps: 30
+
+  - id: PERF_INDICATOR_002
+    title: "GET /api/indicator-dimensions_50并发_60s"
+    priority: P1
+    method: GET
+    path: "/api/indicator-dimensions"
+    description: "验证指标维度列表查询在 50 并发下的响应时间与吞吐"
+    auth:
+      required: false
+    load:
+      users: 50
+      ramp_up: 5
+      duration: 60
+    thresholds:
+      p95: 800
+      error_rate: 0.01
+      min_rps: 30
+
+  - id: PERF_INDICATOR_003
+    title: "GET /api/indicator-categories_20并发_30s"
+    priority: P2
+    method: GET
+    path: "/api/indicator-categories"
+    description: "验证指标分类列表查询在 20 并发下的响应时间与吞吐"
+    auth:
+      required: false
+    load:
+      users: 20
+      ramp_up: 3
+      duration: 30
+    thresholds:
+      p95: 800
+      error_rate: 0.01
+      min_rps: 30
+
+  - id: PERF_INDICATOR_004
+    title: "GET /api/indicator-catalog-versions_20并发_30s"
+    priority: P2
+    method: GET
+    path: "/api/indicator-catalog-versions"
+    description: "验证指标目录版本列表查询在 20 并发下的响应时间与吞吐"
+    auth:
+      required: false
+    load:
+      users: 20
+      ramp_up: 3
+      duration: 30
+    thresholds:
+      p95: 800
+      error_rate: 0.01
+      min_rps: 30

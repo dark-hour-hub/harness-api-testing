@@ -1,0 +1,525 @@
+# API 接口清单 _manifest.yaml
+# 生成阶段: api-doc-discover（接口发现与模块分组）
+# 生成日期: 2026-08-19
+# 路由来源: CodeGraph route index 交叉验证 apis.json（42 条，无遗漏无冗余）
+
+system:
+  name: agent-evaluation-platform（智能体评测平台）
+  base_url: http://localhost:8080
+  framework: "Spring Boot 3.5.16 / Java 17 / 无安全框架（Spring MVC 同步 REST）"
+  database: "MySQL 8.0 + MyBatis-Plus 3.5.17（六边形/DDD 分层）"
+  cache: 无
+  api_doc: "SpringDoc OpenAPI 2.8.17（按模块分 7 组）"
+  auth_type: "none"
+  auth_header: 无
+  encryption: 无
+
+response_wrapper:
+  class: ApiResponse
+  code_field: code       # record ApiResponse<T>(String code, String message, T data, String traceId)
+  msg_field: message
+  success_code: "200"
+  page_class: PageResult
+  page_rows_field: items
+  page_total_field: total
+  note: "ApiResponse.code 为 String 类型，成功固定 \"200\"；message 成功固定 \"success\"。PageResult 字段顺序 items/page/pageSize/total，pageSize 上限 100。"
+
+test_accounts: []
+
+auth:
+  white_list: []          # 无认证机制，所有 /api/** 接口公开访问，无白名单概念
+  public_headers:
+    - name: Content-Type
+      type: String
+      required: true
+      example: application/json
+  auth_headers: []        # 无认证请求头
+  optional_headers:
+    - name: X-Trace-Id
+      type: String
+      required: false
+      example: test-case-001
+      description: 链路追踪 ID（TraceIdFilter 透传并回写响应头），缺失时服务端生成 32 位十六进制 UUID
+
+permission_model:
+  type: none
+  super_admin: 无
+  format: 无
+  data_permission: 无
+  note: 全项目无任何权限注解/角色控制，所有接口无鉴权。
+
+modules:
+  - name: 智能体模块
+    prefix: /api/agents
+    file: "01-智能体模块.md"
+    interface_count: 5
+    controllers:
+      - class: AgentController
+        package: com.czbank.aicgs.evaluation.agent.adapter.in.web
+    services:
+      - class: AgentConfigUseCase
+        package: com.czbank.aicgs.evaluation.agent.application.service
+    dtos: [AgentRequest]
+    vos: [AgentResponse]
+    routes:
+      - method: GET
+        path: /api/agents
+        summary: 分页查询 Agent 配置列表（agentCode/agentName/riskTier/adapterType/enabled 过滤）
+        request_body: null
+        response_type: "ApiResponse<PageResult<AgentResponse>>"
+        response_structure: page
+        auth: false
+        permission: null
+        special: []
+      - method: POST
+        path: /api/agents
+        summary: 创建 Agent 配置（无 @Valid，必填项由 Controller 手工校验，失败报 COMMON_400_VALIDATION）
+        request_body: AgentRequest
+        response_type: "ApiResponse<AgentResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/agents/{id}
+        summary: 按 ID 查询 Agent 配置（id 必须为正整数，不存在返回 404 COMMON_404_RESOURCE）
+        request_body: null
+        response_type: "ApiResponse<AgentResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: PUT
+        path: /api/agents/{id}
+        summary: 更新 Agent 配置（请求体同 POST /api/agents）
+        request_body: AgentRequest
+        response_type: "ApiResponse<AgentResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: DELETE
+        path: /api/agents/{id}
+        summary: 禁用或删除 Agent 配置（成功 data=null）
+        request_body: null
+        response_type: "ApiResponse<Void>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+    split_plan: null
+
+  - name: 指标目录模块
+    prefix: /api/indicator-dimensions,/api/indicator-categories,/api/indicators,/api/indicator-catalog-versions
+    file: "02-指标目录模块.md"
+    interface_count: 5
+    controllers:
+      - class: IndicatorController
+        package: com.czbank.aicgs.evaluation.indicator.adapter.in.web
+      - class: IndicatorCatalogVersionController
+        package: com.czbank.aicgs.evaluation.indicator.adapter.in.web
+    services:
+      - class: IndicatorCatalogService
+        package: com.czbank.aicgs.evaluation.indicator.application.service
+      - class: IndicatorCatalogVersionService
+        package: com.czbank.aicgs.evaluation.indicator.application.service
+    dtos: []
+    vos: [IndicatorResponse, IndicatorDimension, IndicatorCategory, IndicatorCatalogVersion]
+    routes:
+      - method: GET
+        path: /api/indicator-dimensions
+        summary: 查询指标维度列表（catalogVersion 缺省使用唯一默认版本）
+        request_body: null
+        response_type: "ApiResponse<List<IndicatorDimension>>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/indicator-categories
+        summary: 查询指标分类列表（dimensionCode/catalogVersion 过滤）
+        request_body: null
+        response_type: "ApiResponse<List<IndicatorCategory>>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/indicators
+        summary: 分页查询指标（维度/分类/方向/采集方式/指标集/启用/目录版本过滤）
+        request_body: null
+        response_type: "ApiResponse<PageResult<IndicatorResponse>>"
+        response_structure: page
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/indicators/{id}
+        summary: 按 ID 查询指标详情（id 必须为正整数，不存在返回 404）
+        request_body: null
+        response_type: "ApiResponse<IndicatorResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/indicator-catalog-versions
+        summary: 查询已发布的指标目录版本列表
+        request_body: null
+        response_type: "ApiResponse<List<IndicatorCatalogVersion>>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+    split_plan: null
+
+  - name: 测试用例模块
+    prefix: /api/test-cases（含 /import、/import/excel、/import/template）
+    file: "03-测试用例模块.md"
+    interface_count: 8
+    controllers:
+      - class: TestCaseController
+        package: com.czbank.aicgs.evaluation.testcase.adapter.in.web
+      - class: TestCaseExcelImportController
+        package: com.czbank.aicgs.evaluation.testcase.adapter.in.web
+    services:
+      - class: TestCaseService
+        package: com.czbank.aicgs.evaluation.testcase.application.service
+      - class: ExcelTestCaseImportService
+        package: com.czbank.aicgs.evaluation.testcase.application.service
+    dtos: [TestCaseRequest]
+    vos: [TestCaseResponse, TestCaseDeletionResult, ImportTestCasesResult.ImportError]
+    routes:
+      - method: GET
+        path: /api/test-cases
+        summary: 分页查询测试用例（indicatorId/dimensionCode/categoryCode/caseType/enabled 过滤）
+        request_body: null
+        response_type: "ApiResponse<PageResult<TestCaseResponse>>"
+        response_structure: page
+        auth: false
+        permission: null
+        special: []
+      - method: POST
+        path: /api/test-cases
+        summary: 创建测试用例（@Valid 校验，失败返回 400 + 字段错误 Map）
+        request_body: TestCaseRequest
+        response_type: "ApiResponse<TestCaseResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/test-cases/{id}
+        summary: 按 ID 查询测试用例（不存在返回 404 TEST_CASE_NOT_FOUND）
+        request_body: null
+        response_type: "ApiResponse<TestCaseResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: PUT
+        path: /api/test-cases/{id}
+        summary: 更新测试用例（请求体同 POST /api/test-cases）
+        request_body: TestCaseRequest
+        response_type: "ApiResponse<TestCaseResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: DELETE
+        path: /api/test-cases/{id}
+        summary: 软删除测试用例（保留历史引用）
+        request_body: null
+        response_type: "ApiResponse<TestCaseDeletionResult>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: POST
+        path: /api/test-cases/import
+        summary: 批量导入测试用例（JSON 数组，行级校验；有错误时返回 400 及 ImportError 列表）
+        request_body: "List<TestCaseRequest>"
+        response_type: "ApiResponse<List<TestCaseResponse>>（错误时 ApiResponse<List<ImportError>>）"
+        response_structure: single
+        auth: false
+        permission: null
+        special: ["行级校验：COMMON_400_VALIDATION/COMMON_409_CONFLICT/TEST_CASE_400_RULE"]
+      - method: POST
+        path: /api/test-cases/import/excel
+        summary: Excel 导入测试用例（multipart/form-data；文件为空/解析失败返回 400 + ImportError 列表）
+        request_body: "MultipartFile file + 可选 Long indicatorId"
+        response_type: "ApiResponse<List<TestCaseResponse>>（错误时 ApiResponse<List<ImportError>>）"
+        response_structure: single
+        auth: false
+        permission: null
+        special: ["multipart/form-data", "Content-Type: multipart/form-data"]
+      - method: GET
+        path: /api/test-cases/import/template
+        summary: 下载 Excel 导入模板（.xlsx 附件，非 JSON 响应）
+        request_body: null
+        response_type: "application/octet-stream（.xlsx 二进制，Content-Disposition: attachment; filename=test-case-import-template.xlsx）"
+        response_structure: single
+        auth: false
+        permission: null
+        special: ["非 JSON 响应"]
+    split_plan: null
+
+  - name: 评测任务模块
+    prefix: /api/evaluation-tasks（含 ad-hoc、progress、run、measurements、finalize、results、case-results、calls、report）
+    file: "04-评测任务模块.md"
+    interface_count: 14
+    controllers:
+      - class: EvaluationTaskController
+        package: com.czbank.aicgs.evaluation.task.adapter.in.web
+      - class: EvaluationExecutionController
+        package: com.czbank.aicgs.evaluation.execution.adapter.in.web
+      - class: EvaluationResultController
+        package: com.czbank.aicgs.evaluation.report.adapter.in.web
+      - class: IndicatorMeasurementController
+        package: com.czbank.aicgs.evaluation.measurement.adapter.in.web
+    services:
+      - class: EvaluationTaskService
+        package: com.czbank.aicgs.evaluation.task.application.service
+      - class: EvaluationTaskExecutionService
+        package: com.czbank.aicgs.evaluation.execution.application
+      - class: EvaluationReportQueryService
+        package: com.czbank.aicgs.evaluation.report.application
+      - class: EvaluationScoringService
+        package: com.czbank.aicgs.evaluation.scoring.application
+      - class: IndicatorMeasurementService
+        package: com.czbank.aicgs.evaluation.measurement.application
+    dtos: [CreateEvaluationTaskRequest, CreateAdHocEvaluationTaskRequest, SubmitMeasurementRequest, ConfirmMeasurementRequest]
+    vos: [EvaluationTask, CreateEvaluationTaskResponse, EvaluationTaskProgress, RunTaskResponse, FinalizeResponse, EvaluationResultResponse, IndicatorResultResponse, CaseResultResponse, AgentCallResponse, EvaluationReportResponse, IndicatorMeasurementResponse]
+    routes:
+      - method: POST
+        path: /api/evaluation-tasks
+        summary: 创建评估任务（快照 Agent + 已发布方案，不执行；任务状态 CREATED）
+        request_body: CreateEvaluationTaskRequest
+        response_type: "ApiResponse<EvaluationTask>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: POST
+        path: /api/evaluation-tasks/ad-hoc
+        summary: 基于当前配置创建临场（ad-hoc）任务，不保存方案
+        request_body: CreateAdHocEvaluationTaskRequest
+        response_type: "ApiResponse<CreateEvaluationTaskResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/evaluation-tasks
+        summary: 分页查询任务列表（status 过滤）
+        request_body: null
+        response_type: "ApiResponse<PageResult<EvaluationTask>>"
+        response_structure: page
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/evaluation-tasks/{id}
+        summary: 按 ID 查询任务详情（不存在返回 404）
+        request_body: null
+        response_type: "ApiResponse<EvaluationTask>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/evaluation-tasks/{id}/progress
+        summary: 查询任务持久化进度计数
+        request_body: null
+        response_type: "ApiResponse<EvaluationTaskProgress>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: POST
+        path: /api/evaluation-tasks/{id}/run
+        summary: 启动任务执行（成功返回 HTTP 202；执行器队列不可用返回 503 TASK_503_EXECUTOR）
+        request_body: null
+        response_type: "ApiResponse<RunTaskResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: ["HTTP 202 Accepted"]
+      - method: POST
+        path: /api/evaluation-tasks/{id}/finalize
+        summary: 对已完成但结果不完整的任务，基于已确认证据显式重算评分
+        request_body: null
+        response_type: "ApiResponse<FinalizeResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/evaluation-tasks/{id}/results
+        summary: 查询任务评测结果汇总（持久化结果，不重算；未就绪返回 409 TASK_409_RESULT_NOT_READY）
+        request_body: null
+        response_type: "ApiResponse<EvaluationResultResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/evaluation-tasks/{id}/results/indicators
+        summary: 分页查询持久化指标结果（status/dimensionCode 过滤）
+        request_body: null
+        response_type: "ApiResponse<PageResult<IndicatorResultResponse>>"
+        response_structure: page
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/evaluation-tasks/{id}/case-results
+        summary: 分页查询持久化用例判定结果（indicatorId/status/passed 过滤）
+        request_body: null
+        response_type: "ApiResponse<PageResult<CaseResultResponse>>"
+        response_structure: page
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/evaluation-tasks/{id}/calls
+        summary: 分页查询持久化的 Agent 调用记录（已脱敏，success/errorType 过滤）
+        request_body: null
+        response_type: "ApiResponse<PageResult<AgentCallResponse>>"
+        response_structure: page
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/evaluation-tasks/{id}/report
+        summary: 查询唯一持久化评测报告（未就绪返回 409 TASK_409_RESULT_NOT_READY）
+        request_body: null
+        response_type: "ApiResponse<EvaluationReportResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: POST
+        path: /api/evaluation-tasks/{taskId}/measurements
+        summary: 提交指标测量值作为草稿证据（DRAFT 状态，无校验注解，字段均可选）
+        request_body: SubmitMeasurementRequest
+        response_type: "ApiResponse<IndicatorMeasurementResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: POST
+        path: /api/evaluation-tasks/{taskId}/measurements/{measurementId}/confirm
+        summary: 确认草稿测量证据（DRAFT→CONFIRMED；重复确认 409，任务/记录不存在 404）
+        request_body: ConfirmMeasurementRequest
+        response_type: "ApiResponse<IndicatorMeasurementResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+    split_plan: null
+
+  - name: 评测方案模块
+    prefix: /api/evaluation-schemes（含 validate、publish、clone、archive、deletion-impact）
+    file: "05-评测方案模块.md"
+    interface_count: 10
+    controllers:
+      - class: EvaluationSchemeController
+        package: com.czbank.aicgs.evaluation.scheme.adapter.in.web
+    services:
+      - class: EvaluationSchemeService
+        package: com.czbank.aicgs.evaluation.scheme.application
+    dtos: [EvaluationSchemeRequest]
+    vos: [EvaluationSchemeResponse, SchemeDeletionResult, SchemeDeletionImpact, SchemeValidationResult]
+    routes:
+      - method: GET
+        path: /api/evaluation-schemes
+        summary: 分页查询评测方案列表（code/name/status/mode/type/riskTier 过滤）
+        request_body: null
+        response_type: "ApiResponse<PageResult<EvaluationSchemeResponse>>"
+        response_structure: page
+        auth: false
+        permission: null
+        special: []
+      - method: POST
+        path: /api/evaluation-schemes
+        summary: 创建评测方案草稿
+        request_body: EvaluationSchemeRequest
+        response_type: "ApiResponse<EvaluationSchemeResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/evaluation-schemes/{id}
+        summary: 按 ID 查询方案详情（不存在返回 404 SCHEME_NOT_FOUND）
+        request_body: null
+        response_type: "ApiResponse<EvaluationSchemeResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: PUT
+        path: /api/evaluation-schemes/{id}
+        summary: 更新方案草稿（请求体同 POST /api/evaluation-schemes）
+        request_body: EvaluationSchemeRequest
+        response_type: "ApiResponse<EvaluationSchemeResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: DELETE
+        path: /api/evaluation-schemes/{id}
+        summary: 删除方案：未引用草稿物理删除，被引用的已发布方案转为归档
+        request_body: null
+        response_type: "ApiResponse<SchemeDeletionResult>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: GET
+        path: /api/evaluation-schemes/{id}/deletion-impact
+        summary: 预览方案删除的事务性影响（不执行删除）
+        request_body: null
+        response_type: "ApiResponse<SchemeDeletionImpact>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: POST
+        path: /api/evaluation-schemes/{id}/validate
+        summary: 校验方案草稿（校验失败返回 400 SCHEME_400_INVALID + ValidationError 列表）
+        request_body: null
+        response_type: "ApiResponse<SchemeValidationResult>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: ["失败响应体 code=SCHEME_400_INVALID"]
+      - method: POST
+        path: /api/evaluation-schemes/{id}/publish
+        summary: 发布方案（草稿→已发布；状态冲突返回 409 SCHEME_409_STATUS）
+        request_body: null
+        response_type: "ApiResponse<EvaluationSchemeResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: POST
+        path: /api/evaluation-schemes/{id}/clone
+        summary: 克隆方案为草稿
+        request_body: null
+        response_type: "ApiResponse<EvaluationSchemeResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+      - method: POST
+        path: /api/evaluation-schemes/{id}/archive
+        summary: 显式归档方案（已归档返回 409 SCHEME_ALREADY_ARCHIVED）
+        request_body: null
+        response_type: "ApiResponse<EvaluationSchemeResponse>"
+        response_structure: single
+        auth: false
+        permission: null
+        special: []
+    split_plan: null

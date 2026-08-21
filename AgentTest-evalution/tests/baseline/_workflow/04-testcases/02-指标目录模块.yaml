@@ -1,0 +1,313 @@
+# ============================================================
+# 指标目录模块 测试用例 YAML
+# 来源文档: 03-api-docs/modules/02-指标目录模块.md
+# 接口数: 5 | 用例数: 14
+# ============================================================
+module: indicator
+module_name: "指标目录模块"
+base_url: "http://localhost:8080"
+
+# ──────────────────────────────────────────
+# 全局变量预设 (供全局 ${} 引用)
+# ──────────────────────────────────────────
+global_variables:
+  default_page_size: 20
+
+# ──────────────────────────────────────────
+# 全局请求头配置
+# ──────────────────────────────────────────
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers: []
+
+# ──────────────────────────────────────────
+# 认证统一配置 (本项目无认证)
+# ──────────────────────────────────────────
+auth_setup:
+  type: none
+
+# ──────────────────────────────────────────
+# 测试用例列表
+# ──────────────────────────────────────────
+testcases:
+  # ========== 接口 1: GET /api/indicator-dimensions ==========
+  - id: TC_IND_001
+    title: "GET /api/indicator-dimensions_默认参数查询_返回维度列表"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: GET
+    path: "/api/indicator-dimensions"
+    description: "不带 catalogVersion 时使用唯一默认版本查询指标维度列表，返回按 sortOrder、id 升序的维度数组"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "dimensionCode"
+        - "name"
+
+  - id: TC_IND_002
+    title: "GET /api/indicator-dimensions_指定catalogVersion过滤_返回对应版本维度列表"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/indicator-dimensions"
+    description: "指定 catalogVersion=V1 精确匹配目录版本，返回该版本下的维度列表"
+    auth:
+      required: false
+    request:
+      query:
+        catalogVersion: "V1"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "dimensionCode"
+        - "name"
+
+  - id: TC_IND_003
+    title: "GET /api/indicator-dimensions_指定不存在的catalogVersion_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/indicator-dimensions"
+    description: "违反版本解析业务规则：指定 version_code 不存在时返回 COMMON_404_RESOURCE"
+    auth:
+      required: false
+    request:
+      query:
+        catalogVersion: "V_NOT_EXIST"
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "COMMON_404_RESOURCE"
+      data_exists: []
+
+  # ========== 接口 2: GET /api/indicator-categories ==========
+  - id: TC_IND_004
+    title: "GET /api/indicator-categories_默认参数查询_返回分类列表"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: GET
+    path: "/api/indicator-categories"
+    description: "不带过滤参数时使用唯一默认版本查询指标分类列表，返回按 sortOrder、id 升序的分类数组"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "categoryCode"
+        - "name"
+
+  - id: TC_IND_005
+    title: "GET /api/indicator-categories_按维度编码过滤_返回对应分类列表"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/indicator-categories"
+    description: "dimensionCode=SECURITY 精确过滤，仅返回该维度下的分类"
+    auth:
+      required: false
+    request:
+      query:
+        dimensionCode: "SECURITY"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "categoryCode"
+        - "name"
+
+  - id: TC_IND_006
+    title: "GET /api/indicator-categories_指定不存在的catalogVersion_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/indicator-categories"
+    description: "违反版本解析业务规则：指定 version_code 不存在时返回 COMMON_404_RESOURCE"
+    auth:
+      required: false
+    request:
+      query:
+        catalogVersion: "V_NOT_EXIST"
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "COMMON_404_RESOURCE"
+      data_exists: []
+
+  # ========== 接口 3: GET /api/indicators ==========
+  - id: TC_IND_007
+    title: "GET /api/indicators_默认分页查询_返回分页数据"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: GET
+    path: "/api/indicators"
+    description: "不传分页与过滤参数，验证默认 page=1、pageSize=20 的分页查询返回结构完整"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "items"
+        - "page"
+        - "pageSize"
+        - "total"
+
+  - id: TC_IND_008
+    title: "GET /api/indicators_多条件过滤查询_返回过滤后分页数据"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/indicators"
+    description: "同时指定 catalogVersion、dimensionCode、categoryCode 过滤参数，验证过滤条件组合生效"
+    auth:
+      required: false
+    request:
+      query:
+        catalogVersion: "V1"
+        dimensionCode: "SECURITY"
+        categoryCode: "SEC_PRIVACY"
+        page: 1
+        pageSize: 20
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "items"
+        - "page"
+        - "pageSize"
+        - "total"
+
+  - id: TC_IND_009
+    title: "GET /api/indicators_pageSize越界_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/indicators"
+    description: "pageSize=101 超出 1~100 上限，违反参数校验规则，返回 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      query:
+        pageSize: 101
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      data_exists: []
+
+  - id: TC_IND_010
+    title: "GET /api/indicators_direction非法枚举_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/indicators"
+    description: "direction 传入非枚举值，违反枚举精确匹配校验，返回 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      query:
+        direction: "INVALID_DIR"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      data_exists: []
+
+  # ========== 接口 4: GET /api/indicators/{id} ==========
+  - id: TC_IND_011
+    title: "GET /api/indicators/{id}_查询指标详情_返回指标详情"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/indicators/{id}"
+    description: "按主键 ID 查询单条指标详情（库中真实存在的最小 id），返回含 ISO 映射列表的完整指标信息"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "1001"
+      query: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "indicatorCode"
+        - "indicatorName"
+
+  - id: TC_IND_012
+    title: "GET /api/indicators/{id}_指标不存在_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/indicators/{id}"
+    description: "指定 id 在数据库中无对应指标，违反关联数据存在性约束，返回 COMMON_404_RESOURCE"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "999999999"
+      query: {}
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "COMMON_404_RESOURCE"
+      data_exists: []
+
+  - id: TC_IND_013
+    title: "GET /api/indicators/{id}_id非数字_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/indicators/{id}"
+    description: "id 传入非数字字符串，Long.parseLong 解析失败，返回 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "abc"
+      query: {}
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      data_exists: []
+
+  # ========== 接口 5: GET /api/indicator-catalog-versions ==========
+  - id: TC_IND_014
+    title: "GET /api/indicator-catalog-versions_默认查询_返回版本列表"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: GET
+    path: "/api/indicator-catalog-versions"
+    description: "无参数查询目录版本列表。已知出入：SQL 无 status 过滤，返回全部状态版本（含 DRAFT/RETIRED），本用例仅断言响应结构，不断言仅已发布版本"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "versionCode"
+        - "status"

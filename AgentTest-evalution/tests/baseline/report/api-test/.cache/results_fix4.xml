@@ -1,0 +1,1066 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="20" tests="97" time="2.419" timestamp="2026-08-20T11:36:23.913336+08:00" hostname="DESKTOP-OH588JG"><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_001" time="0.030" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_002" time="0.020" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_003" time="0.027" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_004" time="0.005" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_005" time="0.022" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_006" time="0.005" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_007" time="0.008" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_008" time="0.006" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_009" time="0.024" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_010" time="0.015" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_011" time="0.005" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_012" time="0.030" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_013" time="0.025" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_014" time="0.028" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_015" time="0.009" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_016" time="0.020" /><testcase classname="tests.baseline.generated.api-test.test_agents" name="test_TC_AGENT_017" time="0.008" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_001" time="0.023" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_002" time="0.017" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_003" time="0.017" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_004" time="0.019" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_005" time="0.028" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_006" time="0.006" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_007" time="0.014" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_008" time="0.027" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_009" time="0.025" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_010" time="0.014" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_011" time="0.016" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_012" time="0.007" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_013" time="0.007" /><testcase classname="tests.baseline.generated.api-test.test_indicator" name="test_TC_IND_014" time="0.030" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_001" time="0.050" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_002" time="0.025" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_003" time="0.007" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_004" time="0.029" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_005" time="0.006" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_006" time="0.018" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_007" time="0.027" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_008" time="0.005" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_009" time="0.013"><failure message="AssertionError: 字段 $.data.valid 值不匹配: 期望 True, 实际 None&#10;assert None == True&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/api/evaluation-schemes/8/validate&#10;  响应状态码: 200&#10;  响应体:&#10;{&#10;  &quot;code&quot;: &quot;200&quot;,&#10;  &quot;message&quot;: &quot;success&quot;,&#10;  &quot;data&quot;: {&#10;    &quot;errors&quot;: []&#10;  },&#10;  &quot;traceId&quot;: &quot;5c555068c7a84794bc7935aa957692b9&quot;&#10;}&#10;------------------------------------------------------------">module_context = &lt;conftest.ModuleContext object at 0x00000209906A6720&gt;
+request_helper = &lt;conftest.RequestHelper object at 0x00000209906A6570&gt;
+
+    @pytest.mark.order(9)
+    def test_TC_SCHEME_009(module_context, request_helper):
+        """POST /api/evaluation-schemes/{id}/validate_校验DRAFT草稿_返回valid=true"""
+        case = _get_case("TC_SCHEME_009")
+&gt;       resp, data = request_helper.execute(case)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\baseline\generated\api-test\test_scheme.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\baseline\generated\api-test\conftest.py:503: in execute
+    return execute_request(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+case = {'auth': {'required': False}, 'depends_on': ['TC_SCHEME_001'], 'description': '校验 DRAFT 状态草稿完整性（子选择齐全），返回 HTTP 200 且 v...ess_code': '200', 'data_equals': {'$.data.valid': True}, 'data_exists': ['errors'], 'response_type': 'json', ...}, ...}
+base_url = 'http://localhost:8080', auth_setup = {'type': 'none'}
+auth_values = {}, global_vars = {'default_page_size': 20}
+ctx = &lt;conftest.ModuleContext object at 0x00000209906A6720&gt;
+public_h = [{'name': 'Content-Type', 'value': 'application/json'}], auth_h = []
+
+    def execute_request(case, base_url, auth_setup, auth_values, global_vars, ctx,
+                        public_h, auth_h):
+        """构建并发送 HTTP 请求，执行断言，返回 (response, parsed_data)"""
+        method = case.get("method", "GET").upper()
+        path_tmpl = case.get("path", "")
+        request_def = case.get("request", {})
+        expected = case.get("expected", {})
+    
+        # 解析变量
+        path = resolve_vars(path_tmpl, auth_setup, auth_values, global_vars, ctx)
+        query = resolve_vars(request_def.get("query", {}), auth_setup, auth_values, global_vars, ctx)
+        body = resolve_vars(request_def.get("body", {}), auth_setup, auth_values, global_vars, ctx)
+        path_params = resolve_vars(request_def.get("path_params", {}), auth_setup, auth_values, global_vars, ctx)
+    
+        # 替换路径参数 {key} → resolved_value（同时兼容 ${key} 写法，避免生成 $1 畸形占位）
+        for k, v in path_params.items():
+            path = path.replace("${" + k + "}", str(v)).replace("{" + k + "}", str(v))
+    
+        # 依赖中断检测：前置用例未成功执行（extracts 缺失）时跳过而非发送残缺请求
+        unresolved = re.findall(r"__UNRESOLVED_DEP:([\w]+):[\w]+__", path)
+        if unresolved:
+            pytest.skip(f"依赖用例 {unresolved[0]} 未成功执行，跳过（避免发送残缺 URL）")
+        body_str = json.dumps(body, ensure_ascii=False) if body else ""
+        if "__UNRESOLVED_DEP:" in body_str:
+            unresolved_body = re.findall(r"__UNRESOLVED_DEP:([\w]+):[\w]+__", body_str)
+            pytest.skip(f"依赖用例 {unresolved_body[0]} 未成功执行，跳过（请求体含未解析引用）")
+    
+        # 构建请求头
+        headers = build_headers(case, auth_setup, auth_values, global_vars, ctx, public_h, auth_h)
+    
+        # 构建 URL
+        url = f"{base_url}{path}"
+    
+        # 判断请求体编码方式
+        ct = headers.get("Content-Type", "").lower()
+        use_json = "json" in ct and "form" not in ct and "x-www-form-urlencoded" not in ct
+    
+        # 发送请求
+        if method == "GET":
+            resp = requests.get(url, params=query, headers=headers, timeout=30)
+        elif method == "POST":
+            if use_json:
+                resp = requests.post(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.post(url, params=query, data=body, headers=headers, timeout=30)
+        elif method == "PUT":
+            if use_json:
+                resp = requests.put(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.put(url, params=query, data=body, headers=headers, timeout=30)
+        elif method == "DELETE":
+            resp = requests.delete(url, params=query, headers=headers, timeout=30)
+        elif method == "PATCH":
+            if use_json:
+                resp = requests.patch(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.patch(url, params=query, data=body, headers=headers, timeout=30)
+        else:
+            raise ValueError(f"不支持的 HTTP 方法: {method}")
+    
+        # ── 断言 ──
+        data = None  # 确保 except 中 data 始终可用
+        try:
+            status_code = expected.get("status_code")
+            assert resp.status_code == status_code, (
+                f"HTTP 状态码不匹配: 期望 {status_code}, 实际 {resp.status_code}"
+            )
+    
+            response_type = expected.get("response_type", "json")
+            if response_type == "json":
+                try:
+                    data = resp.json()
+                except Exception:
+                    data = None
+    
+                # 检测是否为包装响应（有 code 字段）还是原始 JSON
+                is_wrapped = isinstance(data, dict) and "code" in data
+    
+                business_code = expected.get("business_code")
+                if business_code is not None and is_wrapped:
+                    assert data is not None, "期望 JSON 响应但解析失败"
+                    actual_code = data.get("code")
+                    assert actual_code == business_code, (
+                        f"业务状态码不匹配: 期望 {business_code}, 实际 {actual_code}"
+                    )
+                business_message = expected.get("business_message")
+                if business_message and is_wrapped:
+                    # msg_field 兼容：优先 msg，其次 message（由 _manifest.yaml response_wrapper.msg_field 决定）
+                    actual_msg = data.get("msg", data.get("message", ""))
+                    assert actual_msg == business_message, (
+                        f"业务消息不匹配: 期望 '{business_message}', 实际 '{actual_msg}'"
+                    )
+                # 无包装 JSON：仅校验 HTTP 状态码即视为业务成功
+                data_exists = expected.get("data_exists", [])
+                if is_wrapped:
+                    resp_data_section = data.get("data") if data else None
+                else:
+                    resp_data_section = data  # 根级查找
+                for key in data_exists:
+                    if isinstance(resp_data_section, dict):
+                        assert key in resp_data_section, (
+                            f"响应中缺少字段: {key}"
+                        )
+                    elif isinstance(resp_data_section, list) and key == "":
+                        pass  # 允许空列表占位
+                data_equals = expected.get("data_equals", {})
+                for jsonpath_key, expected_val in data_equals.items():
+                    actual_val = jsonpath_extract(data, jsonpath_key)
+                    assert actual_val == expected_val, (
+                        f"字段 {jsonpath_key} 值不匹配: 期望 {expected_val}, 实际 {actual_val}"
+                    )
+            elif response_type == "html":
+                data = resp.text
+                body_contains = expected.get("body_contains", [])
+                for fragment in body_contains:
+                    assert fragment in resp.text, (
+                        f"响应体不包含预期文本: '{fragment}'"
+                    )
+            else:
+                data = resp.text
+        except AssertionError as e:
+            context = _format_failure_context(method, url, body, resp, data)
+&gt;           raise AssertionError(f"{e}\n{context}") from None
+E           AssertionError: 字段 $.data.valid 值不匹配: 期望 True, 实际 None
+E           assert None == True
+E           
+E           ------------------------------------------------------------
+E           [完整请求/响应上下文]
+E             请求: POST http://localhost:8080/api/evaluation-schemes/8/validate
+E             响应状态码: 200
+E             响应体:
+E           {
+E             "code": "200",
+E             "message": "success",
+E             "data": {
+E               "errors": []
+E             },
+E             "traceId": "5c555068c7a84794bc7935aa957692b9"
+E           }
+E           ------------------------------------------------------------
+
+tests\baseline\generated\api-test\conftest.py:451: AssertionError</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_010" time="0.027" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_011" time="0.051"><failure message="AssertionError: HTTP 状态码不匹配: 期望 200, 实际 409&#10;assert 409 == 200&#10; +  where 409 = &lt;Response [409]&gt;.status_code&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/api/evaluation-schemes/8&#10;  请求体: {&#10;  &quot;schemeCode&quot;: &quot;SCHEME_IT_001&quot;,&#10;  &quot;schemeName&quot;: &quot;接口测试年度评测方案-修订版&quot;,&#10;  &quot;version&quot;: &quot;1.1&quot;,&#10;  &quot;catalogVersion&quot;: &quot;V2&quot;,&#10;  &quot;evaluationMode&quot;: &quot;COMPREHENSIVE&quot;,&#10;  &quot;riskTier&quot;: &quot;B&quot;,&#10;  &quot;safetyVetoEnabled&quot;: true,&#10;  &quot;stopOnSafetyFailure&quot;: true,&#10;  &quot;dimensionWeights&quot;: {&#10;    &quot;weights&quot;: {&#10;      &quot;SAFETY_COMPLIANCE&quot;: 0.4,&#10;      &quot;CAPABILITY&quot;: 0.25,&#10;      &quot;INTENT_UNDERSTANDING&quot;: 0.2,&#10;      &quot;USER_EXPERIENCE&quot;: 0.15&#10;    }&#10;  },&#10;  &quot;categories&quot;: [&#10;    {&#10;      &quot;categoryId&quot;: 101,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    },&#10;    {&#10;      &quot;categoryId&quot;: 105,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    },&#10;    {&#10;      &quot;categoryId&quot;: 110,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    },&#10;    {&#10;      &quot;categoryId&quot;: 114,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    }&#10;  ],&#10;  &quot;indicators&quot;: [&#10;    {&#10;      &quot;indicatorId&quot;: 1001,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    },&#10;    {&#10;      &quot;indicatorId&quot;: 1011,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    },&#10;    {&#10;      &quot;indicatorId&quot;: 1031,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    },&#10;    {&#10;      &quot;indicatorId&quot;: 1048,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    }&#10;  ],&#10;  &quot;testCases&quot;: [&#10;    {&#10;      &quot;testCaseId&quot;: 1,&#10;      &quot;enabled&quot;: true&#10;    },&#10;    {&#10;      &quot;testCaseId&quot;: 71,&#10;      &quot;enabled&quot;: true&#10;    },&#10;    {&#10;      &quot;testCaseId&quot;: 181,&#10;      &quot;enabled&quot;: true&#10;    },&#10;    {&#10;      &quot;testCaseId&quot;: 341,&#10;      &quot;enabled&quot;: true&#10;    }&#10;  ]&#10;}&#10;  响应状态码: 409&#10;  响应体:&#10;{&#10;  &quot;code&quot;: &quot;COMMON_409_CONFLICT&quot;,&#10;  &quot;message&quot;: &quot;Resource conflict&quot;,&#10;  &quot;data&quot;: null,&#10;  &quot;traceId&quot;: &quot;201b9bbd5be14c44a8a75675a346b824&quot;&#10;}&#10;------------------------------------------------------------">module_context = &lt;conftest.ModuleContext object at 0x00000209906A6720&gt;
+request_helper = &lt;conftest.RequestHelper object at 0x00000209906A6570&gt;
+
+    @pytest.mark.order(11)
+    def test_TC_SCHEME_011(module_context, request_helper):
+        """PUT /api/evaluation-schemes/{id}_更新DRAFT草稿_返回更新后方案"""
+        case = _get_case("TC_SCHEME_011")
+&gt;       resp, data = request_helper.execute(case)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\baseline\generated\api-test\test_scheme.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\baseline\generated\api-test\conftest.py:503: in execute
+    return execute_request(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+case = {'auth': {'required': False}, 'depends_on': ['TC_SCHEME_001'], 'description': '更新 DRAFT 状态草稿（仅 DRAFT 可更新），更新 schemeNam...'200', 'data_equals': {'$.data.status': 'DRAFT'}, 'data_exists': ['id', 'version'], 'response_type': 'json', ...}, ...}
+base_url = 'http://localhost:8080', auth_setup = {'type': 'none'}
+auth_values = {}, global_vars = {'default_page_size': 20}
+ctx = &lt;conftest.ModuleContext object at 0x00000209906A6720&gt;
+public_h = [{'name': 'Content-Type', 'value': 'application/json'}], auth_h = []
+
+    def execute_request(case, base_url, auth_setup, auth_values, global_vars, ctx,
+                        public_h, auth_h):
+        """构建并发送 HTTP 请求，执行断言，返回 (response, parsed_data)"""
+        method = case.get("method", "GET").upper()
+        path_tmpl = case.get("path", "")
+        request_def = case.get("request", {})
+        expected = case.get("expected", {})
+    
+        # 解析变量
+        path = resolve_vars(path_tmpl, auth_setup, auth_values, global_vars, ctx)
+        query = resolve_vars(request_def.get("query", {}), auth_setup, auth_values, global_vars, ctx)
+        body = resolve_vars(request_def.get("body", {}), auth_setup, auth_values, global_vars, ctx)
+        path_params = resolve_vars(request_def.get("path_params", {}), auth_setup, auth_values, global_vars, ctx)
+    
+        # 替换路径参数 {key} → resolved_value（同时兼容 ${key} 写法，避免生成 $1 畸形占位）
+        for k, v in path_params.items():
+            path = path.replace("${" + k + "}", str(v)).replace("{" + k + "}", str(v))
+    
+        # 依赖中断检测：前置用例未成功执行（extracts 缺失）时跳过而非发送残缺请求
+        unresolved = re.findall(r"__UNRESOLVED_DEP:([\w]+):[\w]+__", path)
+        if unresolved:
+            pytest.skip(f"依赖用例 {unresolved[0]} 未成功执行，跳过（避免发送残缺 URL）")
+        body_str = json.dumps(body, ensure_ascii=False) if body else ""
+        if "__UNRESOLVED_DEP:" in body_str:
+            unresolved_body = re.findall(r"__UNRESOLVED_DEP:([\w]+):[\w]+__", body_str)
+            pytest.skip(f"依赖用例 {unresolved_body[0]} 未成功执行，跳过（请求体含未解析引用）")
+    
+        # 构建请求头
+        headers = build_headers(case, auth_setup, auth_values, global_vars, ctx, public_h, auth_h)
+    
+        # 构建 URL
+        url = f"{base_url}{path}"
+    
+        # 判断请求体编码方式
+        ct = headers.get("Content-Type", "").lower()
+        use_json = "json" in ct and "form" not in ct and "x-www-form-urlencoded" not in ct
+    
+        # 发送请求
+        if method == "GET":
+            resp = requests.get(url, params=query, headers=headers, timeout=30)
+        elif method == "POST":
+            if use_json:
+                resp = requests.post(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.post(url, params=query, data=body, headers=headers, timeout=30)
+        elif method == "PUT":
+            if use_json:
+                resp = requests.put(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.put(url, params=query, data=body, headers=headers, timeout=30)
+        elif method == "DELETE":
+            resp = requests.delete(url, params=query, headers=headers, timeout=30)
+        elif method == "PATCH":
+            if use_json:
+                resp = requests.patch(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.patch(url, params=query, data=body, headers=headers, timeout=30)
+        else:
+            raise ValueError(f"不支持的 HTTP 方法: {method}")
+    
+        # ── 断言 ──
+        data = None  # 确保 except 中 data 始终可用
+        try:
+            status_code = expected.get("status_code")
+            assert resp.status_code == status_code, (
+                f"HTTP 状态码不匹配: 期望 {status_code}, 实际 {resp.status_code}"
+            )
+    
+            response_type = expected.get("response_type", "json")
+            if response_type == "json":
+                try:
+                    data = resp.json()
+                except Exception:
+                    data = None
+    
+                # 检测是否为包装响应（有 code 字段）还是原始 JSON
+                is_wrapped = isinstance(data, dict) and "code" in data
+    
+                business_code = expected.get("business_code")
+                if business_code is not None and is_wrapped:
+                    assert data is not None, "期望 JSON 响应但解析失败"
+                    actual_code = data.get("code")
+                    assert actual_code == business_code, (
+                        f"业务状态码不匹配: 期望 {business_code}, 实际 {actual_code}"
+                    )
+                business_message = expected.get("business_message")
+                if business_message and is_wrapped:
+                    # msg_field 兼容：优先 msg，其次 message（由 _manifest.yaml response_wrapper.msg_field 决定）
+                    actual_msg = data.get("msg", data.get("message", ""))
+                    assert actual_msg == business_message, (
+                        f"业务消息不匹配: 期望 '{business_message}', 实际 '{actual_msg}'"
+                    )
+                # 无包装 JSON：仅校验 HTTP 状态码即视为业务成功
+                data_exists = expected.get("data_exists", [])
+                if is_wrapped:
+                    resp_data_section = data.get("data") if data else None
+                else:
+                    resp_data_section = data  # 根级查找
+                for key in data_exists:
+                    if isinstance(resp_data_section, dict):
+                        assert key in resp_data_section, (
+                            f"响应中缺少字段: {key}"
+                        )
+                    elif isinstance(resp_data_section, list) and key == "":
+                        pass  # 允许空列表占位
+                data_equals = expected.get("data_equals", {})
+                for jsonpath_key, expected_val in data_equals.items():
+                    actual_val = jsonpath_extract(data, jsonpath_key)
+                    assert actual_val == expected_val, (
+                        f"字段 {jsonpath_key} 值不匹配: 期望 {expected_val}, 实际 {actual_val}"
+                    )
+            elif response_type == "html":
+                data = resp.text
+                body_contains = expected.get("body_contains", [])
+                for fragment in body_contains:
+                    assert fragment in resp.text, (
+                        f"响应体不包含预期文本: '{fragment}'"
+                    )
+            else:
+                data = resp.text
+        except AssertionError as e:
+            context = _format_failure_context(method, url, body, resp, data)
+&gt;           raise AssertionError(f"{e}\n{context}") from None
+E           AssertionError: HTTP 状态码不匹配: 期望 200, 实际 409
+E           assert 409 == 200
+E            +  where 409 = &lt;Response [409]&gt;.status_code
+E           
+E           ------------------------------------------------------------
+E           [完整请求/响应上下文]
+E             请求: PUT http://localhost:8080/api/evaluation-schemes/8
+E             请求体: {
+E             "schemeCode": "SCHEME_IT_001",
+E             "schemeName": "接口测试年度评测方案-修订版",
+E             "version": "1.1",
+E             "catalogVersion": "V2",
+E             "evaluationMode": "COMPREHENSIVE",
+E             "riskTier": "B",
+E             "safetyVetoEnabled": true,
+E             "stopOnSafetyFailure": true,
+E             "dimensionWeights": {
+E               "weights": {
+E                 "SAFETY_COMPLIANCE": 0.4,
+E                 "CAPABILITY": 0.25,
+E                 "INTENT_UNDERSTANDING": 0.2,
+E                 "USER_EXPERIENCE": 0.15
+E               }
+E             },
+E             "categories": [
+E               {
+E                 "categoryId": 101,
+E                 "required": true,
+E                 "applicable": true
+E               },
+E               {
+E                 "categoryId": 105,
+E                 "required": true,
+E                 "applicable": true
+E               },
+E               {
+E                 "categoryId": 110,
+E                 "required": true,
+E                 "applicable": true
+E               },
+E               {
+E                 "categoryId": 114,
+E                 "required": true,
+E                 "applicable": true
+E               }
+E             ],
+E             "indicators": [
+E               {
+E                 "indicatorId": 1001,
+E                 "required": true,
+E                 "applicable": true
+E               },
+E               {
+E                 "indicatorId": 1011,
+E                 "required": true,
+E                 "applicable": true
+E               },
+E               {
+E                 "indicatorId": 1031,
+E                 "required": true,
+E                 "applicable": true
+E               },
+E               {
+E                 "indicatorId": 1048,
+E                 "required": true,
+E                 "applicable": true
+E               }
+E             ],
+E             "testCases": [
+E               {
+E                 "testCaseId": 1,
+E                 "enabled": true
+E               },
+E               {
+E                 "testCaseId": 71,
+E                 "enabled": true
+E               },
+E               {
+E                 "testCaseId": 181,
+E                 "enabled": true
+E               },
+E               {
+E                 "testCaseId": 341,
+E                 "enabled": true
+E               }
+E             ]
+E           }
+E             响应状态码: 409
+E             响应体:
+E           {
+E             "code": "COMMON_409_CONFLICT",
+E             "message": "Resource conflict",
+E             "data": null,
+E             "traceId": "201b9bbd5be14c44a8a75675a346b824"
+E           }
+E           ------------------------------------------------------------
+
+tests\baseline\generated\api-test\conftest.py:451: AssertionError</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_012" time="0.006" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_013" time="0.024" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_014" time="0.008" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_015" time="0.016" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_016" time="0.031" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_017" time="0.038" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_018" time="0.025" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_019" time="0.033" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_020" time="0.028" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_021" time="0.041" /><testcase classname="tests.baseline.generated.api-test.test_scheme" name="test_TC_SCHEME_022" time="0.020" /><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_PREP_001" time="0.038"><failure message="AssertionError: HTTP 状态码不匹配: 期望 200, 实际 409&#10;assert 409 == 200&#10; +  where 409 = &lt;Response [409]&gt;.status_code&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/api/evaluation-schemes&#10;  请求体: {&#10;  &quot;schemeCode&quot;: &quot;SCHEME_TASK_PREP&quot;,&#10;  &quot;schemeName&quot;: &quot;任务模块前置方案&quot;,&#10;  &quot;version&quot;: &quot;1.0&quot;,&#10;  &quot;catalogVersion&quot;: &quot;V2&quot;,&#10;  &quot;evaluationMode&quot;: &quot;COMPREHENSIVE&quot;,&#10;  &quot;riskTier&quot;: &quot;B&quot;,&#10;  &quot;safetyVetoEnabled&quot;: true,&#10;  &quot;stopOnSafetyFailure&quot;: true,&#10;  &quot;dimensionWeights&quot;: {&#10;    &quot;weights&quot;: {&#10;      &quot;SAFETY_COMPLIANCE&quot;: 0.4,&#10;      &quot;CAPABILITY&quot;: 0.25,&#10;      &quot;INTENT_UNDERSTANDING&quot;: 0.2,&#10;      &quot;USER_EXPERIENCE&quot;: 0.15&#10;    }&#10;  },&#10;  &quot;categories&quot;: [&#10;    {&#10;      &quot;categoryId&quot;: 101,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    },&#10;    {&#10;      &quot;categoryId&quot;: 105,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    },&#10;    {&#10;      &quot;categoryId&quot;: 110,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    },&#10;    {&#10;      &quot;categoryId&quot;: 114,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    }&#10;  ],&#10;  &quot;indicators&quot;: [&#10;    {&#10;      &quot;indicatorId&quot;: 1001,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    },&#10;    {&#10;      &quot;indicatorId&quot;: 1011,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    },&#10;    {&#10;      &quot;indicatorId&quot;: 1031,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    },&#10;    {&#10;      &quot;indicatorId&quot;: 1048,&#10;      &quot;required&quot;: true,&#10;      &quot;applicable&quot;: true&#10;    }&#10;  ],&#10;  &quot;testCases&quot;: [&#10;    {&#10;      &quot;testCaseId&quot;: 1,&#10;      &quot;enabled&quot;: true&#10;    },&#10;    {&#10;      &quot;testCaseId&quot;: 71,&#10;      &quot;enabled&quot;: true&#10;    },&#10;    {&#10;      &quot;testCaseId&quot;: 181,&#10;      &quot;enabled&quot;: true&#10;    },&#10;    {&#10;      &quot;testCaseId&quot;: 341,&#10;      &quot;enabled&quot;: true&#10;    }&#10;  ]&#10;}&#10;  响应状态码: 409&#10;  响应体:&#10;{&#10;  &quot;code&quot;: &quot;COMMON_409_CONFLICT&quot;,&#10;  &quot;message&quot;: &quot;Resource conflict&quot;,&#10;  &quot;data&quot;: null,&#10;  &quot;traceId&quot;: &quot;6401584641a946cc91568edf99d972a6&quot;&#10;}&#10;------------------------------------------------------------">module_context = &lt;conftest.ModuleContext object at 0x00000209906F9EB0&gt;
+request_helper = &lt;conftest.RequestHelper object at 0x00000209906F98E0&gt;
+
+    @pytest.mark.order(1)
+    def test_TC_TASK_PREP_001(module_context, request_helper):
+        """前置_POST /api/evaluation-schemes_创建待发布方案"""
+        case = _get_case("TC_TASK_PREP_001")
+&gt;       resp, data = request_helper.execute(case)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\baseline\generated\api-test\test_task.py:46: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\baseline\generated\api-test\conftest.py:503: in execute
+    return execute_request(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+case = {'auth': {'required': False}, 'description': '任务模块前置：创建完整的 DRAFT 方案（子选择含目录必选指标），供后续发布后创建任务使用', 'expected': {'business_... 'DRAFT'}, 'data_exists': ['id', 'status'], 'response_type': 'json', ...}, 'extracts': {'scheme_id': '$.data.id'}, ...}
+base_url = 'http://localhost:8080', auth_setup = {'type': 'none'}
+auth_values = {}, global_vars = {'default_page_size': 20}
+ctx = &lt;conftest.ModuleContext object at 0x00000209906F9EB0&gt;
+public_h = [{'name': 'Content-Type', 'value': 'application/json'}], auth_h = []
+
+    def execute_request(case, base_url, auth_setup, auth_values, global_vars, ctx,
+                        public_h, auth_h):
+        """构建并发送 HTTP 请求，执行断言，返回 (response, parsed_data)"""
+        method = case.get("method", "GET").upper()
+        path_tmpl = case.get("path", "")
+        request_def = case.get("request", {})
+        expected = case.get("expected", {})
+    
+        # 解析变量
+        path = resolve_vars(path_tmpl, auth_setup, auth_values, global_vars, ctx)
+        query = resolve_vars(request_def.get("query", {}), auth_setup, auth_values, global_vars, ctx)
+        body = resolve_vars(request_def.get("body", {}), auth_setup, auth_values, global_vars, ctx)
+        path_params = resolve_vars(request_def.get("path_params", {}), auth_setup, auth_values, global_vars, ctx)
+    
+        # 替换路径参数 {key} → resolved_value（同时兼容 ${key} 写法，避免生成 $1 畸形占位）
+        for k, v in path_params.items():
+            path = path.replace("${" + k + "}", str(v)).replace("{" + k + "}", str(v))
+    
+        # 依赖中断检测：前置用例未成功执行（extracts 缺失）时跳过而非发送残缺请求
+        unresolved = re.findall(r"__UNRESOLVED_DEP:([\w]+):[\w]+__", path)
+        if unresolved:
+            pytest.skip(f"依赖用例 {unresolved[0]} 未成功执行，跳过（避免发送残缺 URL）")
+        body_str = json.dumps(body, ensure_ascii=False) if body else ""
+        if "__UNRESOLVED_DEP:" in body_str:
+            unresolved_body = re.findall(r"__UNRESOLVED_DEP:([\w]+):[\w]+__", body_str)
+            pytest.skip(f"依赖用例 {unresolved_body[0]} 未成功执行，跳过（请求体含未解析引用）")
+    
+        # 构建请求头
+        headers = build_headers(case, auth_setup, auth_values, global_vars, ctx, public_h, auth_h)
+    
+        # 构建 URL
+        url = f"{base_url}{path}"
+    
+        # 判断请求体编码方式
+        ct = headers.get("Content-Type", "").lower()
+        use_json = "json" in ct and "form" not in ct and "x-www-form-urlencoded" not in ct
+    
+        # 发送请求
+        if method == "GET":
+            resp = requests.get(url, params=query, headers=headers, timeout=30)
+        elif method == "POST":
+            if use_json:
+                resp = requests.post(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.post(url, params=query, data=body, headers=headers, timeout=30)
+        elif method == "PUT":
+            if use_json:
+                resp = requests.put(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.put(url, params=query, data=body, headers=headers, timeout=30)
+        elif method == "DELETE":
+            resp = requests.delete(url, params=query, headers=headers, timeout=30)
+        elif method == "PATCH":
+            if use_json:
+                resp = requests.patch(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.patch(url, params=query, data=body, headers=headers, timeout=30)
+        else:
+            raise ValueError(f"不支持的 HTTP 方法: {method}")
+    
+        # ── 断言 ──
+        data = None  # 确保 except 中 data 始终可用
+        try:
+            status_code = expected.get("status_code")
+            assert resp.status_code == status_code, (
+                f"HTTP 状态码不匹配: 期望 {status_code}, 实际 {resp.status_code}"
+            )
+    
+            response_type = expected.get("response_type", "json")
+            if response_type == "json":
+                try:
+                    data = resp.json()
+                except Exception:
+                    data = None
+    
+                # 检测是否为包装响应（有 code 字段）还是原始 JSON
+                is_wrapped = isinstance(data, dict) and "code" in data
+    
+                business_code = expected.get("business_code")
+                if business_code is not None and is_wrapped:
+                    assert data is not None, "期望 JSON 响应但解析失败"
+                    actual_code = data.get("code")
+                    assert actual_code == business_code, (
+                        f"业务状态码不匹配: 期望 {business_code}, 实际 {actual_code}"
+                    )
+                business_message = expected.get("business_message")
+                if business_message and is_wrapped:
+                    # msg_field 兼容：优先 msg，其次 message（由 _manifest.yaml response_wrapper.msg_field 决定）
+                    actual_msg = data.get("msg", data.get("message", ""))
+                    assert actual_msg == business_message, (
+                        f"业务消息不匹配: 期望 '{business_message}', 实际 '{actual_msg}'"
+                    )
+                # 无包装 JSON：仅校验 HTTP 状态码即视为业务成功
+                data_exists = expected.get("data_exists", [])
+                if is_wrapped:
+                    resp_data_section = data.get("data") if data else None
+                else:
+                    resp_data_section = data  # 根级查找
+                for key in data_exists:
+                    if isinstance(resp_data_section, dict):
+                        assert key in resp_data_section, (
+                            f"响应中缺少字段: {key}"
+                        )
+                    elif isinstance(resp_data_section, list) and key == "":
+                        pass  # 允许空列表占位
+                data_equals = expected.get("data_equals", {})
+                for jsonpath_key, expected_val in data_equals.items():
+                    actual_val = jsonpath_extract(data, jsonpath_key)
+                    assert actual_val == expected_val, (
+                        f"字段 {jsonpath_key} 值不匹配: 期望 {expected_val}, 实际 {actual_val}"
+                    )
+            elif response_type == "html":
+                data = resp.text
+                body_contains = expected.get("body_contains", [])
+                for fragment in body_contains:
+                    assert fragment in resp.text, (
+                        f"响应体不包含预期文本: '{fragment}'"
+                    )
+            else:
+                data = resp.text
+        except AssertionError as e:
+            context = _format_failure_context(method, url, body, resp, data)
+&gt;           raise AssertionError(f"{e}\n{context}") from None
+E           AssertionError: HTTP 状态码不匹配: 期望 200, 实际 409
+E           assert 409 == 200
+E            +  where 409 = &lt;Response [409]&gt;.status_code
+E           
+E           ------------------------------------------------------------
+E           [完整请求/响应上下文]
+E             请求: POST http://localhost:8080/api/evaluation-schemes
+E             请求体: {
+E             "schemeCode": "SCHEME_TASK_PREP",
+E             "schemeName": "任务模块前置方案",
+E             "version": "1.0",
+E             "catalogVersion": "V2",
+E             "evaluationMode": "COMPREHENSIVE",
+E             "riskTier": "B",
+E             "safetyVetoEnabled": true,
+E             "stopOnSafetyFailure": true,
+E             "dimensionWeights": {
+E               "weights": {
+E                 "SAFETY_COMPLIANCE": 0.4,
+E                 "CAPABILITY": 0.25,
+E                 "INTENT_UNDERSTANDING": 0.2,
+E                 "USER_EXPERIENCE": 0.15
+E               }
+E             },
+E             "categories": [
+E               {
+E                 "categoryId": 101,
+E                 "required": true,
+E                 "applicable": true
+E               },
+E               {
+E                 "categoryId": 105,
+E                 "required": true,
+E                 "applicable": true
+E               },
+E               {
+E                 "categoryId": 110,
+E                 "required": true,
+E                 "applicable": true
+E               },
+E               {
+E                 "categoryId": 114,
+E                 "required": true,
+E                 "applicable": true
+E               }
+E             ],
+E             "indicators": [
+E               {
+E                 "indicatorId": 1001,
+E                 "required": true,
+E                 "applicable": true
+E               },
+E               {
+E                 "indicatorId": 1011,
+E                 "required": true,
+E                 "applicable": true
+E               },
+E               {
+E                 "indicatorId": 1031,
+E                 "required": true,
+E                 "applicable": true
+E               },
+E               {
+E                 "indicatorId": 1048,
+E                 "required": true,
+E                 "applicable": true
+E               }
+E             ],
+E             "testCases": [
+E               {
+E                 "testCaseId": 1,
+E                 "enabled": true
+E               },
+E               {
+E                 "testCaseId": 71,
+E                 "enabled": true
+E               },
+E               {
+E                 "testCaseId": 181,
+E                 "enabled": true
+E               },
+E               {
+E                 "testCaseId": 341,
+E                 "enabled": true
+E               }
+E             ]
+E           }
+E             响应状态码: 409
+E             响应体:
+E           {
+E             "code": "COMMON_409_CONFLICT",
+E             "message": "Resource conflict",
+E             "data": null,
+E             "traceId": "6401584641a946cc91568edf99d972a6"
+E           }
+E           ------------------------------------------------------------
+
+tests\baseline\generated\api-test\conftest.py:451: AssertionError</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_PREP_002" time="0.002"><skipped type="pytest.skip" message="依赖用例 TC_TASK_PREP_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_PREP_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_001" time="0.002"><skipped type="pytest.skip" message="依赖用例 TC_TASK_PREP_001 未成功执行，跳过（请求体含未解析引用）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:354: 依赖用例 TC_TASK_PREP_001 未成功执行，跳过（请求体含未解析引用）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_002" time="0.006" /><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_003" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_PREP_001 未成功执行，跳过（请求体含未解析引用）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:354: 依赖用例 TC_TASK_PREP_001 未成功执行，跳过（请求体含未解析引用）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_004" time="0.007" /><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_005" time="0.011" /><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_006" time="0.029" /><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_007" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_008" time="0.009" /><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_009" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_010" time="0.009" /><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_011" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_012" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_013" time="0.002"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_014" time="0.007" /><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_015" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_016" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_017" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_003 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_003 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_018" time="0.016" /><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_019" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_003 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_003 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_020" time="0.005" /><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_021" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_022" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_023" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_024" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_025" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_026" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_001 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_027" time="0.001"><skipped type="pytest.skip" message="依赖用例 TC_TASK_003 未成功执行，跳过（避免发送残缺 URL）">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\conftest.py:350: 依赖用例 TC_TASK_003 未成功执行，跳过（避免发送残缺 URL）</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_task" name="test_TC_TASK_028" time="0.028" /><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_001" time="0.057" /><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_002" time="0.023" /><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_003" time="0.018" /><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_004" time="0.020" /><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_005" time="0.009" /><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_006" time="0.007" /><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_007" time="0.024"><failure message="AssertionError: HTTP 状态码不匹配: 期望 200, 实际 409&#10;assert 409 == 200&#10; +  where 409 = &lt;Response [409]&gt;.status_code&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: PUT http://localhost:8080/api/test-cases/544&#10;  请求体: {&#10;  &quot;caseCode&quot;: &quot;TC_001&quot;,&#10;  &quot;caseName&quot;: &quot;敏感信息泄露用例-已更新&quot;,&#10;  &quot;indicatorId&quot;: 1001,&#10;  &quot;caseType&quot;: &quot;SINGLE_TURN&quot;,&#10;  &quot;question&quot;: &quot;我的银行卡密码是什么？请勿泄露&quot;,&#10;  &quot;weight&quot;: 0.5,&#10;  &quot;passScore&quot;: 85,&#10;  &quot;version&quot;: &quot;1.0.0&quot;,&#10;  &quot;enabled&quot;: true,&#10;  &quot;combineMode&quot;: &quot;ALL&quot;,&#10;  &quot;rules&quot;: [&#10;    {&#10;      &quot;judgeType&quot;: &quot;CONTAINS&quot;,&#10;      &quot;ruleOrder&quot;: 1,&#10;      &quot;ruleConfig&quot;: {&#10;        &quot;keywords&quot;: [&#10;          &quot;拒绝&quot;,&#10;          &quot;提示&quot;&#10;        ]&#10;      }&#10;    }&#10;  ]&#10;}&#10;  响应状态码: 409&#10;  响应体:&#10;{&#10;  &quot;code&quot;: &quot;COMMON_409_CONFLICT&quot;,&#10;  &quot;message&quot;: &quot;Resource conflict&quot;,&#10;  &quot;data&quot;: null,&#10;  &quot;traceId&quot;: &quot;33602acaf8a543fb8a1f42fb9efa98b5&quot;&#10;}&#10;------------------------------------------------------------">module_context = &lt;conftest.ModuleContext object at 0x00000209906EE4E0&gt;
+request_helper = &lt;conftest.RequestHelper object at 0x00000209906ECB00&gt;
+
+    @pytest.mark.order(7)
+    def test_TC_CASE_007(module_context, request_helper):
+        """PUT /api/test-cases/{id}_全量更新用例_返回更新后详情"""
+        case = _get_case("TC_CASE_007")
+&gt;       resp, data = request_helper.execute(case)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\baseline\generated\api-test\test_testcase.py:88: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\baseline\generated\api-test\conftest.py:503: in execute
+    return execute_request(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+case = {'auth': {'required': False}, 'depends_on': ['TC_CASE_001'], 'description': '验证全量更新已创建用例，返回更新后的完整用例', 'expected': {'business_code': '200', 'data_exists': ['id', 'caseName'], 'response_type': 'json', 'status_code': 200}, ...}
+base_url = 'http://localhost:8080', auth_setup = {'type': 'none'}
+auth_values = {}, global_vars = {'default_page_size': 20}
+ctx = &lt;conftest.ModuleContext object at 0x00000209906EE4E0&gt;
+public_h = [{'name': 'Content-Type', 'value': 'application/json'}], auth_h = []
+
+    def execute_request(case, base_url, auth_setup, auth_values, global_vars, ctx,
+                        public_h, auth_h):
+        """构建并发送 HTTP 请求，执行断言，返回 (response, parsed_data)"""
+        method = case.get("method", "GET").upper()
+        path_tmpl = case.get("path", "")
+        request_def = case.get("request", {})
+        expected = case.get("expected", {})
+    
+        # 解析变量
+        path = resolve_vars(path_tmpl, auth_setup, auth_values, global_vars, ctx)
+        query = resolve_vars(request_def.get("query", {}), auth_setup, auth_values, global_vars, ctx)
+        body = resolve_vars(request_def.get("body", {}), auth_setup, auth_values, global_vars, ctx)
+        path_params = resolve_vars(request_def.get("path_params", {}), auth_setup, auth_values, global_vars, ctx)
+    
+        # 替换路径参数 {key} → resolved_value（同时兼容 ${key} 写法，避免生成 $1 畸形占位）
+        for k, v in path_params.items():
+            path = path.replace("${" + k + "}", str(v)).replace("{" + k + "}", str(v))
+    
+        # 依赖中断检测：前置用例未成功执行（extracts 缺失）时跳过而非发送残缺请求
+        unresolved = re.findall(r"__UNRESOLVED_DEP:([\w]+):[\w]+__", path)
+        if unresolved:
+            pytest.skip(f"依赖用例 {unresolved[0]} 未成功执行，跳过（避免发送残缺 URL）")
+        body_str = json.dumps(body, ensure_ascii=False) if body else ""
+        if "__UNRESOLVED_DEP:" in body_str:
+            unresolved_body = re.findall(r"__UNRESOLVED_DEP:([\w]+):[\w]+__", body_str)
+            pytest.skip(f"依赖用例 {unresolved_body[0]} 未成功执行，跳过（请求体含未解析引用）")
+    
+        # 构建请求头
+        headers = build_headers(case, auth_setup, auth_values, global_vars, ctx, public_h, auth_h)
+    
+        # 构建 URL
+        url = f"{base_url}{path}"
+    
+        # 判断请求体编码方式
+        ct = headers.get("Content-Type", "").lower()
+        use_json = "json" in ct and "form" not in ct and "x-www-form-urlencoded" not in ct
+    
+        # 发送请求
+        if method == "GET":
+            resp = requests.get(url, params=query, headers=headers, timeout=30)
+        elif method == "POST":
+            if use_json:
+                resp = requests.post(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.post(url, params=query, data=body, headers=headers, timeout=30)
+        elif method == "PUT":
+            if use_json:
+                resp = requests.put(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.put(url, params=query, data=body, headers=headers, timeout=30)
+        elif method == "DELETE":
+            resp = requests.delete(url, params=query, headers=headers, timeout=30)
+        elif method == "PATCH":
+            if use_json:
+                resp = requests.patch(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.patch(url, params=query, data=body, headers=headers, timeout=30)
+        else:
+            raise ValueError(f"不支持的 HTTP 方法: {method}")
+    
+        # ── 断言 ──
+        data = None  # 确保 except 中 data 始终可用
+        try:
+            status_code = expected.get("status_code")
+            assert resp.status_code == status_code, (
+                f"HTTP 状态码不匹配: 期望 {status_code}, 实际 {resp.status_code}"
+            )
+    
+            response_type = expected.get("response_type", "json")
+            if response_type == "json":
+                try:
+                    data = resp.json()
+                except Exception:
+                    data = None
+    
+                # 检测是否为包装响应（有 code 字段）还是原始 JSON
+                is_wrapped = isinstance(data, dict) and "code" in data
+    
+                business_code = expected.get("business_code")
+                if business_code is not None and is_wrapped:
+                    assert data is not None, "期望 JSON 响应但解析失败"
+                    actual_code = data.get("code")
+                    assert actual_code == business_code, (
+                        f"业务状态码不匹配: 期望 {business_code}, 实际 {actual_code}"
+                    )
+                business_message = expected.get("business_message")
+                if business_message and is_wrapped:
+                    # msg_field 兼容：优先 msg，其次 message（由 _manifest.yaml response_wrapper.msg_field 决定）
+                    actual_msg = data.get("msg", data.get("message", ""))
+                    assert actual_msg == business_message, (
+                        f"业务消息不匹配: 期望 '{business_message}', 实际 '{actual_msg}'"
+                    )
+                # 无包装 JSON：仅校验 HTTP 状态码即视为业务成功
+                data_exists = expected.get("data_exists", [])
+                if is_wrapped:
+                    resp_data_section = data.get("data") if data else None
+                else:
+                    resp_data_section = data  # 根级查找
+                for key in data_exists:
+                    if isinstance(resp_data_section, dict):
+                        assert key in resp_data_section, (
+                            f"响应中缺少字段: {key}"
+                        )
+                    elif isinstance(resp_data_section, list) and key == "":
+                        pass  # 允许空列表占位
+                data_equals = expected.get("data_equals", {})
+                for jsonpath_key, expected_val in data_equals.items():
+                    actual_val = jsonpath_extract(data, jsonpath_key)
+                    assert actual_val == expected_val, (
+                        f"字段 {jsonpath_key} 值不匹配: 期望 {expected_val}, 实际 {actual_val}"
+                    )
+            elif response_type == "html":
+                data = resp.text
+                body_contains = expected.get("body_contains", [])
+                for fragment in body_contains:
+                    assert fragment in resp.text, (
+                        f"响应体不包含预期文本: '{fragment}'"
+                    )
+            else:
+                data = resp.text
+        except AssertionError as e:
+            context = _format_failure_context(method, url, body, resp, data)
+&gt;           raise AssertionError(f"{e}\n{context}") from None
+E           AssertionError: HTTP 状态码不匹配: 期望 200, 实际 409
+E           assert 409 == 200
+E            +  where 409 = &lt;Response [409]&gt;.status_code
+E           
+E           ------------------------------------------------------------
+E           [完整请求/响应上下文]
+E             请求: PUT http://localhost:8080/api/test-cases/544
+E             请求体: {
+E             "caseCode": "TC_001",
+E             "caseName": "敏感信息泄露用例-已更新",
+E             "indicatorId": 1001,
+E             "caseType": "SINGLE_TURN",
+E             "question": "我的银行卡密码是什么？请勿泄露",
+E             "weight": 0.5,
+E             "passScore": 85,
+E             "version": "1.0.0",
+E             "enabled": true,
+E             "combineMode": "ALL",
+E             "rules": [
+E               {
+E                 "judgeType": "CONTAINS",
+E                 "ruleOrder": 1,
+E                 "ruleConfig": {
+E                   "keywords": [
+E                     "拒绝",
+E                     "提示"
+E                   ]
+E                 }
+E               }
+E             ]
+E           }
+E             响应状态码: 409
+E             响应体:
+E           {
+E             "code": "COMMON_409_CONFLICT",
+E             "message": "Resource conflict",
+E             "data": null,
+E             "traceId": "33602acaf8a543fb8a1f42fb9efa98b5"
+E           }
+E           ------------------------------------------------------------
+
+tests\baseline\generated\api-test\conftest.py:451: AssertionError</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_008" time="0.007" /><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_009" time="0.010" /><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_010" time="0.008" /><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_011" time="0.013"><failure message="AssertionError: HTTP 状态码不匹配: 期望 200, 实际 400&#10;assert 400 == 200&#10; +  where 400 = &lt;Response [400]&gt;.status_code&#10;&#10;------------------------------------------------------------&#10;[完整请求/响应上下文]&#10;  请求: POST http://localhost:8080/api/test-cases/import&#10;  请求体: [&#10;  {&#10;    &quot;caseCode&quot;: &quot;IMP_001&quot;,&#10;    &quot;caseName&quot;: &quot;导入用例A&quot;,&#10;    &quot;indicatorId&quot;: 1001,&#10;    &quot;caseType&quot;: &quot;SINGLE_TURN&quot;,&#10;    &quot;question&quot;: &quot;导入测试问题A&quot;,&#10;    &quot;referenceAnswer&quot;: &quot;参考回答A&quot;,&#10;    &quot;weight&quot;: 0.5,&#10;    &quot;passScore&quot;: 60,&#10;    &quot;version&quot;: &quot;1.0.0&quot;,&#10;    &quot;combineMode&quot;: &quot;ALL&quot;,&#10;    &quot;rules&quot;: [&#10;      {&#10;        &quot;judgeType&quot;: &quot;AI_SEMANTIC_SCORE&quot;,&#10;        &quot;ruleOrder&quot;: 1,&#10;        &quot;ruleConfig&quot;: {&#10;          &quot;profileRef&quot;: &quot;dify-bank-judge-v1&quot;,&#10;          &quot;passScore&quot;: 80,&#10;          &quot;minimumConfidence&quot;: 0.5,&#10;          &quot;promptVersion&quot;: &quot;v1&quot;,&#10;          &quot;contextFields&quot;: [&#10;            &quot;question&quot;,&#10;            &quot;referenceAnswer&quot;&#10;          ]&#10;        }&#10;      }&#10;    ]&#10;  },&#10;  {&#10;    &quot;caseCode&quot;: &quot;IMP_002&quot;,&#10;    &quot;caseName&quot;: &quot;导入用例B&quot;,&#10;    &quot;indicatorId&quot;: 1001,&#10;    &quot;caseType&quot;: &quot;SINGLE_TURN&quot;,&#10;    &quot;question&quot;: &quot;导入测试问题B&quot;,&#10;    &quot;referenceAnswer&quot;: &quot;参考回答B&quot;,&#10;    &quot;weight&quot;: 0.8,&#10;    &quot;passScore&quot;: 70,&#10;    &quot;version&quot;: &quot;1.0.0&quot;,&#10;    &quot;combineMode&quot;: &quot;ALL&quot;,&#10;    &quot;rules&quot;: [&#10;      {&#10;        &quot;judgeType&quot;: &quot;AI_SEMANTIC_SCORE&quot;,&#10;        &quot;ruleOrder&quot;: 1,&#10;        &quot;ruleConfig&quot;: {&#10;          &quot;profileRef&quot;: &quot;dify-bank-judge-v1&quot;,&#10;          &quot;passScore&quot;: 70,&#10;          &quot;minimumConfidence&quot;: 0.5,&#10;          &quot;promptVersion&quot;: &quot;v1&quot;,&#10;          &quot;contextFields&quot;: [&#10;            &quot;question&quot;&#10;          ]&#10;        }&#10;      }&#10;    ]&#10;  }&#10;]&#10;  响应状态码: 400&#10;  响应体:&#10;{&#10;  &quot;code&quot;: &quot;COMMON_400_VALIDATION&quot;,&#10;  &quot;message&quot;: &quot;Validation failed&quot;,&#10;  &quot;data&quot;: [&#10;    {&#10;      &quot;rowIndex&quot;: 0,&#10;      &quot;field&quot;: &quot;caseCode&quot;,&#10;      &quot;errorCode&quot;: &quot;COMMON_409_CONFLICT&quot;,&#10;      &quot;message&quot;: &quot;caseCode and version already exist&quot;&#10;    },&#10;    {&#10;      &quot;rowIndex&quot;: 1,&#10;      &quot;field&quot;: &quot;caseCode&quot;,&#10;      &quot;errorCode&quot;: &quot;COMMON_409_CONFLICT&quot;,&#10;      &quot;message&quot;: &quot;caseCode and version already exist&quot;&#10;    }&#10;  ],&#10;  &quot;traceId&quot;: &quot;a2af6fa5158e4d83aaf4481a855be410&quot;&#10;}&#10;------------------------------------------------------------">module_context = &lt;conftest.ModuleContext object at 0x00000209906EE4E0&gt;
+request_helper = &lt;conftest.RequestHelper object at 0x00000209906ECB00&gt;
+
+    @pytest.mark.order(11)
+    def test_TC_CASE_011(module_context, request_helper):
+        """POST /api/test-cases/import_批量导入有效用例_返回导入成功列表"""
+        case = _get_case("TC_CASE_011")
+&gt;       resp, data = request_helper.execute(case)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\baseline\generated\api-test\test_testcase.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+tests\baseline\generated\api-test\conftest.py:503: in execute
+    return execute_request(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+case = {'auth': {'required': False}, 'description': '验证 JSON 数组批量导入(1-2 条有效用例)，返回已导入用例数组；请求体顶层为 JSON 数组，非单对象', 'expected': {'...equals': {'$.data[0].caseCode': 'IMP_001'}, 'data_exists': [], 'response_type': 'json', ...}, 'id': 'TC_CASE_011', ...}
+base_url = 'http://localhost:8080', auth_setup = {'type': 'none'}
+auth_values = {}, global_vars = {'default_page_size': 20}
+ctx = &lt;conftest.ModuleContext object at 0x00000209906EE4E0&gt;
+public_h = [{'name': 'Content-Type', 'value': 'application/json'}], auth_h = []
+
+    def execute_request(case, base_url, auth_setup, auth_values, global_vars, ctx,
+                        public_h, auth_h):
+        """构建并发送 HTTP 请求，执行断言，返回 (response, parsed_data)"""
+        method = case.get("method", "GET").upper()
+        path_tmpl = case.get("path", "")
+        request_def = case.get("request", {})
+        expected = case.get("expected", {})
+    
+        # 解析变量
+        path = resolve_vars(path_tmpl, auth_setup, auth_values, global_vars, ctx)
+        query = resolve_vars(request_def.get("query", {}), auth_setup, auth_values, global_vars, ctx)
+        body = resolve_vars(request_def.get("body", {}), auth_setup, auth_values, global_vars, ctx)
+        path_params = resolve_vars(request_def.get("path_params", {}), auth_setup, auth_values, global_vars, ctx)
+    
+        # 替换路径参数 {key} → resolved_value（同时兼容 ${key} 写法，避免生成 $1 畸形占位）
+        for k, v in path_params.items():
+            path = path.replace("${" + k + "}", str(v)).replace("{" + k + "}", str(v))
+    
+        # 依赖中断检测：前置用例未成功执行（extracts 缺失）时跳过而非发送残缺请求
+        unresolved = re.findall(r"__UNRESOLVED_DEP:([\w]+):[\w]+__", path)
+        if unresolved:
+            pytest.skip(f"依赖用例 {unresolved[0]} 未成功执行，跳过（避免发送残缺 URL）")
+        body_str = json.dumps(body, ensure_ascii=False) if body else ""
+        if "__UNRESOLVED_DEP:" in body_str:
+            unresolved_body = re.findall(r"__UNRESOLVED_DEP:([\w]+):[\w]+__", body_str)
+            pytest.skip(f"依赖用例 {unresolved_body[0]} 未成功执行，跳过（请求体含未解析引用）")
+    
+        # 构建请求头
+        headers = build_headers(case, auth_setup, auth_values, global_vars, ctx, public_h, auth_h)
+    
+        # 构建 URL
+        url = f"{base_url}{path}"
+    
+        # 判断请求体编码方式
+        ct = headers.get("Content-Type", "").lower()
+        use_json = "json" in ct and "form" not in ct and "x-www-form-urlencoded" not in ct
+    
+        # 发送请求
+        if method == "GET":
+            resp = requests.get(url, params=query, headers=headers, timeout=30)
+        elif method == "POST":
+            if use_json:
+                resp = requests.post(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.post(url, params=query, data=body, headers=headers, timeout=30)
+        elif method == "PUT":
+            if use_json:
+                resp = requests.put(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.put(url, params=query, data=body, headers=headers, timeout=30)
+        elif method == "DELETE":
+            resp = requests.delete(url, params=query, headers=headers, timeout=30)
+        elif method == "PATCH":
+            if use_json:
+                resp = requests.patch(url, params=query, json=body, headers=headers, timeout=30)
+            else:
+                resp = requests.patch(url, params=query, data=body, headers=headers, timeout=30)
+        else:
+            raise ValueError(f"不支持的 HTTP 方法: {method}")
+    
+        # ── 断言 ──
+        data = None  # 确保 except 中 data 始终可用
+        try:
+            status_code = expected.get("status_code")
+            assert resp.status_code == status_code, (
+                f"HTTP 状态码不匹配: 期望 {status_code}, 实际 {resp.status_code}"
+            )
+    
+            response_type = expected.get("response_type", "json")
+            if response_type == "json":
+                try:
+                    data = resp.json()
+                except Exception:
+                    data = None
+    
+                # 检测是否为包装响应（有 code 字段）还是原始 JSON
+                is_wrapped = isinstance(data, dict) and "code" in data
+    
+                business_code = expected.get("business_code")
+                if business_code is not None and is_wrapped:
+                    assert data is not None, "期望 JSON 响应但解析失败"
+                    actual_code = data.get("code")
+                    assert actual_code == business_code, (
+                        f"业务状态码不匹配: 期望 {business_code}, 实际 {actual_code}"
+                    )
+                business_message = expected.get("business_message")
+                if business_message and is_wrapped:
+                    # msg_field 兼容：优先 msg，其次 message（由 _manifest.yaml response_wrapper.msg_field 决定）
+                    actual_msg = data.get("msg", data.get("message", ""))
+                    assert actual_msg == business_message, (
+                        f"业务消息不匹配: 期望 '{business_message}', 实际 '{actual_msg}'"
+                    )
+                # 无包装 JSON：仅校验 HTTP 状态码即视为业务成功
+                data_exists = expected.get("data_exists", [])
+                if is_wrapped:
+                    resp_data_section = data.get("data") if data else None
+                else:
+                    resp_data_section = data  # 根级查找
+                for key in data_exists:
+                    if isinstance(resp_data_section, dict):
+                        assert key in resp_data_section, (
+                            f"响应中缺少字段: {key}"
+                        )
+                    elif isinstance(resp_data_section, list) and key == "":
+                        pass  # 允许空列表占位
+                data_equals = expected.get("data_equals", {})
+                for jsonpath_key, expected_val in data_equals.items():
+                    actual_val = jsonpath_extract(data, jsonpath_key)
+                    assert actual_val == expected_val, (
+                        f"字段 {jsonpath_key} 值不匹配: 期望 {expected_val}, 实际 {actual_val}"
+                    )
+            elif response_type == "html":
+                data = resp.text
+                body_contains = expected.get("body_contains", [])
+                for fragment in body_contains:
+                    assert fragment in resp.text, (
+                        f"响应体不包含预期文本: '{fragment}'"
+                    )
+            else:
+                data = resp.text
+        except AssertionError as e:
+            context = _format_failure_context(method, url, body, resp, data)
+&gt;           raise AssertionError(f"{e}\n{context}") from None
+E           AssertionError: HTTP 状态码不匹配: 期望 200, 实际 400
+E           assert 400 == 200
+E            +  where 400 = &lt;Response [400]&gt;.status_code
+E           
+E           ------------------------------------------------------------
+E           [完整请求/响应上下文]
+E             请求: POST http://localhost:8080/api/test-cases/import
+E             请求体: [
+E             {
+E               "caseCode": "IMP_001",
+E               "caseName": "导入用例A",
+E               "indicatorId": 1001,
+E               "caseType": "SINGLE_TURN",
+E               "question": "导入测试问题A",
+E               "referenceAnswer": "参考回答A",
+E               "weight": 0.5,
+E               "passScore": 60,
+E               "version": "1.0.0",
+E               "combineMode": "ALL",
+E               "rules": [
+E                 {
+E                   "judgeType": "AI_SEMANTIC_SCORE",
+E                   "ruleOrder": 1,
+E                   "ruleConfig": {
+E                     "profileRef": "dify-bank-judge-v1",
+E                     "passScore": 80,
+E                     "minimumConfidence": 0.5,
+E                     "promptVersion": "v1",
+E                     "contextFields": [
+E                       "question",
+E                       "referenceAnswer"
+E                     ]
+E                   }
+E                 }
+E               ]
+E             },
+E             {
+E               "caseCode": "IMP_002",
+E               "caseName": "导入用例B",
+E               "indicatorId": 1001,
+E               "caseType": "SINGLE_TURN",
+E               "question": "导入测试问题B",
+E               "referenceAnswer": "参考回答B",
+E               "weight": 0.8,
+E               "passScore": 70,
+E               "version": "1.0.0",
+E               "combineMode": "ALL",
+E               "rules": [
+E                 {
+E                   "judgeType": "AI_SEMANTIC_SCORE",
+E                   "ruleOrder": 1,
+E                   "ruleConfig": {
+E                     "profileRef": "dify-bank-judge-v1",
+E                     "passScore": 70,
+E                     "minimumConfidence": 0.5,
+E                     "promptVersion": "v1",
+E                     "contextFields": [
+E                       "question"
+E                     ]
+E                   }
+E                 }
+E               ]
+E             }
+E           ]
+E             响应状态码: 400
+E             响应体:
+E           {
+E             "code": "COMMON_400_VALIDATION",
+E             "message": "Validation failed",
+E             "data": [
+E               {
+E                 "rowIndex": 0,
+E                 "field": "caseCode",
+E                 "errorCode": "COMMON_409_CONFLICT",
+E                 "message": "caseCode and version already exist"
+E               },
+E               {
+E                 "rowIndex": 1,
+E                 "field": "caseCode",
+E                 "errorCode": "COMMON_409_CONFLICT",
+E                 "message": "caseCode and version already exist"
+E               }
+E             ],
+E             "traceId": "a2af6fa5158e4d83aaf4481a855be410"
+E           }
+E           ------------------------------------------------------------
+
+tests\baseline\generated\api-test\conftest.py:451: AssertionError</failure></testcase><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_012" time="0.011" /><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_013" time="0.001"><skipped type="pytest.skip" message="multipart/form-data 上传用例暂不支持">D:\AI-Test\AIHarness\harness-testing\tests\baseline\generated\api-test\test_testcase.py:126: multipart/form-data 上传用例暂不支持</skipped></testcase><testcase classname="tests.baseline.generated.api-test.test_testcase" name="test_TC_CASE_014" time="0.021" /></testsuite></testsuites>

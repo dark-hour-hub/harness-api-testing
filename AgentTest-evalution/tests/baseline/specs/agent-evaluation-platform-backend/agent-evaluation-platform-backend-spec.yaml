@@ -1,0 +1,779 @@
+module: agent-evaluation-platform-backend
+version: "0.3.0"
+analyzed_at: "2026-08-19"
+base_url: http://localhost:8080
+response_wrapper:
+  description: 所有 JSON 接口统一包装为 ApiResponse(code, message, data, traceId)；分页数据为 PageResult(items, page, pageSize, total)
+  properties:
+    code: { type: string, description: 成功固定 "200"，失败为 ErrorCode 枚举名 }
+    message: { type: string, description: 成功固定 "success" }
+    data: { type: object, nullable: true }
+    traceId: { type: string, description: X-Trace-Id 或服务端生成的 32 位十六进制 UUID }
+
+apis:
+  # ==================== agents ====================
+  - id: API_AGENT_LIST
+    method: GET
+    path: /api/agents
+    description: 分页查询 Agent 配置；过滤参数 agentCode/agentName/riskTier/adapterType/enabled，page 默认1，pageSize 默认20(1-100)
+    requires_auth: false
+    permissions: []
+    request:
+      type: query
+      properties:
+        agentCode: { type: string, required: false }
+        agentName: { type: string, required: false }
+        riskTier: { type: string, required: false, enum: [A, B, C, D] }
+        adapterType: { type: string, required: false, enum: [MINI_ZHEXIAOZHI, GENERIC_HTTP_JSON] }
+        enabled: { type: string, required: false }
+        page: { type: string, required: true, default: "1" }
+        pageSize: { type: string, required: true, default: "20" }
+    response:
+      type: object
+      properties:
+        data.items: { type: array, description: AgentResponse: id/agentCode/agentName/category/riskTier/department/version/agentType/adapterType/endpoint/method/requestTemplate/messageField/sessionField/answerField/successField/errorField/latencyField/tokenField/toolTraceField/timeoutMs/enabled/headerSecretConfigured/createdAt/updatedAt }
+        data.page: { type: integer }
+        data.pageSize: { type: integer }
+        data.total: { type: integer }
+
+  - id: API_AGENT_CREATE
+    method: POST
+    path: /api/agents
+    description: 创建 Agent 配置（无 @Valid，必填项由 Controller 手工校验）
+    requires_auth: false
+    permissions: []
+    request:
+      type: object
+      required: [agentCode, agentName, category, riskTier, version, agentType, adapterType, endpoint, method, timeoutMs]
+      properties:
+        agentCode: { type: string, required: true, pattern: "[A-Z0-9_]{2,64}" }
+        agentName: { type: string, required: true }
+        category: { type: string, required: true }
+        riskTier: { type: string, required: true, enum: [A, B, C, D] }
+        department: { type: string, required: false }
+        version: { type: string, required: true }
+        agentType: { type: string, required: true }
+        adapterType: { type: string, required: true, enum: [MINI_ZHEXIAOZHI, GENERIC_HTTP_JSON] }
+        endpoint: { type: string, required: true }
+        method: { type: string, required: true }
+        requestTemplate: { type: string, required: false }
+        messageField: { type: string, required: false }
+        sessionField: { type: string, required: false }
+        answerField: { type: string, required: false }
+        successField: { type: string, required: false }
+        errorField: { type: string, required: false }
+        latencyField: { type: string, required: false }
+        tokenField: { type: string, required: false }
+        toolTraceField: { type: string, required: false }
+        headerSecretRef: { type: string, required: false, pattern: "(?:env:[A-Za-z_][A-Za-z0-9_]*|secret:[A-Za-z0-9][A-Za-z0-9._:/-]*|app-[A-Za-z0-9]{6,})" }
+        timeoutMs: { type: string, required: true, description: "100-120000" }
+        enabled: { type: string, required: false, default: "true" }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: AgentResponse }
+
+  - id: API_AGENT_GET
+    method: GET
+    path: /api/agents/{id}
+    description: 按 ID 查询 Agent；id 必须为正整数，不存在 404 COMMON_404_RESOURCE
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, description: AgentResponse }
+
+  - id: API_AGENT_UPDATE
+    method: PUT
+    path: /api/agents/{id}
+    description: 更新 Agent 配置，请求体同 POST /api/agents
+    requires_auth: false
+    permissions: []
+    request:
+      type: object
+      required: [agentCode, agentName, category, riskTier, version, agentType, adapterType, endpoint, method, timeoutMs]
+      properties:
+        agentCode: { type: string, required: true, pattern: "[A-Z0-9_]{2,64}" }
+        agentName: { type: string, required: true }
+        category: { type: string, required: true }
+        riskTier: { type: string, required: true, enum: [A, B, C, D] }
+        version: { type: string, required: true }
+        agentType: { type: string, required: true }
+        adapterType: { type: string, required: true }
+        endpoint: { type: string, required: true }
+        method: { type: string, required: true }
+        timeoutMs: { type: string, required: true }
+        headerSecretRef: { type: string, required: false }
+        enabled: { type: string, required: false, default: "true" }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: AgentResponse }
+
+  - id: API_AGENT_DELETE
+    method: DELETE
+    path: /api/agents/{id}
+    description: 禁用或删除 Agent 配置，成功 data=null
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: "null" }
+
+  # ==================== indicators ====================
+  - id: API_INDICATOR_DIMENSION_LIST
+    method: GET
+    path: /api/indicator-dimensions
+    description: 指标维度列表；catalogVersion 缺省用默认版本
+    requires_auth: false
+    permissions: []
+    request:
+      type: query
+      properties:
+        catalogVersion: { type: string, required: false }
+    response:
+      type: object
+      properties:
+        data: { type: array, items: { type: object, properties: { id: { type: integer }, dimensionCode: { type: string }, name: { type: string }, defaultWeight: { type: number }, sortOrder: { type: integer }, enabled: { type: boolean } } } }
+
+  - id: API_INDICATOR_CATEGORY_LIST
+    method: GET
+    path: /api/indicator-categories
+    description: 指标分类列表；支持 dimensionCode/catalogVersion 过滤
+    requires_auth: false
+    permissions: []
+    request:
+      type: query
+      properties:
+        dimensionCode: { type: string, required: false }
+        catalogVersion: { type: string, required: false }
+    response:
+      type: object
+      properties:
+        data: { type: array, items: { type: object, properties: { id: { type: integer }, dimensionCode: { type: string }, categoryCode: { type: string }, name: { type: string }, defaultWeight: { type: number }, sortOrder: { type: integer }, enabled: { type: boolean } } } }
+
+  - id: API_INDICATOR_LIST
+    method: GET
+    path: /api/indicators
+    description: 分页查询指标；indicatorSet 默认 CORE；page/pageSize 默认 1/20
+    requires_auth: false
+    permissions: []
+    request:
+      type: query
+      properties:
+        dimensionCode: { type: string, required: false }
+        categoryCode: { type: string, required: false }
+        direction: { type: string, required: false, enum: [HIGHER_BETTER, LOWER_BETTER, SCORE_VALUE, RANGE_BETTER] }
+        collectionMethod: { type: string, required: false, enum: [AUTO_API, CONFIG_AUDIT, TOOL_TRACE, LLM_JUDGE, MANUAL_EXPERT, HISTORY_COMPARE, MONITORING, LOAD_TEST] }
+        indicatorSet: { type: string, required: true, default: "CORE" }
+        enabled: { type: string, required: false }
+        page: { type: string, required: true, default: "1" }
+        pageSize: { type: string, required: true, default: "20" }
+        catalogVersion: { type: string, required: false }
+    response:
+      type: object
+      properties:
+        data.items: { type: array, description: IndicatorResponse: id/indicatorCode/indicatorName/indicatorSet/dimensionCode/dimensionName/categoryCode/categoryName/definition/formulaDescription/unit/metricDirection/calculatorType/bestValue/worstValue/entryThreshold/runningThreshold/thresholdExpression/collectionMethod/defaultWeight/required/vetoEnabled/dataVersion/sourceNote/enabled/sortOrder/isoMappings[] }
+        data.page: { type: integer }
+        data.pageSize: { type: integer }
+        data.total: { type: integer }
+
+  - id: API_INDICATOR_GET
+    method: GET
+    path: /api/indicators/{id}
+    description: 按 ID 查询指标详情；id 必须为正整数
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, description: IndicatorResponse }
+
+  - id: API_INDICATOR_CATALOG_VERSION_LIST
+    method: GET
+    path: /api/indicator-catalog-versions
+    description: 已发布指标目录版本列表
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: array, items: { type: object, properties: { versionCode: { type: string }, displayName: { type: string }, status: { type: string, enum: [DRAFT, PUBLISHED, RETIRED] }, isDefault: { type: boolean }, dimensionCount: { type: integer }, categoryCount: { type: integer }, indicatorCount: { type: integer }, riskWeights: { type: object }, publishedAt: { type: string }, createdAt: { type: string } } } }
+
+  # ==================== test-cases ====================
+  - id: API_TEST_CASE_LIST
+    method: GET
+    path: /api/test-cases
+    description: 分页查询测试用例；支持 indicatorId/dimensionCode/categoryCode/caseType/enabled 过滤
+    requires_auth: false
+    permissions: []
+    request:
+      type: query
+      properties:
+        indicatorId: { type: string, required: false }
+        dimensionCode: { type: string, required: false }
+        categoryCode: { type: string, required: false }
+        caseType: { type: string, required: false, enum: [SINGLE_TURN, MULTI_TURN, TOOL_CALL, MANUAL_AUDIT] }
+        enabled: { type: string, required: false }
+        page: { type: string, required: true, default: "1" }
+        pageSize: { type: string, required: true, default: "20" }
+    response:
+      type: object
+      properties:
+        data.items: { type: array, description: TestCaseResponse: id/caseCode/caseName/indicatorId/caseType/question/conversationTurns[]/referenceAnswer/expectedBehavior/expectedIntent/expectedTool/expectedToolParameters{} /factReferences[]/weight/passScore/scenarioType/version/enabled/createdAt/updatedAt/rules[] }
+        data.page: { type: integer }
+        data.pageSize: { type: integer }
+        data.total: { type: integer }
+
+  - id: API_TEST_CASE_CREATE
+    method: POST
+    path: /api/test-cases
+    description: 创建测试用例（@Valid）：必填 caseCode/caseName/indicatorId/caseType/weight(>0)/passScore(0-100)/version/combineMode/rules(>=1)
+    requires_auth: false
+    permissions: []
+    request:
+      type: object
+      required: [caseCode, caseName, indicatorId, caseType, weight, passScore, version, combineMode, rules]
+      properties:
+        caseCode: { type: string, required: true, description: "@NotBlank" }
+        caseName: { type: string, required: true, description: "@NotBlank" }
+        indicatorId: { type: integer, required: true, description: "@NotNull @Positive" }
+        caseType: { type: string, required: true, enum: [SINGLE_TURN, MULTI_TURN, TOOL_CALL, MANUAL_AUDIT], description: "@NotNull" }
+        question: { type: string, required: false }
+        conversationTurns: { type: array, items: { type: string }, required: false }
+        referenceAnswer: { type: string, required: false }
+        expectedBehavior: { type: string, required: false }
+        expectedIntent: { type: string, required: false }
+        expectedTool: { type: string, required: false }
+        expectedToolParameters: { type: object, required: false }
+        factReferences: { type: array, items: { type: string }, required: false }
+        weight: { type: number, required: true, description: "@DecimalMin(0, exclusive)" }
+        passScore: { type: number, required: true, description: "@DecimalMin(0) @DecimalMax(100)" }
+        scenarioType: { type: string, required: false, default: "AUTO" }
+        version: { type: string, required: true, description: "@NotBlank" }
+        enabled: { type: boolean, required: false, default: true }
+        combineMode: { type: string, required: true, enum: [ALL, ANY, WEIGHTED], description: "@NotNull" }
+        rules:
+          type: array
+          required: true
+          description: "@NotEmpty"
+          items:
+            type: object
+            required: [judgeType, ruleOrder, ruleConfig]
+            properties:
+              judgeType: { type: string, required: true, enum: [EXACT_MATCH, CONTAINS, REGEX_MATCH, REFUSAL, SENSITIVE_LEAK, LATENCY, HTTP_SUCCESS, JSON_PATH, NUMERIC_COMPARE, MANUAL_SCORE, AI_SEMANTIC_SCORE] }
+              ruleOrder: { type: integer, required: true, description: "@Positive" }
+              weight: { type: number, required: false }
+              required: { type: boolean, required: false, default: true }
+              enabled: { type: boolean, required: false, default: true }
+              ruleConfig: { type: object, required: true }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: TestCaseResponse }
+
+  - id: API_TEST_CASE_GET
+    method: GET
+    path: /api/test-cases/{id}
+    description: 按 ID 查询用例；不存在 404 TEST_CASE_NOT_FOUND
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, description: TestCaseResponse }
+
+  - id: API_TEST_CASE_UPDATE
+    method: PUT
+    path: /api/test-cases/{id}
+    description: 更新测试用例，请求体同 POST /api/test-cases
+    requires_auth: false
+    permissions: []
+    request:
+      type: object
+      required: [caseCode, caseName, indicatorId, caseType, weight, passScore, version, combineMode, rules]
+      properties:
+        caseCode: { type: string, required: true }
+        caseName: { type: string, required: true }
+        indicatorId: { type: integer, required: true }
+        caseType: { type: string, required: true }
+        weight: { type: number, required: true }
+        passScore: { type: number, required: true }
+        version: { type: string, required: true }
+        combineMode: { type: string, required: true }
+        enabled: { type: boolean, required: false }
+        rules: { type: array, required: true, description: "同 POST 的 rules 结构" }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: TestCaseResponse }
+
+  - id: API_TEST_CASE_DELETE
+    method: DELETE
+    path: /api/test-cases/{id}
+    description: 软删除测试用例（保留历史引用）
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, description: TestCaseDeletionResult }
+
+  - id: API_TEST_CASE_IMPORT
+    method: POST
+    path: /api/test-cases/import
+    description: 批量导入用例（JSON 数组）；有行错误返回 400 COMMON_400_VALIDATION + ImportError 列表
+    requires_auth: false
+    permissions: []
+    request:
+      type: array
+      items: { type: object, description: "TestCaseRequest 结构，同 POST /api/test-cases" }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: "成功：imported TestCaseResponse[]；失败：ImportError[]（rowIndex/field/errorCode/message）" }
+
+  - id: API_TEST_CASE_IMPORT_EXCEL
+    method: POST
+    path: /api/test-cases/import/excel
+    description: Excel 导入测试用例（multipart/form-data）
+    requires_auth: false
+    permissions: []
+    request:
+      type: multipart
+      required: [file]
+      properties:
+        file: { type: file, required: true, description: "Excel .xlsx，非空" }
+        indicatorId: { type: integer, required: false, description: "默认指标 ID" }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: "成功：imported TestCaseResponse[]；失败：ImportError[]" }
+
+  - id: API_TEST_CASE_IMPORT_TEMPLATE
+    method: GET
+    path: /api/test-cases/import/template
+    description: 下载 Excel 导入模板（二进制附件，非 JSON）
+    requires_auth: false
+    permissions: []
+    response:
+      type: file
+      properties:
+        content_type: { type: string, description: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }
+        content_disposition: { type: string, description: "attachment; filename=test-case-import-template.xlsx" }
+
+  # ==================== evaluation-tasks ====================
+  - id: API_TASK_CREATE
+    method: POST
+    path: /api/evaluation-tasks
+    description: 创建评估任务（快照 Agent+已发布方案，不执行）
+    requires_auth: false
+    permissions: []
+    request:
+      type: object
+      required: [agentId, schemeId]
+      properties:
+        agentId: { type: integer, required: true, description: "@NotNull @Positive" }
+        schemeId: { type: integer, required: true, description: "@NotNull @Positive，已发布方案" }
+        createdBy: { type: string, required: false, description: "@Size(max=100)，默认 api" }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: "EvaluationTask：id/taskNo/agentId/schemeId/sourceSchemeId/sourceType/agentSnapshot/schemeSnapshot/snapshotHash/evaluationMode/riskTier/evaluationType/thresholdLevel/status/progress/startedAt/finishedAt/interruptionReason/createdBy/createdAt/updatedAt/cases[]" }
+
+  - id: API_TASK_CREATE_ADHOC
+    method: POST
+    path: /api/evaluation-tasks/ad-hoc
+    description: 基于当前配置创建临场任务（不保存方案）
+    requires_auth: false
+    permissions: []
+    request:
+      type: object
+      required: [agentId, evaluationMode, riskTier, indicators, testCaseIds]
+      properties:
+        agentId: { type: integer, required: true, description: "@NotNull @Positive" }
+        sourceSchemeId: { type: integer, required: false, description: "@Positive" }
+        catalogVersion: { type: string, required: false }
+        evaluationMode: { type: string, required: true, enum: [COMPREHENSIVE, SPECIAL] }
+        evaluationType: { type: string, required: false, description: "弃用" }
+        riskTier: { type: string, required: true, enum: [A, B, C, D] }
+        thresholdLevel: { type: string, required: false, description: "弃用" }
+        dimensionWeights: { type: object, required: false, description: "Map<维度编码,权重> 或 {safety,capability,evolution}" }
+        safetyVetoEnabled: { type: boolean, required: false, default: true }
+        stopOnSafetyFailure: { type: boolean, required: false, default: true }
+        scoringConfigJson: { type: string, required: false }
+        indicators:
+          type: array
+          required: true
+          description: "@NotEmpty"
+          items:
+            type: object
+            required: [indicatorId]
+            properties:
+              indicatorId: { type: integer, required: true, description: "@NotNull @Positive" }
+              weightOverride: { type: number, required: false, description: "@DecimalMin(0, exclusive)" }
+              thresholdOverride: { type: number, required: false, description: "@DecimalMin(0, exclusive)" }
+              normalizationOverrideJson: { type: string, required: false }
+              required: { type: boolean, required: false }
+        testCaseIds: { type: array, items: { type: integer }, required: true, description: "@NotEmpty，元素 @Positive" }
+        createdBy: { type: string, required: false, description: "@Size(max=100)" }
+    response:
+      type: object
+      properties:
+        data: { type: object, properties: { taskId: { type: integer }, taskNo: { type: string }, status: { type: string }, sourceType: { type: string, enum: [AD_HOC] }, sourceSchemeId: { type: integer, nullable: true } } }
+
+  - id: API_TASK_LIST
+    method: GET
+    path: /api/evaluation-tasks
+    description: 分页查询任务；status 过滤 CREATED/RUNNING/COMPLETED/FAILED
+    requires_auth: false
+    permissions: []
+    request:
+      type: query
+      properties:
+        status: { type: string, required: false, enum: [CREATED, RUNNING, COMPLETED, FAILED] }
+        page: { type: string, required: true, default: "1" }
+        pageSize: { type: string, required: true, default: "20" }
+    response:
+      type: object
+      properties:
+        data.items: { type: array, description: EvaluationTask[] }
+        data.page: { type: integer }
+        data.pageSize: { type: integer }
+        data.total: { type: integer }
+
+  - id: API_TASK_GET
+    method: GET
+    path: /api/evaluation-tasks/{id}
+    description: 按 ID 查询任务详情
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, description: EvaluationTask }
+
+  - id: API_TASK_PROGRESS
+    method: GET
+    path: /api/evaluation-tasks/{id}/progress
+    description: 查询任务持久化进度
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, properties: { taskId: { type: integer }, status: { type: string }, progress: { type: number }, totalCount: { type: integer }, completedCount: { type: integer }, successCount: { type: integer }, failureCount: { type: integer } } }
+
+  - id: API_TASK_RUN
+    method: POST
+    path: /api/evaluation-tasks/{id}/run
+    description: 启动任务执行；成功 HTTP 202；执行器不可用 503 TASK_503_EXECUTOR；状态冲突 409 TASK_409_STATUS
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, properties: { taskId: { type: integer }, status: { type: string }, progress: { type: number }, totalCount: { type: integer }, completedCount: { type: integer }, successCount: { type: integer }, failureCount: { type: integer } } }
+
+  # ==================== evaluation-schemes ====================
+  - id: API_SCHEME_LIST
+    method: GET
+    path: /api/evaluation-schemes
+    description: 分页查询评测方案；支持 schemeCode/schemeName/status/evaluationMode/evaluationType/riskTier 过滤
+    requires_auth: false
+    permissions: []
+    request:
+      type: query
+      properties:
+        schemeCode: { type: string, required: false }
+        schemeName: { type: string, required: false }
+        status: { type: string, required: false, enum: [DRAFT, PUBLISHED, ARCHIVED] }
+        evaluationMode: { type: string, required: false, enum: [COMPREHENSIVE, SPECIAL] }
+        evaluationType: { type: string, required: false, enum: [ENTRY, REGRESSION, RUNNING, SECURITY_SPECIAL] }
+        riskTier: { type: string, required: false, enum: [A, B, C, D] }
+        page: { type: string, required: true, default: "1" }
+        pageSize: { type: string, required: true, default: "20" }
+    response:
+      type: object
+      properties:
+        data.items: { type: array, description: "EvaluationSchemeResponse：id/schemeCode/schemeName/version/catalogVersion/status/evaluationMode/evaluationType/riskTier/thresholdLevel/dimensionWeights/safetyVetoEnabled/stopOnSafetyFailure/scoringConfigJson/createdAt/updatedAt/categories[]/indicators[]/testCases[]" }
+        data.page: { type: integer }
+        data.pageSize: { type: integer }
+        data.total: { type: integer }
+
+  - id: API_SCHEME_CREATE
+    method: POST
+    path: /api/evaluation-schemes
+    description: 创建方案草稿（@Valid）；version 必须为数字点分格式
+    requires_auth: false
+    permissions: []
+    request:
+      type: object
+      required: [schemeCode, schemeName, version, evaluationMode, riskTier]
+      properties:
+        schemeCode: { type: string, required: true, description: "@NotBlank" }
+        schemeName: { type: string, required: true, description: "@NotBlank" }
+        version: { type: string, required: true, description: "@NotBlank @Size(max=64) @Pattern(数字点分版本号)" }
+        catalogVersion: { type: string, required: false }
+        evaluationMode: { type: string, required: true, enum: [COMPREHENSIVE, SPECIAL], description: "@NotNull" }
+        evaluationType: { type: string, required: false, description: "弃用" }
+        riskTier: { type: string, required: true, enum: [A, B, C, D], description: "@NotNull" }
+        thresholdLevel: { type: string, required: false, description: "弃用" }
+        dimensionWeights: { type: object, required: false }
+        safetyVetoEnabled: { type: boolean, required: false, default: true }
+        stopOnSafetyFailure: { type: boolean, required: false, default: true }
+        scoringConfigJson: { type: string, required: false }
+        categories:
+          type: array
+          required: false
+          items: { type: object, properties: { id: { type: integer }, categoryId: { type: integer }, weightOverride: { type: number }, required: { type: boolean }, applicable: { type: boolean } } }
+        indicators:
+          type: array
+          required: false
+          items: { type: object, properties: { id: { type: integer }, indicatorId: { type: integer }, weightOverride: { type: number }, thresholdOverride: { type: number }, normalizationOverrideJson: { type: string }, required: { type: boolean }, applicable: { type: boolean }, notApplicableReason: { type: string } } }
+        testCases:
+          type: array
+          required: false
+          items: { type: object, properties: { id: { type: integer }, testCaseId: { type: integer }, weightOverride: { type: number }, enabled: { type: boolean } } }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: EvaluationSchemeResponse }
+
+  - id: API_SCHEME_GET
+    method: GET
+    path: /api/evaluation-schemes/{id}
+    description: 按 ID 查询方案；不存在 404 SCHEME_NOT_FOUND
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, description: EvaluationSchemeResponse }
+
+  - id: API_SCHEME_UPDATE
+    method: PUT
+    path: /api/evaluation-schemes/{id}
+    description: 更新方案草稿，请求体同 POST /api/evaluation-schemes
+    requires_auth: false
+    permissions: []
+    request:
+      type: object
+      required: [schemeCode, schemeName, version, evaluationMode, riskTier]
+      properties:
+        schemeCode: { type: string, required: true }
+        schemeName: { type: string, required: true }
+        version: { type: string, required: true }
+        catalogVersion: { type: string, required: false }
+        evaluationMode: { type: string, required: true }
+        evaluationType: { type: string, required: false }
+        riskTier: { type: string, required: true }
+        safetyVetoEnabled: { type: boolean, required: false }
+        stopOnSafetyFailure: { type: boolean, required: false }
+        scoringConfigJson: { type: string, required: false }
+        categories: { type: array, required: false }
+        indicators: { type: array, required: false }
+        testCases: { type: array, required: false }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: EvaluationSchemeResponse }
+
+  - id: API_SCHEME_DELETE
+    method: DELETE
+    path: /api/evaluation-schemes/{id}
+    description: 删除方案：未引用草稿物理删除，被引用已发布方案归档；返回删除决策结果
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, properties: { schemeId: { type: integer }, originalStatus: { type: string }, action: { type: string, enum: [PHYSICALLY_DELETED, ARCHIVED] }, taskReferenceCount: { type: integer }, reportReferenceCount: { type: integer }, resultingStatus: { type: string } } }
+
+  - id: API_SCHEME_DELETION_IMPACT
+    method: GET
+    path: /api/evaluation-schemes/{id}/deletion-impact
+    description: 预览删除影响（不执行）
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, properties: { schemeId: { type: integer }, status: { type: string }, taskReferenceCount: { type: integer }, reportReferenceCount: { type: integer }, actionIfConfirmed: { type: string } } }
+
+  - id: API_SCHEME_VALIDATE
+    method: POST
+    path: /api/evaluation-schemes/{id}/validate
+    description: 校验方案草稿；失败 400 SCHEME_400_INVALID + 错误列表
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, properties: { errors: { type: array, items: { type: object, properties: { field: { type: string }, errorCode: { type: string }, message: { type: string } } } }, valid: { type: boolean } } }
+
+  - id: API_SCHEME_PUBLISH
+    method: POST
+    path: /api/evaluation-schemes/{id}/publish
+    description: 发布方案；状态冲突 409 SCHEME_409_STATUS
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, description: EvaluationSchemeResponse }
+
+  - id: API_SCHEME_CLONE
+    method: POST
+    path: /api/evaluation-schemes/{id}/clone
+    description: 克隆方案为草稿
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, description: EvaluationSchemeResponse }
+
+  - id: API_SCHEME_ARCHIVE
+    method: POST
+    path: /api/evaluation-schemes/{id}/archive
+    description: 显式归档方案；已归档 409 SCHEME_ALREADY_ARCHIVED
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, description: EvaluationSchemeResponse }
+
+  # ==================== results ====================
+  - id: API_TASK_FINALIZE
+    method: POST
+    path: /api/evaluation-tasks/{id}/finalize
+    description: 对不完整完成的任务显式重算评分；状态冲突 409
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, properties: { taskId: { type: integer }, finalized: { type: boolean } } }
+
+  - id: API_TASK_RESULTS
+    method: GET
+    path: /api/evaluation-tasks/{id}/results
+    description: 查询评测结果汇总；未就绪 409 TASK_409_RESULT_NOT_READY
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, description: "EvaluationResultResponse：taskId/taskStatus/agent{}/scheme{}/totalScore/grade/safetyVetoTriggered(弃用)/safetyVetoReason(弃用)/dimensions[]/categories[]/conclusion(弃用)/reportStatus/incompleteReason/specialScore/specialPassed/entryConclusion/runningConclusion/entrySafetyVeto*/runningSafetyVeto*/coverage{}/createdAt/startedAt/finishedAt/generatedAt" }
+
+  - id: API_TASK_RESULTS_INDICATORS
+    method: GET
+    path: /api/evaluation-tasks/{id}/results/indicators
+    description: 分页查询指标结果；status 必须命中 16 个白名单值
+    requires_auth: false
+    permissions: []
+    request:
+      type: query
+      properties:
+        status: { type: string, required: false, description: "COMPLETED/NOT_APPLICABLE/WAITING_MANUAL/WAITING_MONITORING/WAITING_LOAD_TEST/WAITING_HISTORY_BASELINE/WAITING_DATA/WAITING_AI_JUDGE/WAITING_REVIEW/NO_DATA/CALCULATION_FAILED/FAILED/PENDING/RUNNING/SUCCEEDED" }
+        dimensionCode: { type: string, required: false }
+        page: { type: string, required: true, default: "1" }
+        pageSize: { type: string, required: true, default: "20" }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: "PageResult<IndicatorResultResponse>：indicatorId/indicatorCode/indicatorName/dimensionCode/dimensionName/categoryCode/categoryName/rawValue/normalizedScore/weight/threshold(弃用)/passed(弃用)/status/entryThreshold/entryPassed/runningThreshold/runningPassed/completedCaseCount/applicableCaseCount/evidenceSummary/dataVersion/isoMappings[]" }
+
+  - id: API_TASK_CASE_RESULTS
+    method: GET
+    path: /api/evaluation-tasks/{id}/case-results
+    description: 分页查询用例判定结果；支持 indicatorId/status/passed 过滤
+    requires_auth: false
+    permissions: []
+    request:
+      type: query
+      properties:
+        indicatorId: { type: string, required: false }
+        status: { type: string, required: false }
+        passed: { type: string, required: false, description: "true/false" }
+        page: { type: string, required: true, default: "1" }
+        pageSize: { type: string, required: true, default: "20" }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: "PageResult<CaseResultResponse>：taskCaseId/caseId/caseCode/caseName/indicatorId/sequenceNo/executionStatus/judgementStatus/score(可空)/passed(可空)/evidenceSummary/failureReason/invocationStartedAt/invocationFinishedAt/judgedAt/judgeType/aiScore/aiPassed/aiReason/aiConfidence/provider/profileRef/modelName/modelVersion/promptVersion/aiStatus/aiErrorType/reviewStatus" }
+
+  - id: API_TASK_CALLS
+    method: GET
+    path: /api/evaluation-tasks/{id}/calls
+    description: 分页查询脱敏 Agent 调用记录；errorType 枚举校验
+    requires_auth: false
+    permissions: []
+    request:
+      type: query
+      properties:
+        success: { type: string, required: false, description: "true/false" }
+        errorType: { type: string, required: false, enum: [TIMEOUT, CONNECTION_FAILURE, HTTP_NON_2XX, EMPTY_RESPONSE, INVALID_JSON, ANSWER_FIELD_MISSING, TEMPLATE_ERROR, SECRET_RESOLUTION_FAILURE, UNSUPPORTED_CONFIGURATION] }
+        page: { type: string, required: true, default: "1" }
+        pageSize: { type: string, required: true, default: "20" }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: "PageResult<AgentCallResponse>：callId/taskId/taskCaseId/sequenceNo/httpStatus(可空)/latencyMs/success/errorType(可空)/answerMasked/requestSummaryMasked/errorMessageMasked/createdAt" }
+
+  - id: API_TASK_REPORT
+    method: GET
+    path: /api/evaluation-tasks/{id}/report
+    description: 查询唯一持久化评测报告；未就绪 409
+    requires_auth: false
+    permissions: []
+    response:
+      type: object
+      properties:
+        data: { type: object, description: "EvaluationReportResponse：taskId/taskStatus/reportStatus/totalScore/grade/specialScore/specialPassed/dimensions[]/safetyVetoTriggered(弃用)/safetyVetoReason(弃用)/conclusion(弃用)/entryConclusion/runningConclusion/entrySafetyVeto*/runningSafetyVeto*/incompleteReason/agent{}/scheme{}/summary/remediation/reportVersion/generatedAt" }
+
+  # ==================== measurements ====================
+  - id: API_MEASUREMENT_SUBMIT
+    method: POST
+    path: /api/evaluation-tasks/{taskId}/measurements
+    description: 提交指标测量草稿证据（DRAFT）；无校验注解，所有字段可选
+    requires_auth: false
+    permissions: []
+    request:
+      type: object
+      properties:
+        indicatorId: { type: integer, required: false }
+        measurementType: { type: string, required: false }
+        rawValue: { type: number, required: false }
+        unit: { type: string, required: false }
+        measurementPayloadJson: { type: string, required: false }
+        sourceSystem: { type: string, required: false }
+        sourceReference: { type: string, required: false }
+        periodStart: { type: string, required: false, format: datetime }
+        periodEnd: { type: string, required: false, format: datetime }
+        collectedAt: { type: string, required: false, format: datetime }
+        submittedBy: { type: string, required: false }
+        remark: { type: string, required: false }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: "IndicatorMeasurementResponse：id/taskId/indicatorId/measurementType/status(DRAFT)/rawValue/unit/measurementPayloadJson/sourceSystem/sourceReference/periodStart/periodEnd/collectedAt/submittedBy/confirmedBy(可空)/confirmedAt(可空)/remark/createdAt" }
+
+  - id: API_MEASUREMENT_CONFIRM
+    method: POST
+    path: /api/evaluation-tasks/{taskId}/measurements/{measurementId}/confirm
+    description: 确认草稿证据（DRAFT→CONFIRMED）；重复确认 409，任务/记录不存在 404
+    requires_auth: false
+    permissions: []
+    request:
+      type: object
+      properties:
+        confirmedBy: { type: string, required: false }
+    response:
+      type: object
+      properties:
+        data: { type: object, description: "IndicatorMeasurementResponse（status=CONFIRMED）" }

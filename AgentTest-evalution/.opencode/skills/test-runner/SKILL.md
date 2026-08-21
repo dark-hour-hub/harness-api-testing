@@ -1,0 +1,121 @@
+---
+name: test-runner
+description: 执行 generated/api-test/ 下的 pytest 测试脚本并生成 HTML 报告。触发方式：/test-runner、运行API测试、执行接口测试、生成测试报告、pytest api test、run api tests and generate report、跑接口测试、执行pytest测试。每次用户提到运行测试、执行测试脚本、生成测试报告时使用此 skill。
+---
+
+# API 测试执行与报告生成
+
+执行 pytest 测试脚本并生成 HTML 报告。
+
+## 参数
+
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|:---:|--------|------|
+| `mode` | enum | 否 | `baseline` | `baseline` = 全量模式；`diff` = 增量模式 |
+
+路径决议（按 mode）：
+
+| 路径变量 | `baseline` | `diff` |
+|---------|----------|--------|
+| `TEST_DIR` | `tests/baseline/generated/api-test` | `tests/diff/generated/api-test` |
+| `REPORT_DIR` | `tests/baseline/report/api-test` | `tests/diff/report/api-test` |
+
+## 范围
+
+此 skill 仅做两件事：**执行** pytest 测试脚本 + **生成** HTML 报告。不分析、不修复、不重跑。
+
+## 铁律
+
+执行结束后，无论通过率多少，**严格禁止**以下行为：
+
+- 禁止分析失败用例的根因（即使失败率很高）
+- 禁止查看失败用例的响应体或错误堆栈
+- 禁止修改 YAML 测试用例定义
+- 禁止修改生成的 pytest 测试脚本
+- 禁止向用户建议修复方案
+- 禁止重新执行测试（即使只改了一个小参数）
+- 禁止说"让我验证一下"、"让我看一眼"、"再跑一次确认"
+
+**红牌思想** — 出现以下念头时立刻停止：
+
+| 红牌思想 | 现实 |
+|---------|------|
+| "失败率这么高，我看一眼原因" | 分析失败 = 违反铁律。输出摘要即结束。 |
+| "改一个小参数就能全过" | 修改 YAML/脚本 = 违反铁律。 |
+| "让我验证修复效果" | 验证 = error-analyzer 的事，不是 test-runner 的事。 |
+| "再跑一次确认是不是偶发" | 禁止重跑。一次运行，一个报告。 |
+| "这个错误很明显，我可以快速定位" | 不难也不准。结束。 |
+
+**唯一允许的动作**：按下方输出模板输出统计摘要和报告路径；若存在失败用例，追加一句"是否分析本次失败用例"的询问（后续交给 `post-run-analysis` skill），然后结束。
+
+## 输出模板
+
+执行完成后**严格按此格式**输出，不增减内容：
+
+```
+**测试执行完成**
+
+| 文件 | 用例数 | 通过 | 失败 | 错误 | 耗时 |
+|------|--------|------|------|------|------|
+| test_xxx.py | N | N | N | N | Xs |
+
+**合计**: N 通过 / M 总计 (X%)
+**报告**: `${REPORT_DIR}/report_<timestamp>.html`
+```
+
+最后一行"报告"之后不再输出任何内容。存在失败用例时仅可追加"是否分析本次失败用例"的一句询问（交给 `post-run-analysis` skill），不追加分析建议。
+
+## 执行模式：逐文件隔离
+
+每个 `test_*.py` 文件以**独立 pytest 进程**执行，确保：
+
+- **Token 隔离**：每个模块独立登录获取 token，登出/改密码等破坏性用例不会影响其他模块
+- **进程隔离**：单个文件 crash 或超时不影响其他文件继续执行
+- **模块边界清晰**：报告按文件分组，一目了然
+
+所有文件执行完毕后，自动合并各模块的 JUnit XML 结果，生成一份聚合 HTML 报告。
+
+## 执行步骤
+
+直接执行脚本并生成报告：
+
+```bash
+# 全量模式（默认）
+python .opencode/skills/test-runner/scripts/run_tests.py --mode baseline
+
+# 增量模式
+python .opencode/skills/test-runner/scripts/run_tests.py --mode diff
+```
+
+可选参数：
+```bash
+python .opencode/skills/test-runner/scripts/run_tests.py -m smoke        # 只运行冒烟测试
+python .opencode/skills/test-runner/scripts/run_tests.py -k "test_auth"  # 运行特定模块
+python .opencode/skills/test-runner/scripts/run_tests.py --test-path <dir> --output <dir>  # 显式指定路径（优先级高于 --mode）
+```
+
+报告命名格式：`report_<YYYYMMDD_HHMMSS>.html`，同时更新 `latest.html` 指向最新报告。
+
+## 报告内容
+
+HTML 报告含摘要卡片、失败分类、通过率饼图、耗时分布图、详细结果表（含筛选/分页/按模块分组）。样式定义在 `template/report_template.html`。
+
+## 输出文件
+
+| 文件 | 路径 | 说明 |
+|------|------|------|
+| 测试报告 | `${REPORT_DIR}/report_<timestamp>.html` | 带时间戳的聚合报告 |
+| 最新报告 | `${REPORT_DIR}/latest.html` | 始终指向最新报告 |
+| JUnit 缓存 | `${REPORT_DIR}/.cache/results_<module>.xml` | 各模块独立 XML（临时） |
+
+## 报告后的经验沉淀钩子（重要）
+
+本 skill 只负责执行 + 报告，**不分析失败**（铁律见上）。但报告已产出：
+- 若本次执行 **0 失败**：正常结束，无需后续动作。
+- 若存在失败：**在输出统计与报告路径后，主动询问用户是否分析本次失败用例**（调用 `post-run-analysis` skill），例如：
+
+  > 本次 API 测试有 N 个失败用例。是否分析失败原因并沉淀为项目级/企业级经验？
+
+  由用户决定；用户同意后，分析、归类、确认、回写等流程交给 `post-run-analysis` skill 执行，本 skill 不再参与。
+
+- 前置检查（可选增强）：执行前可先读 `D:\AI-Test\AIHarness\experience-library\ENTERPRISE-KNOWN-ISSUES.md` 对照已知的企业级坑（如残留清理、编码、断言取真实值），避免重复踩坑。

@@ -1,0 +1,135 @@
+module: testcase
+module_name: "测试用例模块"
+base_url: "http://localhost:8080"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+
+scenarios:
+  - id: PERF_TESTCASE_001
+    title: "GET /api/test-cases_100并发_60s"
+    priority: P0
+    method: GET
+    path: "/api/test-cases"
+    description: "验证测试用例分页列表查询在 100 并发下的响应时间与吞吐"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+        pageSize: 10
+    load:
+      users: 100
+      ramp_up: 10
+      duration: 60
+    thresholds:
+      p95: 800
+      error_rate: 0.01
+      min_rps: 30
+
+  - id: PERF_TESTCASE_002
+    title: "POST /api/test-cases_50并发_60s"
+    priority: P1
+    method: POST
+    path: "/api/test-cases"
+    description: "验证创建测试用例在 50 并发下的响应时间与吞吐"
+    auth:
+      required: false
+    request:
+      body:
+        caseCode: "PERF_TC_${__RandomString(12,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789)}"
+        caseName: "压测用例"
+        indicatorId: 1001
+        caseType: "SINGLE_TURN"
+        question: "压测问题示例"
+        weight: 1
+        passScore: 60
+        version: "1.0"
+        combineMode: "ALL"
+        rules:
+          - judgeType: "CONTAINS"
+            ruleOrder: 1
+            ruleConfig:
+              keywords: ["压测"]
+              matchMode: "ANY"
+    load:
+      users: 50
+      ramp_up: 5
+      duration: 60
+    thresholds:
+      p95: 800
+      error_rate: 0.01
+      min_rps: 20
+
+  - id: PERF_TESTCASE_003
+    title: "POST /api/test-cases/import_20并发_30s"
+    priority: P2
+    method: POST
+    path: "/api/test-cases/import"
+    description: "验证批量导入测试用例（JSON 数组）在 20 并发下的响应时间与吞吐"
+    auth:
+      required: false
+    request:
+      body:
+        - caseCode: "PERF_TC_IMP_A_${__RandomString(12,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789)}"
+          caseName: "压测导入用例一"
+          indicatorId: 1001
+          caseType: "SINGLE_TURN"
+          question: "压测导入问题一"
+          referenceAnswer: "压测导入参考答案一"
+          weight: 1
+          passScore: 60
+          version: "1.0"
+          combineMode: "ALL"
+          rules:
+            - judgeType: "CONTAINS"
+              ruleOrder: 1
+              ruleConfig:
+                keywords: ["压测"]
+                matchMode: "ANY"
+        - caseCode: "PERF_TC_IMP_B_${__RandomString(12,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789)}"
+          caseName: "压测导入用例二"
+          indicatorId: 1001
+          caseType: "SINGLE_TURN"
+          question: "压测导入问题二"
+          referenceAnswer: "压测导入参考答案二"
+          weight: 1
+          passScore: 60
+          version: "1.0"
+          combineMode: "ALL"
+          rules:
+            - judgeType: "CONTAINS"
+              ruleOrder: 1
+              ruleConfig:
+                keywords: ["压测"]
+                matchMode: "ANY"
+    load:
+      users: 10
+      ramp_up: 2
+      duration: 30
+    thresholds:
+      p95: 800
+      error_rate: 0.01
+      min_rps: 10
+
+  - id: PERF_TESTCASE_004
+    title: "GET /api/test-cases/{id}_20并发_30s"
+    priority: P2
+    method: GET
+    path: "/api/test-cases/{id}"
+    description: "验证测试用例详情查询在 20 并发下的响应时间与吞吐"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "1"
+    load:
+      users: 20
+      ramp_up: 3
+      duration: 30
+    thresholds:
+      p95: 800
+      error_rate: 0.01
+      min_rps: 30

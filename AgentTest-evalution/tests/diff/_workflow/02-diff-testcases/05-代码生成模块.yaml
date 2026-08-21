@@ -1,0 +1,332 @@
+module: "tool"
+module_name: "代码生成模块"
+base_url: "http://localhost:8080"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    visitor:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    visitor:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+
+global_variables:
+  default_page_size: 10
+
+testcases:
+  - id: TC_TOOL_001
+    title: "GET /tool/gen/list_正常分页查询_返回业务表列表"
+    tags: [正常, 回归, 冒烟]
+    priority: P0
+    request:
+      method: GET
+      path: "/tool/gen/list"
+      params:
+        pageNum: 1
+        pageSize: 10
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 200
+      data_exists: ["rows"]
+
+  - id: TC_TOOL_002
+    title: "GET /tool/gen/list_无tool:gen:list权限_返回403"
+    tags: [异常, 回归]
+    priority: P1
+    request:
+      method: GET
+      path: "/tool/gen/list"
+    auth:
+      required: true
+      account: visitor
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 403
+
+  - id: TC_TOOL_003
+    title: "GET /tool/gen/{tableId}_正常查询详情_返回表与字段信息"
+    tags: [正常, 回归, 冒烟]
+    priority: P0
+    request:
+      method: GET
+      path: "/tool/gen/1"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 200
+      data_exists: ["info"]
+
+  - id: TC_TOOL_004
+    title: "GET /tool/gen/{tableId}_tableId不存在_返回500"
+    tags: [异常, 回归]
+    priority: P1
+    request:
+      method: GET
+      path: "/tool/gen/999999"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 500
+
+  - id: TC_TOOL_005
+    title: "GET /tool/gen/db/list_正常分页查询_返回未导入表列表"
+    tags: [正常, 回归]
+    priority: P0
+    request:
+      method: GET
+      path: "/tool/gen/db/list"
+      params:
+        pageNum: 1
+        pageSize: 10
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 200
+      data_exists: ["rows"]
+
+  - id: TC_TOOL_006
+    title: "GET /tool/gen/db/list_数据源元数据读取失败_返回500"
+    tags: [异常, 回归]
+    priority: P1
+    request:
+      method: GET
+      path: "/tool/gen/db/list"
+      params:
+        dataName: "not_exist_datasource"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 500
+
+  - id: TC_TOOL_007
+    title: "GET /tool/gen/column/{tableId}_正常查询字段列表_返回字段配置"
+    tags: [正常, 回归]
+    priority: P0
+    request:
+      method: GET
+      path: "/tool/gen/column/1"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 200
+      data_exists: ["rows"]
+
+  - id: TC_TOOL_008
+    title: "GET /tool/gen/column/{tableId}_tableId不存在_返回500"
+    tags: [异常, 回归]
+    priority: P1
+    request:
+      method: GET
+      path: "/tool/gen/column/999999"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 500
+
+  - id: TC_TOOL_009
+    title: "POST /tool/gen/importTable_正常导入表结构_操作成功"
+    tags: [正常, 回归]
+    priority: P0
+    request:
+      method: POST
+      path: "/tool/gen/importTable"
+      params:
+        tables: "sys_user,sys_role"
+        dataName: "master"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 200
+      data_exists: []
+
+  - id: TC_TOOL_010
+    title: "POST /tool/gen/importTable_缺失必填表名_返回500"
+    tags: [异常, 回归]
+    priority: P1
+    request:
+      method: POST
+      path: "/tool/gen/importTable"
+      params:
+        dataName: "master"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 500
+
+  - id: TC_TOOL_011
+    title: "DELETE /tool/gen/{tableIds}_正常批量删除_操作成功"
+    tags: [正常, 回归]
+    priority: P0
+    request:
+      method: DELETE
+      path: "/tool/gen/1"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 200
+      data_exists: []
+
+  - id: TC_TOOL_012
+    title: "DELETE /tool/gen/{tableIds}_tableIds含非数字_返回500"
+    tags: [异常, 回归]
+    priority: P1
+    request:
+      method: DELETE
+      path: "/tool/gen/abc"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 500
+
+  - id: TC_TOOL_013
+    title: "GET /tool/gen/preview/{tableId}_正常预览代码_返回文件内容"
+    tags: [正常, 回归]
+    priority: P0
+    request:
+      method: GET
+      path: "/tool/gen/preview/1"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 200
+      data_exists: ["vm/java/controller.java.vm"]
+
+  - id: TC_TOOL_014
+    title: "GET /tool/gen/preview/{tableId}_tableId不存在_返回500"
+    tags: [异常, 回归]
+    priority: P1
+    request:
+      method: GET
+      path: "/tool/gen/preview/999999"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 500
+
+  - id: TC_TOOL_015
+    title: "GET /tool/gen/synchDb/{tableId}_正常同步数据库_操作成功"
+    tags: [正常, 回归]
+    priority: P0
+    request:
+      method: GET
+      path: "/tool/gen/synchDb/1"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 200
+      data_exists: []
+
+  - id: TC_TOOL_016
+    title: "GET /tool/gen/synchDb/{tableId}_原表结构不存在_返回500"
+    tags: [异常, 回归]
+    priority: P1
+    request:
+      method: GET
+      path: "/tool/gen/synchDb/999999"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 500
+
+  - id: TC_TOOL_017
+    title: "GET /tool/gen/getDataNames_正常查询_返回数据源名称列表"
+    tags: [正常, 回归]
+    priority: P0
+    request:
+      method: GET
+      path: "/tool/gen/getDataNames"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 200
+      data_exists: ["master"]
+
+  - id: TC_TOOL_018
+    title: "GET /tool/gen/getDataNames_数据源辅助类读取失败_返回500"
+    tags: [异常, 回归]
+    priority: P1
+    request:
+      method: GET
+      path: "/tool/gen/getDataNames"
+    auth:
+      required: true
+      account: admin
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: 500

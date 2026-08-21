@@ -1,0 +1,89 @@
+# ============================================================
+# 源码配置
+# ============================================================
+source:
+  backend:
+    - name: "agent-test-backend"
+      path: 'D:\AI评测\智能体评测平台\agent-evaluation-platform-backend'
+      enabled: true
+      git:
+        repo: ""
+        branch: "main"
+
+  frontend:
+    - name: "agent-test-frontend"
+      path: 'D:\AI评测\智能体评测平台\agent-evaluation-platform-frontend'
+      enabled: true
+      git:
+        repo: ""
+        branch: "main"
+
+# ============================================================
+# 环境配置
+# ============================================================
+current_environment: "dev"
+environments:
+  dev:
+    frontend:
+      - name: "agent-test-frontend"
+        url: "http://localhost:5173"
+
+    backend:
+      - name: "agent-test-backend"
+        url: "http://localhost:8080"
+        description: "主应用服务"
+        accounts:
+          - role: ""
+            description: ""
+            username: ""
+            password: ""
+            clientId: ""
+            grantType: ""
+            tenantId: ""
+          - role: ""
+            description: ""
+            username: ""
+            password: ""
+            clientId: ""
+            grantType: ""
+            tenantId: ""
+      - name: ""
+        url: ""
+        description: ""
+        accounts:
+          - role: ""
+            description: ""
+            username: ""
+            password: ""
+      - name: ""
+        url: ""
+        description: ""
+        accounts:
+          - role: ""
+            description: ""
+            username: ""
+            password: ""
+
+  test:
+    frontend:
+      - name: ""
+        url: ""
+    backend:
+      - name: ""
+        url: ""
+
+  staging:
+    frontend:
+      - name: ""
+        url: ""
+    backend:
+      - name: ""
+        url: ""
+
+# ============================================================
+# 测试工具配置
+# ============================================================
+tools:
+  python: "C:/Users/17201/AppData/Local/Programs/Python/Python312"
+  jmeter: "D:/Jmeter/apache-jmeter-5.6.3/bin"
+  git: "D:/Git/Git/bin"

@@ -1,0 +1,63 @@
+# UI 场景清单 _manifest.yaml
+# 生成阶段: ui-scenario-design（场景设计）
+# 生成日期: 2026-08-20
+# 需求来源: tests/baseline/_workflow/00-requirements/ui-requirements.md（7 模块，已确认）
+
+system:
+  name: agent-evaluation-platform（智能体评测平台）
+  frontend_url: http://localhost:5173
+  auth: none（无登录流程，前端无登录路由）
+  view_routes:
+    - path: /overview
+      title: 总览
+    - path: /projects
+      title: 评测项目
+    - path: /indicators
+      title: 指标配置
+    - path: /execution/:taskId?
+      title: 评测执行
+    - path: /results/:taskId?
+      title: 结果看板
+  navigation: StepNavigation RouterLink（role=link，非菜单项，场景统一用「点击链接」）
+
+custom_steps:
+  - step: '选择下拉框 "<名称>" 的选项 "<文本>"'
+    file: steps/common_steps.py
+    reason: "AgentFormDialog 使用原生 <select>（风险等级/适配器类型/HTTP 方法），通用步骤库未覆盖 select_option；同时为 el-select 提供兜底"
+    registered_by: "test_*.py 中 import steps.common_steps"
+
+features:
+  - module: 总览
+    file: 01-overview.feature
+    scenarios:
+      - overview navigation elements
+      - navigate to agent projects via quick action
+
+  - module: 评测项目（Agent 配置）
+    file: 02-agent-projects.feature
+    scenarios:
+      - list and view agent cards
+      - filter agents by code
+      - create agent
+      - edit agent
+      - delete agent
+
+  - module: 指标配置
+    file: 03-indicator-config.feature
+    scenarios:
+      - indicator page elements
+      - ai expand shows unavailable message
+      - add test case requires selected indicator
+
+  - module: 评测执行
+    file: 04-evaluation-execution.feature
+    scenarios:
+      - execution empty state
+      - reset shows unavailable message
+
+  - module: 结果看板
+    file: 05-result-board.feature
+    scenarios:
+      - result board empty state
+      - result filters visible
+      - navigate back to overview

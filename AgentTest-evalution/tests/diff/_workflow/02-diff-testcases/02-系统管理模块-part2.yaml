@@ -1,0 +1,452 @@
+module: "system_part2"
+module_name: "系统管理模块-part2"
+base_url: "http://localhost:8080"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    visitor:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    visitor:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+
+global_variables:
+  default_page_size: 10
+
+testcases:
+  - id: "TC_SYSTEM_PART2_001"
+    title: "GET /system/dept/list/exclude/{deptId}_合法deptId_返回排除节点后的部门列表"
+    tags: [正常, 回归, 冒烟]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dept/list/exclude/100"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "deptId"
+
+  - id: "TC_SYSTEM_PART2_002"
+    title: "GET /system/dept/list/exclude/{deptId}_visitor无权限_返回403无访问权限"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "visitor"
+    request:
+      method: "GET"
+      path: "/system/dept/list/exclude/100"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 403
+
+  - id: "TC_SYSTEM_PART2_003"
+    title: "GET /system/dept/{deptId}_合法deptId_返回部门详细信息"
+    tags: [正常, 回归, 冒烟]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dept/101"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "deptId"
+        - "deptName"
+
+  - id: "TC_SYSTEM_PART2_004"
+    title: "GET /system/dept/{deptId}_deptId不在数据权限_返回500无权限访问部门数据"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dept/999999"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART2_005"
+    title: "DELETE /system/dept/{deptId}_合法deptId_删除部门成功"
+    tags: [正常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "DELETE"
+      path: "/system/dept/9999"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART2_006"
+    title: "DELETE /system/dept/{deptId}_删除无数据权限部门_返回500"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "DELETE"
+      path: "/system/dept/200"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART2_007"
+    title: "GET /system/dept/optionselect_无过滤条件_返回部门下拉列表"
+    tags: [正常, 回归, 冒烟]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dept/optionselect"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "deptId"
+
+  - id: "TC_SYSTEM_PART2_008"
+    title: "GET /system/dept/optionselect_deptIds格式非法_返回500"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dept/optionselect"
+      query:
+        - name: "deptIds"
+          value: "abc"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART2_009"
+    title: "GET /system/dict/data/list_合法分页参数_返回字典数据分页列表"
+    tags: [正常, 回归, 冒烟]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dict/data/list"
+      query:
+        - name: "pageNum"
+          value: "1"
+        - name: "pageSize"
+          value: "10"
+        - name: "dictType"
+          value: "sys_normal_disable"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "rows"
+
+  - id: "TC_SYSTEM_PART2_010"
+    title: "GET /system/dict/data/list_pageSize非法_返回500"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dict/data/list"
+      query:
+        - name: "pageNum"
+          value: "1"
+        - name: "pageSize"
+          value: "-1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART2_011"
+    title: "GET /system/dict/data/{dictCode}_合法dictCode_返回字典数据详情"
+    tags: [正常, 回归, 冒烟]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dict/data/1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "dictCode"
+
+  - id: "TC_SYSTEM_PART2_012"
+    title: "GET /system/dict/data/{dictCode}_dictCode非数字_返回500"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dict/data/abc"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART2_013"
+    title: "GET /system/dict/data/type/{dictType}_合法dictType_返回类型下字典数据"
+    tags: [正常, 回归, 冒烟]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dict/data/type/sys_normal_disable"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "dictCode"
+
+  - id: "TC_SYSTEM_PART2_014"
+    title: "GET /system/dict/data/type/{dictType}_dictType含非法字符_返回500"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dict/data/type/sys@#$%"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART2_015"
+    title: "DELETE /system/dict/data/{dictCodes}_合法dictCodes_删除字典数据成功"
+    tags: [正常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "DELETE"
+      path: "/system/dict/data/9999"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART2_016"
+    title: "DELETE /system/dict/data/{dictCodes}_dictCodes不存在_返回500"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "DELETE"
+      path: "/system/dict/data/0"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART2_017"
+    title: "GET /system/dict/type/list_合法分页参数_返回字典类型分页列表"
+    tags: [正常, 回归, 冒烟]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dict/type/list"
+      query:
+        - name: "pageNum"
+          value: "1"
+        - name: "pageSize"
+          value: "10"
+        - name: "dictType"
+          value: "sys_"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "rows"
+
+  - id: "TC_SYSTEM_PART2_018"
+    title: "GET /system/dict/type/list_beginTime格式非法_返回500"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dict/type/list"
+      query:
+        - name: "params[beginTime]"
+          value: "not-a-date"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART2_019"
+    title: "GET /system/dict/type/{dictId}_合法dictId_返回字典类型详情"
+    tags: [正常, 回归, 冒烟]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dict/type/1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "dictId"
+
+  - id: "TC_SYSTEM_PART2_020"
+    title: "GET /system/dict/type/{dictId}_dictId非数字_返回500"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dict/type/abc"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART2_021"
+    title: "DELETE /system/dict/type/{dictIds}_合法dictIds_删除字典类型成功"
+    tags: [正常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "DELETE"
+      path: "/system/dict/type/9999"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART2_022"
+    title: "DELETE /system/dict/type/{dictIds}_字典类型已分配数据_返回500不能删除"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "DELETE"
+      path: "/system/dict/type/1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART2_023"
+    title: "DELETE /system/dict/type/refreshCache_合法刷新_清空缓存成功"
+    tags: [正常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "DELETE"
+      path: "/system/dict/type/refreshCache"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART2_024"
+    title: "DELETE /system/dict/type/refreshCache_并发获取锁失败_返回500操作失败"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "DELETE"
+      path: "/system/dict/type/refreshCache"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART2_025"
+    title: "GET /system/dict/type/optionselect_无参数_返回字典类型下拉列表"
+    tags: [正常, 回归, 冒烟]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dict/type/optionselect"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "dictId"
+
+  - id: "TC_SYSTEM_PART2_026"
+    title: "GET /system/dict/type/optionselect_缓存异常_返回500"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/system/dict/type/optionselect"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500

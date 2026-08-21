@@ -1,0 +1,325 @@
+base_url: "http://localhost:8080"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    visitor:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    visitor:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+
+global_variables:
+  default_page_size: 10
+
+module: "system_part7"
+module_name: "系统管理模块-part7"
+
+testcases:
+  - id: "TC_SYSTEM_PART7_001"
+    title: "GET /system/user/optionselect_带用户ID串_返回用户基础信息列表"
+    tags:
+      - "正常"
+      - "回归"
+      - "冒烟"
+    method: "GET"
+    path: "/system/user/optionselect"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        userIds: "1,2,3"
+        deptId: 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "userId"
+
+  - id: "TC_SYSTEM_PART7_002"
+    title: "GET /system/user/optionselect_无查询权限_返回403"
+    tags:
+      - "异常"
+      - "回归"
+    method: "GET"
+    path: "/system/user/optionselect"
+    auth:
+      required: true
+      account: "visitor"
+    request:
+      query:
+        deptId: 100
+    expected:
+      status_code: 403
+      response_type: "json"
+      business_code: 403
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART7_003"
+    title: "PUT /system/user/resetPwd_重置普通用户密码_操作成功"
+    tags:
+      - "正常"
+      - "回归"
+    method: "PUT"
+    path: "/system/user/resetPwd"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 3
+        password: "Abc@12345"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART7_004"
+    title: "PUT /system/user/resetPwd_重置超级管理员密码_返回500"
+    tags:
+      - "异常"
+      - "回归"
+    method: "PUT"
+    path: "/system/user/resetPwd"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 1
+        password: "Abc@12345"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART7_005"
+    title: "PUT /system/user/changeStatus_修改普通用户状态_操作成功"
+    tags:
+      - "正常"
+      - "回归"
+    method: "PUT"
+    path: "/system/user/changeStatus"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 3
+        status: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART7_006"
+    title: "PUT /system/user/changeStatus_修改超级管理员状态_返回500"
+    tags:
+      - "异常"
+      - "回归"
+    method: "PUT"
+    path: "/system/user/changeStatus"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 1
+        status: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART7_007"
+    title: "GET /system/user/authRole/{userId}_查询用户授权角色_返回角色列表"
+    tags:
+      - "正常"
+      - "回归"
+      - "冒烟"
+    method: "GET"
+    path: "/system/user/authRole/{userId}"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        userId: 2
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "user"
+
+  - id: "TC_SYSTEM_PART7_008"
+    title: "GET /system/user/authRole/{userId}_访问无数据权限用户_返回500"
+    tags:
+      - "异常"
+      - "回归"
+    method: "GET"
+    path: "/system/user/authRole/{userId}"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        userId: 999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART7_009"
+    title: "PUT /system/user/authRole_为普通用户分配角色_操作成功"
+    tags:
+      - "正常"
+      - "回归"
+    method: "PUT"
+    path: "/system/user/authRole"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 3
+        roleIds:
+          - 100
+          - 101
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART7_010"
+    title: "PUT /system/user/authRole_为无数据权限用户授权_返回500"
+    tags:
+      - "异常"
+      - "回归"
+    method: "PUT"
+    path: "/system/user/authRole"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 999
+        roleIds:
+          - 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART7_011"
+    title: "GET /system/user/deptTree_查询部门树_返回树结构"
+    tags:
+      - "正常"
+      - "回归"
+      - "冒烟"
+    method: "GET"
+    path: "/system/user/deptTree"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      query:
+        deptId: 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "id"
+
+  - id: "TC_SYSTEM_PART7_012"
+    title: "GET /system/user/deptTree_无查询权限_返回403"
+    tags:
+      - "异常"
+      - "回归"
+    method: "GET"
+    path: "/system/user/deptTree"
+    auth:
+      required: true
+      account: "visitor"
+    request:
+      query:
+        deptId: 100
+    expected:
+      status_code: 403
+      response_type: "json"
+      business_code: 403
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART7_013"
+    title: "GET /system/user/list/dept/{deptId}_查询部门下用户_返回用户列表"
+    tags:
+      - "正常"
+      - "回归"
+      - "冒烟"
+    method: "GET"
+    path: "/system/user/list/dept/{deptId}"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        deptId: 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "userId"
+
+  - id: "TC_SYSTEM_PART7_014"
+    title: "GET /system/user/list/dept/{deptId}_部门ID为空_返回500"
+    tags:
+      - "异常"
+      - "回归"
+    method: "GET"
+    path: "/system/user/list/dept/{deptId}"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        deptId: null
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+      data_exists: []

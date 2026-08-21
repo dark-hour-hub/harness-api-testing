@@ -1,0 +1,540 @@
+module: "system_part5"
+module_name: "系统管理模块-part5"
+base_url: "http://localhost:8080"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    visitor:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    visitor:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+
+global_variables:
+  default_page_size: 10
+
+testcases:
+  - id: "TC_SYSTEM_PART5_001"
+    title: "GET /system/social/list_正常登录_返回社会化关系列表"
+    module: "system_part5"
+    tags: [正常, 回归, 冒烟]
+    request:
+      method: "GET"
+      url: "/system/social/list"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART5_002"
+    title: "GET /system/social/list_查询异常_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "GET"
+      url: "/system/social/list"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_003"
+    title: "GET /system/tenant/list_分页查询_返回租户列表"
+    module: "system_part5"
+    tags: [正常, 回归, 冒烟]
+    request:
+      method: "GET"
+      url: "/system/tenant/list"
+      params:
+        pageNum: 1
+        pageSize: 10
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_SYSTEM_PART5_004"
+    title: "GET /system/tenant/list_排序参数有误_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/list"
+      params:
+        orderByColumn: "id"
+        isAsc: "invalid"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_005"
+    title: "GET /system/tenant/{id}_主键存在_返回租户详情"
+    module: "system_part5"
+    tags: [正常, 回归, 冒烟]
+    request:
+      method: "GET"
+      url: "/system/tenant/{id}"
+      path:
+        id: 1
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["id", "companyName"]
+
+  - id: "TC_SYSTEM_PART5_006"
+    title: "GET /system/tenant/{id}_主键为空_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/{id}"
+      path:
+        id: ""
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_007"
+    title: "POST /system/tenant_必填齐全_新增租户成功"
+    module: "system_part5"
+    tags: [正常, 回归, 冒烟]
+    request:
+      method: "POST"
+      url: "/system/tenant"
+      body:
+        contactUserName: "接口测试联系人QA"
+        contactPhone: "13800009999"
+        companyName: "接口测试专用租户QA2026"
+        username: "qa_tenant_admin_2026"
+        password: "admin123"
+        packageId: 1
+        status: "0"
+      auth:
+        required: true
+        account: "admin"
+    extracts:
+      id: "$.data.id"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART5_008"
+    title: "POST /system/tenant_联系人缺失_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "POST"
+      url: "/system/tenant"
+      body:
+        contactPhone: "13800009999"
+        companyName: "接口测试专用租户QA2026B"
+        username: "qa_tenant_admin_2026b"
+        password: "admin123"
+        packageId: 1
+        status: "0"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_009"
+    title: "PUT /system/tenant_修改自建租户_修改成功"
+    module: "system_part5"
+    tags: [正常, 回归]
+    request:
+      method: "PUT"
+      url: "/system/tenant"
+      body:
+        id: "${TC_SYSTEM_PART5_007.extracts.id}"
+        contactUserName: "接口测试联系人QA改"
+        contactPhone: "13900008888"
+        companyName: "接口测试专用租户QA2026"
+        status: "0"
+      auth:
+        required: true
+        account: "admin"
+    depends_on: ["TC_SYSTEM_PART5_007"]
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART5_010"
+    title: "PUT /system/tenant_主键为空_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "PUT"
+      url: "/system/tenant"
+      body:
+        contactUserName: "接口测试联系人QA改"
+        contactPhone: "13900008888"
+        companyName: "接口测试专用租户QA2026C"
+        status: "0"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_011"
+    title: "PUT /system/tenant/changeStatus_停用自建租户_状态修改成功"
+    module: "system_part5"
+    tags: [正常, 回归]
+    request:
+      method: "PUT"
+      url: "/system/tenant/changeStatus"
+      body:
+        id: "${TC_SYSTEM_PART5_007.extracts.id}"
+        status: "1"
+      auth:
+        required: true
+        account: "admin"
+    depends_on: ["TC_SYSTEM_PART5_007"]
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART5_012"
+    title: "PUT /system/tenant/changeStatus_操作管理租户_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "PUT"
+      url: "/system/tenant/changeStatus"
+      body:
+        id: 1
+        status: "1"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_013"
+    title: "DELETE /system/tenant/{ids}_删除自建租户_删除成功"
+    module: "system_part5"
+    tags: [正常, 回归]
+    request:
+      method: "DELETE"
+      url: "/system/tenant/{ids}"
+      path:
+        ids: "${TC_SYSTEM_PART5_007.extracts.id}"
+      auth:
+        required: true
+        account: "admin"
+    depends_on: ["TC_SYSTEM_PART5_007"]
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART5_014"
+    title: "DELETE /system/tenant/{ids}_删除超管租户_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "DELETE"
+      url: "/system/tenant/{ids}"
+      path:
+        ids: "1"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_015"
+    title: "GET /system/tenant/dynamic/{tenantId}_切换至目标租户_切换成功"
+    module: "system_part5"
+    tags: [正常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/dynamic/{tenantId}"
+      path:
+        tenantId: "000001"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART5_016"
+    title: "GET /system/tenant/dynamic/{tenantId}_租户ID为空_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/dynamic/{tenantId}"
+      path:
+        tenantId: ""
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_017"
+    title: "GET /system/tenant/dynamic/clear_清除动态租户_清除成功"
+    module: "system_part5"
+    tags: [正常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/dynamic/clear"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART5_018"
+    title: "GET /system/tenant/dynamic/clear_服务异常_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/dynamic/clear"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_019"
+    title: "GET /system/tenant/syncTenantPackage_同步套餐菜单_同步成功"
+    module: "system_part5"
+    tags: [正常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/syncTenantPackage"
+      params:
+        tenantId: "000001"
+        packageId: 1
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART5_020"
+    title: "GET /system/tenant/syncTenantPackage_租户ID为空_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/syncTenantPackage"
+      params:
+        packageId: 1
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_021"
+    title: "GET /system/tenant/syncTenantDict_同步字典_同步成功"
+    module: "system_part5"
+    tags: [正常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/syncTenantDict"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART5_022"
+    title: "GET /system/tenant/syncTenantDict_未开启租户模式_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/syncTenantDict"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_023"
+    title: "GET /system/tenant/syncTenantConfig_同步参数配置_同步成功"
+    module: "system_part5"
+    tags: [正常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/syncTenantConfig"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART5_024"
+    title: "GET /system/tenant/syncTenantConfig_未开启租户模式_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/syncTenantConfig"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_025"
+    title: "GET /system/tenant/package/list_分页查询_返回套餐列表"
+    module: "system_part5"
+    tags: [正常, 回归, 冒烟]
+    request:
+      method: "GET"
+      url: "/system/tenant/package/list"
+      params:
+        pageNum: 1
+        pageSize: 10
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows", "total"]
+
+  - id: "TC_SYSTEM_PART5_026"
+    title: "GET /system/tenant/package/list_排序参数有误_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/package/list"
+      params:
+        orderByColumn: "packageId"
+        isAsc: "invalid"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART5_027"
+    title: "GET /system/tenant/package/selectList_查询正常套餐_返回下拉列表"
+    module: "system_part5"
+    tags: [正常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/package/selectList"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART5_028"
+    title: "GET /system/tenant/package/selectList_服务端异常_返回500"
+    module: "system_part5"
+    tags: [异常, 回归]
+    request:
+      method: "GET"
+      url: "/system/tenant/package/selectList"
+      auth:
+        required: true
+        account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500

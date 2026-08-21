@@ -1,0 +1,488 @@
+module: "system_part1"
+module_name: "系统管理模块-part1"
+base_url: "http://localhost:8080"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    visitor:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    visitor:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+
+global_variables:
+  default_page_size: 10
+
+testcases:
+  - id: "TC_SYSTEM_PART1_001"
+    title: "POST /system/client_新增客户端_成功"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    request:
+      method: "POST"
+      path: "/system/client"
+      body:
+        clientKey: "tc_client_auto"
+        clientSecret: "tc_secret_123"
+        grantTypeList: ["password", "social"]
+        deviceType: "pc"
+        status: "0"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+
+  - id: "TC_SYSTEM_PART1_002"
+    title: "POST /system/client_客户端key为空_业务失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "POST"
+      path: "/system/client"
+      body:
+        clientSecret: "tc_secret_123"
+        grantTypeList: ["password"]
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART1_003"
+    title: "GET /system/client/list_按clientKey查询_成功"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    request:
+      method: "GET"
+      path: "/system/client/list"
+      query:
+        clientKey: "tc_client_auto"
+        pageSize: 10
+    auth:
+      required: true
+      account: "admin"
+    extracts:
+      client_id: "$.rows[0].id"
+      client_clientId: "$.rows[0].clientId"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows"]
+
+  - id: "TC_SYSTEM_PART1_004"
+    title: "GET /system/client/list_排序参数有误_业务失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "GET"
+      path: "/system/client/list"
+      query:
+        orderByColumn: "1=1"
+        isAsc: "x"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART1_005"
+    title: "GET /system/client/{id}_查询新建客户端详情_成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    depends_on: ["TC_SYSTEM_PART1_003"]
+    request:
+      method: "GET"
+      path: "/system/client/${TC_SYSTEM_PART1_003.extracts.client_id}"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["id", "clientId"]
+
+  - id: "TC_SYSTEM_PART1_006"
+    title: "GET /system/client/{id}_主键为空_业务失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "GET"
+      path: "/system/client/"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART1_007"
+    title: "PUT /system/client_修改新建客户端_成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    depends_on: ["TC_SYSTEM_PART1_003"]
+    request:
+      method: "PUT"
+      path: "/system/client"
+      body:
+        id: ${TC_SYSTEM_PART1_003.extracts.client_id}
+        clientKey: "tc_client_auto"
+        clientSecret: "tc_secret_123"
+        grantTypeList: ["password", "social"]
+        deviceType: "pc"
+        status: "1"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+
+  - id: "TC_SYSTEM_PART1_008"
+    title: "PUT /system/client_主键id为空_业务失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "PUT"
+      path: "/system/client"
+      body:
+        clientKey: "tc_client_auto"
+        clientSecret: "tc_secret_123"
+        grantTypeList: ["password"]
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART1_009"
+    title: "PUT /system/client/changeStatus_修改新建客户端状态_成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    depends_on: ["TC_SYSTEM_PART1_003"]
+    request:
+      method: "PUT"
+      path: "/system/client/changeStatus"
+      body:
+        clientId: "${TC_SYSTEM_PART1_003.extracts.client_clientId}"
+        status: "1"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+
+  - id: "TC_SYSTEM_PART1_010"
+    title: "PUT /system/client/changeStatus_clientId缺失_业务失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "PUT"
+      path: "/system/client/changeStatus"
+      body:
+        status: "1"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART1_011"
+    title: "DELETE /system/client/{ids}_删除新建客户端_成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    depends_on: ["TC_SYSTEM_PART1_003"]
+    request:
+      method: "DELETE"
+      path: "/system/client/${TC_SYSTEM_PART1_003.extracts.client_id}"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+
+  - id: "TC_SYSTEM_PART1_012"
+    title: "DELETE /system/client/{ids}_主键为空_业务失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "DELETE"
+      path: "/system/client/"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART1_013"
+    title: "GET /system/config/list_分页查询参数列表_成功"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    request:
+      method: "GET"
+      path: "/system/config/list"
+      query:
+        pageSize: 10
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["rows"]
+
+  - id: "TC_SYSTEM_PART1_014"
+    title: "GET /system/config/list_排序参数有误_业务失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "GET"
+      path: "/system/config/list"
+      query:
+        orderByColumn: "1=1"
+        isAsc: "x"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART1_015"
+    title: "GET /system/config/{configId}_查询参数详情_成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    request:
+      method: "GET"
+      path: "/system/config/1"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["configId", "configKey"]
+
+  - id: "TC_SYSTEM_PART1_016"
+    title: "GET /system/config/{configId}_无权限_拒绝访问"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "GET"
+      path: "/system/config/1"
+    auth:
+      required: true
+      account: "visitor"
+    expected:
+      status_code: 403
+      response_type: "json"
+      business_code: 403
+
+  - id: "TC_SYSTEM_PART1_017"
+    title: "GET /system/config/configKey/{configKey}_按键名查询参数值_成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    request:
+      method: "GET"
+      path: "/system/config/configKey/sys.index.skinName"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART1_018"
+    title: "GET /system/config/configKey/{configKey}_无权限_拒绝访问"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "GET"
+      path: "/system/config/configKey/sys.index.skinName"
+    auth:
+      required: true
+      account: "visitor"
+    expected:
+      status_code: 403
+      response_type: "json"
+      business_code: 403
+
+  - id: "TC_SYSTEM_PART1_019"
+    title: "PUT /system/config/updateByKey_修改参数配置_成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    request:
+      method: "PUT"
+      path: "/system/config/updateByKey"
+      body:
+        configKey: "sys.index.skinName"
+        configValue: "skin-green"
+        configName: "主框架页-默认主题"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+
+  - id: "TC_SYSTEM_PART1_020"
+    title: "PUT /system/config/updateByKey_键名不存在_业务失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "PUT"
+      path: "/system/config/updateByKey"
+      body:
+        configKey: "nonexistent.key.xyz"
+        configValue: "x"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART1_021"
+    title: "DELETE /system/config/{configIds}_删除非内置参数_成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    request:
+      method: "DELETE"
+      path: "/system/config/2"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+
+  - id: "TC_SYSTEM_PART1_022"
+    title: "DELETE /system/config/{configIds}_删除内置参数_业务失败"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "DELETE"
+      path: "/system/config/1"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART1_023"
+    title: "DELETE /system/config/refreshCache_刷新参数缓存_成功"
+    priority: "P0"
+    tags: ["正常", "回归"]
+    request:
+      method: "DELETE"
+      path: "/system/config/refreshCache"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+
+  - id: "TC_SYSTEM_PART1_024"
+    title: "DELETE /system/config/refreshCache_无权限_拒绝访问"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "DELETE"
+      path: "/system/config/refreshCache"
+    auth:
+      required: true
+      account: "visitor"
+    expected:
+      status_code: 403
+      response_type: "json"
+      business_code: 403
+
+  - id: "TC_SYSTEM_PART1_025"
+    title: "GET /system/dept/list_查询部门列表_成功"
+    priority: "P0"
+    tags: ["正常", "回归", "冒烟"]
+    request:
+      method: "GET"
+      path: "/system/dept/list"
+      query:
+        status: "0"
+    auth:
+      required: true
+      account: "admin"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: ["data"]
+
+  - id: "TC_SYSTEM_PART1_026"
+    title: "GET /system/dept/list_无权限_拒绝访问"
+    priority: "P1"
+    tags: ["异常", "回归"]
+    request:
+      method: "GET"
+      path: "/system/dept/list"
+    auth:
+      required: true
+      account: "visitor"
+    expected:
+      status_code: 403
+      response_type: "json"
+      business_code: 403

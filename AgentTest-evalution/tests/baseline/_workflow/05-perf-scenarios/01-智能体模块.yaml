@@ -1,0 +1,82 @@
+module: agent
+module_name: "智能体模块"
+base_url: "http://localhost:8080"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+
+scenarios:
+  - id: PERF_AGENT_001
+    title: "GET /api/agents_100并发_60s"
+    priority: P0
+    method: GET
+    path: "/api/agents"
+    description: "验证智能体分页列表查询在 100 并发下的响应时间与吞吐"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+        pageSize: 20
+    load:
+      users: 100
+      ramp_up: 10
+      duration: 60
+    thresholds:
+      p95: 800
+      error_rate: 0.01
+      min_rps: 30
+
+  - id: PERF_AGENT_002
+    title: "POST /api/agents_50并发_60s"
+    priority: P1
+    method: POST
+    path: "/api/agents"
+    description: "验证智能体创建在 50 并发下的响应时间与吞吐"
+    auth:
+      required: false
+    request:
+      body:
+        agentCode: "PERF_AG_${__RandomString(12,ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789)}"
+        agentName: "压测智能体"
+        category: "TEST"
+        riskTier: "D"
+        department: "perf"
+        version: "1.0.0"
+        agentType: "CHAT"
+        adapterType: "GENERIC_HTTP_JSON"
+        method: "POST"
+        endpoint: "http://localhost:8080/mock-perf"
+        timeoutMs: "60000"
+        answerField: "$.answer"
+        enabled: "true"
+    load:
+      users: 50
+      ramp_up: 5
+      duration: 60
+    thresholds:
+      p95: 800
+      error_rate: 0.01
+      min_rps: 20
+
+  - id: PERF_AGENT_003
+    title: "GET /api/agents/{id}_20并发_30s"
+    priority: P2
+    method: GET
+    path: "/api/agents/{id}"
+    description: "验证智能体详情查询在 20 并发下的响应时间与吞吐"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "1"
+    load:
+      users: 20
+      ramp_up: 3
+      duration: 30
+    thresholds:
+      p95: 800
+      error_rate: 0.01
+      min_rps: 30

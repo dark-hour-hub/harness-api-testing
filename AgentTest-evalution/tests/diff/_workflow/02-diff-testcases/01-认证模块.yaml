@@ -1,0 +1,327 @@
+module: "auth"
+module_name: "认证模块"
+base_url: "http://localhost:8080"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    visitor:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    visitor:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+
+global_variables:
+  default_page_size: 10
+
+testcases:
+  - id: "TC_AUTH_001"
+    title: "POST /auth/login_正确账号密码_登录成功返回令牌"
+    tags: [正常, 回归, 冒烟]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "POST"
+      path: "/auth/login"
+      body:
+        clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+        grantType: "password"
+        tenantId: "000000"
+        username: "admin"
+        password: "admin123"
+    extracts:
+      token: "$.data.access_token"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "access_token"
+
+  - id: "TC_AUTH_002"
+    title: "POST /auth/login_clientId为空_认证客户端id不能为空"
+    tags: [异常, 回归]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "POST"
+      path: "/auth/login"
+      body:
+        clientId: ""
+        grantType: "password"
+        tenantId: "000000"
+        username: "admin"
+        password: "admin123"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_AUTH_003"
+    title: "GET /auth/binding/{source}_合法第三方平台_返回跳转URL"
+    tags: [正常, 回归]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/auth/binding/gitee"
+      query:
+        - name: "tenantId"
+          value: "000000"
+        - name: "domain"
+          value: "localhost"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_AUTH_004"
+    title: "GET /auth/binding/{source}_不支持的平台_返回平台暂不支持"
+    tags: [异常, 回归]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/auth/binding/wechat"
+      query:
+        - name: "tenantId"
+          value: "000000"
+        - name: "domain"
+          value: "localhost"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_AUTH_005"
+    title: "POST /auth/social/callback_已登录携带第三方授权码_绑定成功"
+    tags: [正常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "POST"
+      path: "/auth/social/callback"
+      body:
+        clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+        grantType: "social"
+        tenantId: "000000"
+        source: "gitee"
+        socialCode: "081abc"
+        socialState: "STATE"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_AUTH_006"
+    title: "POST /auth/social/callback_未携带Token_返回401认证失败"
+    tags: [异常, 回归]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "POST"
+      path: "/auth/social/callback"
+      body:
+        clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+        grantType: "social"
+        tenantId: "000000"
+        source: "gitee"
+        socialCode: "081abc"
+        socialState: "STATE"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 401
+
+  - id: "TC_AUTH_007"
+    title: "DELETE /auth/unlock/{socialId}_已登录合法记录_解除绑定成功"
+    tags: [正常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "DELETE"
+      path: "/auth/unlock/12"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_AUTH_008"
+    title: "DELETE /auth/unlock/{socialId}_记录不存在_取消授权失败"
+    tags: [异常, 回归]
+    auth:
+      required: true
+      account: "admin"
+    request:
+      method: "DELETE"
+      path: "/auth/unlock/999999"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_AUTH_009"
+    title: "POST /auth/logout_已登录退出_退出成功"
+    tags: [正常, 回归]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "POST"
+      path: "/auth/logout"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_AUTH_010"
+    title: "POST /auth/logout_注销过程未知异常_系统异常"
+    tags: [异常, 回归]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "POST"
+      path: "/auth/logout"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_AUTH_011"
+    title: "POST /auth/register_合法新用户_注册成功"
+    tags: [正常, 回归]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "POST"
+      path: "/auth/register"
+      body:
+        clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+        grantType: "password"
+        tenantId: "000000"
+        username: "testuser"
+        password: "abc12345"
+        userType: "sys_user"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_AUTH_012"
+    title: "POST /auth/register_username为空_用户名不能为空"
+    tags: [异常, 回归]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "POST"
+      path: "/auth/register"
+      body:
+        clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+        grantType: "password"
+        tenantId: "000000"
+        username: ""
+        password: "abc12345"
+        userType: "sys_user"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_AUTH_013"
+    title: "GET /auth/tenant/list_无需认证_返回租户下拉列表"
+    tags: [正常, 回归]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/auth/tenant/list"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "tenantEnabled"
+
+  - id: "TC_AUTH_014"
+    title: "GET /auth/tenant/list_IP限流触发_访问过于频繁"
+    tags: [异常, 回归]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/auth/tenant/list"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_AUTH_015"
+    title: "GET /auth/code_无需认证_返回验证码信息"
+    tags: [正常, 回归]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/auth/code"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "captchaEnabled"
+
+  - id: "TC_AUTH_016"
+    title: "GET /auth/code_IP限流触发_访问过于频繁"
+    tags: [异常, 回归]
+    auth:
+      required: false
+      account: "admin"
+    request:
+      method: "GET"
+      path: "/auth/code"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500

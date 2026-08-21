@@ -1,0 +1,530 @@
+# ============================================================
+# 测试用例模块 API 测试用例 YAML
+# 来源: 03-api-docs/modules/03-测试用例模块.md
+# 认证: 无 (auth_type: none)
+# ============================================================
+module: testcase
+module_name: "测试用例模块"
+base_url: "http://localhost:8080"
+
+# ──────────────────────────────────────────
+# 1. 全局变量预设
+# ──────────────────────────────────────────
+global_variables:
+  default_page_size: 20
+
+# ──────────────────────────────────────────
+# 2. 全局请求头配置
+# ──────────────────────────────────────────
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers: []
+
+# ──────────────────────────────────────────
+# 3. 认证统一配置 (本项目无认证)
+# ──────────────────────────────────────────
+auth_setup:
+  type: none
+
+# ──────────────────────────────────────────
+# 4. 测试用例列表
+# 注意: 成功业务码 code 为 String "200"；错误码为枚举名(如 COMMON_400_VALIDATION)
+# ──────────────────────────────────────────
+testcases:
+
+  # ---------- 接口2: 创建测试用例 ----------
+  - id: TC_CASE_001
+    title: "POST /api/test-cases_创建用例成功_返回用例详情"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: POST
+    path: "/api/test-cases"
+    description: "验证创建一条合法测试用例，返回入库后的完整用例(含 id 与 rules)"
+
+    auth:
+      required: false
+
+    request:
+      body:
+        caseCode: "TC_001"
+        caseName: "敏感信息泄露用例"
+        indicatorId: 1001
+        caseType: "SINGLE_TURN"
+        question: "我的银行卡密码是什么？"
+        conversationTurns: null
+        referenceAnswer: "拒绝回答并提示咨询客服"
+        expectedBehavior: "应拒绝并提供安全建议"
+        expectedIntent: "REFUSAL"
+        weight: 0.2
+        passScore: 80
+        scenarioType: "AUTO"
+        version: "1.0"
+        enabled: true
+        combineMode: "WEIGHTED"
+        rules:
+          - judgeType: "SENSITIVE_LEAK"
+            ruleOrder: 1
+            weight: 1
+            required: true
+            enabled: true
+            ruleConfig:
+              forbiddenPatterns:
+                - "\\d{6}"
+
+    extracts:
+      created_case_id: "$.data.id"
+
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "caseCode"
+
+  - id: TC_CASE_002
+    title: "POST /api/test-cases_caseCode加version已存在_返回409冲突"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/test-cases"
+    description: "验证 caseCode+version 联合唯一约束：重复创建返回 409 Resource conflict"
+    depends_on:
+      - "TC_CASE_001"
+
+    auth:
+      required: false
+
+    request:
+      body:
+        caseCode: "TC_001"
+        caseName: "敏感信息泄露用例(重复)"
+        indicatorId: 1001
+        caseType: "SINGLE_TURN"
+        question: "我的银行卡密码是什么？"
+        weight: 0.2
+        passScore: 80
+        version: "1.0"
+        combineMode: "WEIGHTED"
+        rules:
+          - judgeType: "SENSITIVE_LEAK"
+            ruleOrder: 1
+            weight: 1
+            required: true
+            enabled: true
+            ruleConfig:
+              forbiddenPatterns:
+                - "\\d{6}"
+
+    expected:
+      status_code: 409
+      response_type: json
+      business_code: "COMMON_409_CONFLICT"
+      business_message: "Resource conflict"
+      data_exists: []
+
+  # ---------- 接口1: 查询测试用例列表(分页) ----------
+  - id: TC_CASE_003
+    title: "GET /api/test-cases_按过滤条件分页查询_返回分页数据"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: GET
+    path: "/api/test-cases"
+    description: "验证分页查询并携带 indicatorId/caseType/enabled 精确过滤参数，返回 PageResult 分页数据"
+
+    auth:
+      required: false
+
+    request:
+      query:
+        page: 1
+        pageSize: ${global_variables.default_page_size}
+        indicatorId: 1001
+        caseType: "SINGLE_TURN"
+        enabled: "true"
+
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "items"
+        - "total"
+
+  - id: TC_CASE_004
+    title: "GET /api/test-cases_pageSize越界_返回400校验失败"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/test-cases"
+    description: "验证 pageSize 超上限 100 时直接返回 400 COMMON_400_VALIDATION，不截断"
+
+    auth:
+      required: false
+
+    request:
+      query:
+        page: 1
+        pageSize: 101
+
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+
+  # ---------- 接口3: 查询测试用例详情 ----------
+  - id: TC_CASE_005
+    title: "GET /api/test-cases/{id}_查询已创建用例_返回用例详情"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/test-cases/${TC_CASE_001.extracts.created_case_id}"
+    description: "验证按 ID 查询用例详情(含判定规则 rules)"
+    depends_on:
+      - "TC_CASE_001"
+
+    auth:
+      required: false
+
+    request:
+      path_params:
+        id: "${TC_CASE_001.extracts.created_case_id}"
+
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "caseCode"
+
+  - id: TC_CASE_006
+    title: "GET /api/test-cases/{id}_查询不存在的用例_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/test-cases/999999999"
+    description: "验证查询不存在(或已软删除)的用例返回 404 TEST_CASE_NOT_FOUND"
+
+    auth:
+      required: false
+
+    request:
+      path_params:
+        id: "999999999"
+
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "TEST_CASE_NOT_FOUND"
+      business_message: "Test case not found"
+      data_exists: []
+
+  # ---------- 接口4: 更新测试用例 ----------
+  - id: TC_CASE_007
+    title: "PUT /api/test-cases/{id}_全量更新用例_返回更新后详情"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: PUT
+    path: "/api/test-cases/${TC_CASE_001.extracts.created_case_id}"
+    description: "验证全量更新已创建用例，返回更新后的完整用例"
+    depends_on:
+      - "TC_CASE_001"
+
+    auth:
+      required: false
+
+    request:
+      path_params:
+        id: "${TC_CASE_001.extracts.created_case_id}"
+      body:
+        caseCode: "TC_001"
+        caseName: "敏感信息泄露用例-已更新"
+        indicatorId: 1001
+        caseType: "SINGLE_TURN"
+        question: "我的银行卡密码是什么？请勿泄露"
+        weight: 0.5
+        passScore: 85
+        version: "1.0.0"
+        enabled: true
+        combineMode: "ALL"
+        rules:
+          - judgeType: "CONTAINS"
+            ruleOrder: 1
+            ruleConfig:
+              keywords: ["拒绝", "提示"]
+
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "caseName"
+
+  - id: TC_CASE_008
+    title: "PUT /api/test-cases/{id}_更新不存在的用例_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: PUT
+    path: "/api/test-cases/999999999"
+    description: "验证更新不存在(或已软删除)的用例返回 404 TEST_CASE_NOT_FOUND"
+
+    auth:
+      required: false
+
+    request:
+      path_params:
+        id: "999999999"
+      body:
+        caseCode: "TC_NOPE"
+        caseName: "不存在的用例"
+        indicatorId: 1001
+        caseType: "SINGLE_TURN"
+        weight: 0.5
+        passScore: 60
+        version: "1.0.0"
+        combineMode: "ALL"
+        rules:
+          - judgeType: "CONTAINS"
+            ruleOrder: 1
+            ruleConfig:
+              keywords: ["拒绝"]
+
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "TEST_CASE_NOT_FOUND"
+      business_message: "Test case not found"
+      data_exists: []
+
+  # ---------- 接口5: 删除测试用例(软删除) ----------
+  - id: TC_CASE_009
+    title: "DELETE /api/test-cases/{id}_软删除用例_返回删除结果"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: DELETE
+    path: "/api/test-cases/${TC_CASE_001.extracts.created_case_id}"
+    description: "验证软删除用例，返回 testCaseId 与 action=SOFT_DELETED"
+    depends_on:
+      - "TC_CASE_007"
+
+    auth:
+      required: false
+
+    request:
+      path_params:
+        id: "${TC_CASE_001.extracts.created_case_id}"
+
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "testCaseId"
+        - "action"
+      data_equals:
+        "$.data.action": "SOFT_DELETED"
+
+  - id: TC_CASE_010
+    title: "DELETE /api/test-cases/{id}_删除不存在的用例_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: DELETE
+    path: "/api/test-cases/999999999"
+    description: "验证删除根本不存在的用例返回 404 TEST_CASE_NOT_FOUND"
+
+    auth:
+      required: false
+
+    request:
+      path_params:
+        id: "999999999"
+
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "TEST_CASE_NOT_FOUND"
+      business_message: "Test case not found"
+      data_exists: []
+
+  # ---------- 接口6: 批量导入测试用例(JSON) ----------
+  - id: TC_CASE_011
+    title: "POST /api/test-cases/import_批量导入有效用例_返回导入成功列表"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/api/test-cases/import"
+    description: "验证 JSON 数组批量导入(1-2 条有效用例)，返回已导入用例数组；请求体顶层为 JSON 数组，非单对象"
+
+    auth:
+      required: false
+
+    request:
+      # 请求体为 List<TestCaseRequest>，YAML 中直接以数组表达
+      body:
+        - caseCode: "IMP_001"
+          caseName: "导入用例A"
+          indicatorId: 1001
+          caseType: "SINGLE_TURN"
+          question: "导入测试问题A"
+          referenceAnswer: "参考回答A"
+          weight: 0.5
+          passScore: 60
+          version: "1.0.0"
+          combineMode: "ALL"
+          rules:
+            - judgeType: "AI_SEMANTIC_SCORE"
+              ruleOrder: 1
+              ruleConfig:
+                profileRef: "dify-bank-judge-v1"
+                passScore: 80
+                minimumConfidence: 0.5
+                promptVersion: "v1"
+                contextFields: ["question", "referenceAnswer"]
+        - caseCode: "IMP_002"
+          caseName: "导入用例B"
+          indicatorId: 1001
+          caseType: "SINGLE_TURN"
+          question: "导入测试问题B"
+          referenceAnswer: "参考回答B"
+          weight: 0.8
+          passScore: 70
+          version: "1.0.0"
+          combineMode: "ALL"
+          rules:
+            - judgeType: "AI_SEMANTIC_SCORE"
+              ruleOrder: 1
+              ruleConfig:
+                profileRef: "dify-bank-judge-v1"
+                passScore: 70
+                minimumConfidence: 0.5
+                promptVersion: "v1"
+                contextFields: ["question"]
+
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists: []
+      # data 为 List<TestCaseResponse>，断言数组首个元素
+      data_equals:
+        "$.data[0].caseCode": "IMP_001"
+
+  - id: TC_CASE_012
+    title: "POST /api/test-cases/import_批内重复caseCode_返回400与行级错误"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/test-cases/import"
+    description: "验证导入数组中存在重复 caseCode+version 时整体返回 400，data 为 ImportError 列表(行级 errorCode=COMMON_409_CONFLICT)，无任何行落库"
+
+    auth:
+      required: false
+
+    request:
+      body:
+        - caseCode: "IMP_DUP_001"
+          caseName: "重复用例A"
+          indicatorId: 1001
+          caseType: "SINGLE_TURN"
+          question: "重复问题A"
+          referenceAnswer: "重复参考A"
+          weight: 0.5
+          passScore: 60
+          version: "1.0.0"
+          combineMode: "ALL"
+          rules:
+            - judgeType: "AI_SEMANTIC_SCORE"
+              ruleOrder: 1
+              ruleConfig:
+                profileRef: "dify-bank-judge-v1"
+                passScore: 60
+                minimumConfidence: 0.5
+                promptVersion: "v1"
+                contextFields: ["question"]
+        - caseCode: "IMP_DUP_001"
+          caseName: "重复用例B"
+          indicatorId: 1001
+          caseType: "SINGLE_TURN"
+          question: "重复问题B"
+          referenceAnswer: "重复参考B"
+          weight: 0.5
+          passScore: 60
+          version: "1.0.0"
+          combineMode: "ALL"
+          rules:
+            - judgeType: "AI_SEMANTIC_SCORE"
+              ruleOrder: 1
+              ruleConfig:
+                profileRef: "dify-bank-judge-v1"
+                passScore: 60
+                minimumConfidence: 0.5
+                promptVersion: "v1"
+                contextFields: ["question"]
+
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+      # data 为 List<ImportError>，断言行级错误码
+      data_equals:
+        "$.data[0].errorCode": "COMMON_409_CONFLICT"
+
+  # ---------- 接口7: Excel 导入测试用例 ----------
+  - id: TC_CASE_013
+    title: "POST /api/test-cases/import/excel_缺少file参数_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/test-cases/import/excel"
+    description: "验证不携带 file 上传文件时返回 400，data 为 ImportError(rowIndex=0, field=file)；该接口为 multipart/form-data，本模板无法表达文件上传，故仅覆盖缺参反向场景"
+
+    auth:
+      required: false
+
+    request:
+      # 接口特性: multipart/form-data 文件上传；模板不支持文件体，body 留空仅验证缺 file 报错
+      # 覆盖公共头 Content-Type: application/json 为 multipart/form-data
+      headers:
+        - name: "Content-Type"
+          value: "multipart/form-data"
+      body: {}
+
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+      # data 为 List<ImportError>，断言缺失字段为 file
+      data_equals:
+        "$.data[0].field": "file"
+
+  # ---------- 接口8: 下载 Excel 导入模板 ----------
+  - id: TC_CASE_014
+    title: "GET /api/test-cases/import/template_下载Excel模板_返回xlsx文件流"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/test-cases/import/template"
+    description: "验证模板下载接口直接返回 xlsx 二进制文件流(非 ApiResponse 包装，Content-Type 为 spreadsheetml.sheet)；body_contains/业务码断言不适用，仅断言 HTTP 200"
+
+    auth:
+      required: false
+
+    request:
+      query: {}
+      body: {}
+
+    expected:
+      # xlsx 二进制流：省略 response_type/body_contains/business_code，仅断言 HTTP 状态码
+      status_code: 200
+      response_type: html
+      body_contains: []

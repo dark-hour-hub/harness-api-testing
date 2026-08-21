@@ -1,0 +1,775 @@
+# ============================================================
+# 评测任务模块测试用例 YAML
+# 覆盖 14 个接口：创建/查询/进度/执行/测量/终评/结果报告
+# 说明：run/finalize/results/report 依赖真实智能体与完整任务流转，
+#       测试环境不可控，故以状态冲突/未就绪反向用例为主，避免用例互相阻塞
+# ============================================================
+module: task
+module_name: "评测任务模块"
+base_url: "http://localhost:8080"
+
+# ──────────────────────────────────────────
+# 1. 全局变量预设
+# ──────────────────────────────────────────
+global_variables:
+  default_page_size: 20
+
+# ──────────────────────────────────────────
+# 2. 全局请求头配置
+# ──────────────────────────────────────────
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers: []
+
+# ──────────────────────────────────────────
+# 3. 认证统一配置（本项目无认证）
+# ──────────────────────────────────────────
+auth_setup:
+  type: none
+
+# ──────────────────────────────────────────
+# 4. 测试用例列表
+# ──────────────────────────────────────────
+testcases:
+  # ========== 前置：创建并发布一个可用方案（任务创建要求 scheme PUBLISHED） ==========
+  - id: "TC_TASK_PREP_001"
+    title: "前置_POST /api/evaluation-schemes_创建待发布方案"
+    priority: P0
+    tags: ["前置"]
+    method: POST
+    path: "/api/evaluation-schemes"
+    description: "任务模块前置：创建完整的 DRAFT 方案（子选择含目录必选指标），供后续发布后创建任务使用"
+    auth:
+      required: false
+    request:
+      body:
+        schemeCode: "SCHEME_TASK_PREP"
+        schemeName: "任务模块前置方案"
+        version: "1.0"
+        catalogVersion: "V2"
+        evaluationMode: "COMPREHENSIVE"
+        riskTier: "B"
+        safetyVetoEnabled: true
+        stopOnSafetyFailure: true
+        dimensionWeights:
+          weights:
+            SAFETY_COMPLIANCE: 0.4
+            CAPABILITY: 0.25
+            INTENT_UNDERSTANDING: 0.2
+            USER_EXPERIENCE: 0.15
+        categories:
+          - categoryId: 101
+            required: true
+            applicable: true
+          - categoryId: 105
+            required: true
+            applicable: true
+          - categoryId: 110
+            required: true
+            applicable: true
+          - categoryId: 114
+            required: true
+            applicable: true
+        indicators:
+          - indicatorId: 1001
+            required: true
+            applicable: true
+          - indicatorId: 1011
+            required: true
+            applicable: true
+          - indicatorId: 1031
+            required: true
+            applicable: true
+          - indicatorId: 1048
+            required: true
+            applicable: true
+        testCases:
+          - testCaseId: 1
+            enabled: true
+          - testCaseId: 71
+            enabled: true
+          - testCaseId: 181
+            enabled: true
+          - testCaseId: 341
+            enabled: true
+    extracts:
+      scheme_id: "$.data.id"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "status"
+      data_equals:
+        "$.data.status": "DRAFT"
+
+  - id: "TC_TASK_PREP_002"
+    title: "前置_POST /api/evaluation-schemes/{id}/publish_发布方案"
+    priority: P0
+    tags: ["前置"]
+    method: POST
+    path: "/api/evaluation-schemes/${TC_TASK_PREP_001.extracts.scheme_id}/publish"
+    description: "任务模块前置：发布上一步创建的方案（仅 PUBLISHED 方案可创建任务）"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_TASK_PREP_001.extracts.scheme_id}"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "status"
+      data_equals:
+        "$.data.status": "PUBLISHED"
+    depends_on:
+      - "TC_TASK_PREP_001"
+
+  # ========== 接口 1：创建评测任务 ==========
+  - id: "TC_TASK_001"
+    title: "POST /api/evaluation-tasks_合法agentId与schemeId_创建成功返回CREATED任务"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: POST
+    path: "/api/evaluation-tasks"
+    description: "验证使用合法的 agentId/schemeId 创建评测任务成功，任务初始状态为 CREATED"
+    auth:
+      required: false
+    request:
+      body:
+        agentId: 1
+        schemeId: "${TC_TASK_PREP_001.extracts.scheme_id}"
+        createdBy: "api"
+    extracts:
+      task_id: "$.data.id"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "taskNo"
+
+  - id: "TC_TASK_002"
+    title: "POST /api/evaluation-tasks_schemeId缺失_返回400校验错误"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-tasks"
+    description: "验证 schemeId 为必填参数，缺失时返回 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      body:
+        agentId: 1
+        createdBy: "api"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+
+  # ========== 接口 2：创建临时评测任务（ad-hoc） ==========
+  - id: "TC_TASK_003"
+    title: "POST /api/evaluation-tasks/ad-hoc_合法参数_创建成功返回CREATED任务"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: POST
+    path: "/api/evaluation-tasks/ad-hoc"
+    description: "验证基于内联指标与用例创建 ad-hoc 临时任务成功，返回轻量任务信息"
+    auth:
+      required: false
+    request:
+      body:
+        agentId: 1
+        sourceSchemeId: "${TC_TASK_PREP_001.extracts.scheme_id}"
+        catalogVersion: "V2"
+        evaluationMode: "COMPREHENSIVE"
+        evaluationType: null
+        riskTier: "B"
+        thresholdLevel: null
+        dimensionWeights:
+          weights:
+            SAFETY_COMPLIANCE: 0.4
+            CAPABILITY: 0.25
+            INTENT_UNDERSTANDING: 0.2
+            USER_EXPERIENCE: 0.15
+        safetyVetoEnabled: true
+        stopOnSafetyFailure: true
+        scoringConfigJson: "{}"
+        indicators:
+          - indicatorId: 1001
+            required: true
+          - indicatorId: 1011
+            required: true
+          - indicatorId: 1031
+            required: true
+          - indicatorId: 1048
+            required: true
+        testCaseIds: [1, 71, 181, 341]
+        createdBy: "api"
+    extracts:
+      ad_hoc_task_id: "$.data.taskId"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "taskId"
+        - "status"
+
+  - id: "TC_TASK_004"
+    title: "POST /api/evaluation-tasks/ad-hoc_indicators为空_返回400校验错误"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-tasks/ad-hoc"
+    description: "验证 indicators 非空约束，为空列表时返回 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      body:
+        agentId: 1
+        evaluationMode: "COMPREHENSIVE"
+        riskTier: "B"
+        indicators: []
+        testCaseIds: [1, 2, 3]
+        createdBy: "api"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+
+  # ========== 接口 3：分页查询评测任务列表 ==========
+  - id: "TC_TASK_005"
+    title: "GET /api/evaluation-tasks_分页并按状态过滤_返回分页数据"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: GET
+    path: "/api/evaluation-tasks"
+    description: "验证分页查询任务列表并按 CREATED 状态精确过滤，返回 PageResult 结构"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+        pageSize: 20
+        status: "CREATED"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "items"
+        - "total"
+
+  - id: "TC_TASK_006"
+    title: "GET /api/evaluation-tasks_status非法枚举_返回400校验错误"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks"
+    description: "验证 status 参数仅接受 CREATED/RUNNING/COMPLETED/FAILED，非法值返回 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+        pageSize: 20
+        status: "DONE"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+
+  # ========== 接口 4：查询评测任务详情 ==========
+  - id: "TC_TASK_007"
+    title: "GET /api/evaluation-tasks/{id}_查询已创建任务_返回任务详情"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}"
+    description: "验证按 ID 查询已创建任务详情，返回完整任务实体与用例列表"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "status"
+    depends_on:
+      - "TC_TASK_001"
+
+  - id: "TC_TASK_008"
+    title: "GET /api/evaluation-tasks/{id}_任务不存在_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/999999999"
+    description: "验证查询不存在的任务 ID 时返回 COMMON_404_RESOURCE"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "COMMON_404_RESOURCE"
+      business_message: "Resource not found"
+      data_exists: []
+
+  # ========== 接口 5：查询任务进度 ==========
+  - id: "TC_TASK_009"
+    title: "GET /api/evaluation-tasks/{id}/progress_查询已创建任务进度_返回进度信息"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}/progress"
+    description: "验证查询任务持久化进度，返回 taskId/status/progress 等计数信息"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "taskId"
+        - "status"
+    depends_on:
+      - "TC_TASK_001"
+
+  - id: "TC_TASK_010"
+    title: "GET /api/evaluation-tasks/{id}/progress_任务不存在_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/999999999/progress"
+    description: "验证查询不存在的任务进度时返回 COMMON_404_RESOURCE"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "COMMON_404_RESOURCE"
+      business_message: "Resource not found"
+      data_exists: []
+
+  # ========== 接口 6：启动评测执行 ==========
+  - id: "TC_TASK_011"
+    title: "POST /api/evaluation-tasks/{id}/run_CREATED状态任务启动_返回202异步受理"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}/run"
+    description: "验证仅 CREATED 状态任务可启动执行，接口异步受理返回 HTTP 202"
+    auth:
+      required: false
+    request:
+      body: {}
+    expected:
+      status_code: 202
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "taskId"
+        - "status"
+    depends_on:
+      - "TC_TASK_001"
+
+  - id: "TC_TASK_012"
+    title: "POST /api/evaluation-tasks/{id}/run_任务非CREATED状态重复启动_返回409状态冲突"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}/run"
+    description: "验证任务已启动（RUNNING/COMPLETED/FAILED）后重复调用 run 返回 TASK_409_STATUS"
+    auth:
+      required: false
+    request:
+      body: {}
+    expected:
+      status_code: 409
+      response_type: json
+      business_code: "TASK_409_STATUS"
+      business_message: "Evaluation task status conflict"
+      data_exists: []
+    depends_on:
+      - "TC_TASK_011"
+
+  # ========== 接口 7：提交指标测量 ==========
+  - id: "TC_TASK_013"
+    title: "POST /api/evaluation-tasks/{taskId}/measurements_提交合法测量_返回DRAFT证据"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}/measurements"
+    description: "验证向任务提交指标测量值成功，证据落库为 DRAFT 状态"
+    auth:
+      required: false
+    request:
+      body:
+        indicatorId: 1001
+        measurementType: "AUTO_API"
+        rawValue: 0.2
+        unit: "%"
+        measurementPayloadJson: '{"sample": 100}'
+        sourceSystem: "dify"
+        sourceReference: "run-123"
+        periodStart: "2026-08-01T00:00:00"
+        periodEnd: "2026-08-31T23:59:59"
+        submittedBy: "expert"
+        remark: "人工复核证据"
+    extracts:
+      measurement_id: "$.data.id"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "status"
+    depends_on:
+      - "TC_TASK_001"
+
+  - id: "TC_TASK_014"
+    title: "POST /api/evaluation-tasks/{taskId}/measurements_任务不存在_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-tasks/999999999/measurements"
+    description: "验证向不存在的任务提交测量时返回 COMMON_404_RESOURCE"
+    auth:
+      required: false
+    request:
+      body:
+        indicatorId: 1001
+        measurementType: "MANUAL_EXPERT"
+        rawValue: 0.2
+        unit: "%"
+        submittedBy: "expert"
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "COMMON_404_RESOURCE"
+      business_message: "Resource not found"
+      data_exists: []
+
+  # ========== 接口 8：确认指标测量 ==========
+  - id: "TC_TASK_015"
+    title: "POST /api/evaluation-tasks/{taskId}/measurements/{measurementId}/confirm_确认DRAFT测量_返回CONFIRMED证据"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}/measurements/${TC_TASK_013.extracts.measurement_id}/confirm"
+    description: "验证确认草稿测量证据成功，状态 DRAFT 流转为 CONFIRMED"
+    auth:
+      required: false
+    request:
+      body:
+        confirmedBy: "expert"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "status"
+    depends_on:
+      - "TC_TASK_013"
+
+  - id: "TC_TASK_016"
+    title: "POST /api/evaluation-tasks/{taskId}/measurements/{measurementId}/confirm_测量记录不存在_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}/measurements/999999999/confirm"
+    description: "验证确认不存在的测量记录时返回 COMMON_404_RESOURCE"
+    auth:
+      required: false
+    request:
+      body:
+        confirmedBy: "expert"
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "COMMON_404_RESOURCE"
+      business_message: "Resource not found"
+      data_exists: []
+    depends_on:
+      - "TC_TASK_001"
+
+  # ========== 接口 9：任务终评/定稿 ==========
+  - id: "TC_TASK_017"
+    title: "POST /api/evaluation-tasks/{id}/finalize_任务非COMPLETED状态_返回409状态冲突"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-tasks/${TC_TASK_003.extracts.ad_hoc_task_id}/finalize"
+    description: "验证 finalize 仅允许 COMPLETED 且报告结论 INCOMPLETE 的任务，CREATED 状态任务返回 TASK_409_STATUS"
+    auth:
+      required: false
+    request:
+      body: {}
+    expected:
+      status_code: 409
+      response_type: json
+      business_code: "TASK_409_STATUS"
+      business_message: "Evaluation task status conflict"
+      data_exists: []
+    depends_on:
+      - "TC_TASK_003"
+
+  - id: "TC_TASK_018"
+    title: "POST /api/evaluation-tasks/{id}/finalize_id非数字_返回400校验错误"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-tasks/abc/finalize"
+    description: "验证 finalize 路径参数 id 必须为正整数，非数字返回 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      body: {}
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+
+  # ========== 接口 10：查询评测结果汇总 ==========
+  - id: "TC_TASK_019"
+    title: "GET /api/evaluation-tasks/{id}/results_任务结果未就绪_返回409"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/${TC_TASK_003.extracts.ad_hoc_task_id}/results"
+    description: "验证任务未 COMPLETED 或报告未生成时查询结果返回 TASK_409_RESULT_NOT_READY"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 409
+      response_type: json
+      business_code: "TASK_409_RESULT_NOT_READY"
+      business_message: "Evaluation result is not ready"
+      data_exists: []
+    depends_on:
+      - "TC_TASK_003"
+
+  - id: "TC_TASK_020"
+    title: "GET /api/evaluation-tasks/{id}/results_任务不存在_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/999999999/results"
+    description: "验证查询不存在的任务结果时返回 COMMON_404_RESOURCE"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "COMMON_404_RESOURCE"
+      business_message: "Resource not found"
+      data_exists: []
+
+  # ========== 接口 11：分页查询指标结果 ==========
+  - id: "TC_TASK_021"
+    title: "GET /api/evaluation-tasks/{id}/results/indicators_分页查询指标结果_返回分页数据"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}/results/indicators"
+    description: "验证分页查询持久化指标结果，仅要求任务存在，返回 PageResult 结构"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+        pageSize: 20
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "items"
+        - "total"
+    depends_on:
+      - "TC_TASK_001"
+
+  - id: "TC_TASK_022"
+    title: "GET /api/evaluation-tasks/{id}/results/indicators_status非法值_返回400校验错误"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}/results/indicators"
+    description: "验证指标结果 status 过滤参数仅接受合法枚举，非法值返回 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+        pageSize: 20
+        status: "DONE"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+    depends_on:
+      - "TC_TASK_001"
+
+  # ========== 接口 12：分页查询用例结果 ==========
+  - id: "TC_TASK_023"
+    title: "GET /api/evaluation-tasks/{id}/case-results_分页查询用例结果_返回分页数据"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}/case-results"
+    description: "验证分页查询持久化用例判定结果，仅要求任务存在，返回 PageResult 结构"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+        pageSize: 20
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "items"
+        - "total"
+    depends_on:
+      - "TC_TASK_001"
+
+  - id: "TC_TASK_024"
+    title: "GET /api/evaluation-tasks/{id}/case-results_passed非法值_返回400校验错误"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}/case-results"
+    description: "验证 passed 过滤参数仅接受 true/false，非法值返回 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+        pageSize: 20
+        passed: "yes"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+    depends_on:
+      - "TC_TASK_001"
+
+  # ========== 接口 13：分页查询智能体调用记录 ==========
+  - id: "TC_TASK_025"
+    title: "GET /api/evaluation-tasks/{id}/calls_分页查询调用记录_返回分页数据"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}/calls"
+    description: "验证分页查询脱敏后的 Agent 调用记录，仅要求任务存在，返回 PageResult 结构"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+        pageSize: 20
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "items"
+        - "total"
+    depends_on:
+      - "TC_TASK_001"
+
+  - id: "TC_TASK_026"
+    title: "GET /api/evaluation-tasks/{id}/calls_errorType非法值_返回400校验错误"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/${TC_TASK_001.extracts.task_id}/calls"
+    description: "验证 errorType 过滤参数为 NONE 或非法值时返回 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+        pageSize: 20
+        errorType: "NONE"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+    depends_on:
+      - "TC_TASK_001"
+
+  # ========== 接口 14：查询评测报告 ==========
+  - id: "TC_TASK_027"
+    title: "GET /api/evaluation-tasks/{id}/report_报告未就绪_返回409"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/${TC_TASK_003.extracts.ad_hoc_task_id}/report"
+    description: "验证任务未 COMPLETED 或报告行缺失时查询报告返回 TASK_409_RESULT_NOT_READY"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 409
+      response_type: json
+      business_code: "TASK_409_RESULT_NOT_READY"
+      business_message: "Evaluation result is not ready"
+      data_exists: []
+    depends_on:
+      - "TC_TASK_003"
+
+  - id: "TC_TASK_028"
+    title: "GET /api/evaluation-tasks/{id}/report_id非数字_返回400校验错误"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-tasks/abc/report"
+    description: "验证 report 路径参数 id 必须为正整数，非数字返回 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      query: {}
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []

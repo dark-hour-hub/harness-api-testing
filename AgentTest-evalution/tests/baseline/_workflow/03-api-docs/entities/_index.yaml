@@ -1,0 +1,164 @@
+# 实体索引 — 由 api-doc-entities 生成
+# 来源: _manifest.yaml 各模块 dtos+vos 去重合并 + 通用泛型包装（ApiResponse/PageResult）
+# 生成日期: 2026-08-19
+entities:
+  AgentRequest:
+    file: AgentRequest.md
+    module: agents
+    type: DTO
+    fields: [agentCode, agentName, category, riskTier, department, version, agentType, adapterType, endpoint, method, requestTemplate, messageField, sessionField, answerField, successField, errorField, latencyField, tokenField, toolTraceField, headerSecretRef, timeoutMs, enabled]
+  AgentResponse:
+    file: AgentResponse.md
+    module: agents
+    type: VO
+    fields: [id, agentCode, agentName, category, riskTier, department, version, agentType, adapterType, endpoint, method, requestTemplate, messageField, sessionField, answerField, successField, errorField, latencyField, tokenField, toolTraceField, timeoutMs, enabled, headerSecretConfigured, createdAt, updatedAt]
+  IndicatorResponse:
+    file: IndicatorResponse.md
+    module: indicator
+    type: VO
+    fields: [id, indicatorCode, indicatorName, indicatorSet, dimensionCode, dimensionName, categoryCode, categoryName, definition, formulaDescription, unit, metricDirection, calculatorType, bestValue, worstValue, entryThreshold, runningThreshold, thresholdExpression, collectionMethod, defaultWeight, required, vetoEnabled, dataVersion, sourceNote, enabled, sortOrder, isoMappings]
+  IndicatorDimension:
+    file: IndicatorDimension.md
+    module: indicator
+    type: VO
+    fields: [id, dimensionCode, name, defaultWeight, sortOrder, enabled]
+  IndicatorCategory:
+    file: IndicatorCategory.md
+    module: indicator
+    type: VO
+    fields: [id, dimensionCode, categoryCode, name, defaultWeight, sortOrder, enabled]
+  IndicatorCatalogVersion:
+    file: IndicatorCatalogVersion.md
+    module: indicator
+    type: VO
+    fields: [versionCode, displayName, status, isDefault, dimensionCount, categoryCount, indicatorCount, riskWeights, publishedAt, createdAt]
+  TestCaseRequest:
+    file: TestCaseRequest.md
+    module: testcase
+    type: DTO
+    fields: [caseCode, caseName, indicatorId, caseType, question, conversationTurns, referenceAnswer, expectedBehavior, expectedIntent, expectedTool, expectedToolParameters, factReferences, weight, passScore, scenarioType, version, enabled, combineMode, rules]
+  TestCaseResponse:
+    file: TestCaseResponse.md
+    module: testcase
+    type: VO
+    fields: [id, caseCode, caseName, indicatorId, caseType, question, conversationTurns, referenceAnswer, expectedBehavior, expectedIntent, expectedTool, expectedToolParameters, factReferences, weight, passScore, scenarioType, version, enabled, createdAt, updatedAt, rules]
+  TestCaseDeletionResult:
+    file: TestCaseDeletionResult.md
+    module: testcase
+    type: VO
+    fields: [testCaseId, action]
+  ImportError:
+    file: ImportError.md
+    module: testcase
+    type: VO
+    fields: [rowIndex, field, errorCode, message]
+  CreateEvaluationTaskRequest:
+    file: CreateEvaluationTaskRequest.md
+    module: task
+    type: DTO
+    fields: [agentId, schemeId, createdBy]
+  CreateAdHocEvaluationTaskRequest:
+    file: CreateAdHocEvaluationTaskRequest.md
+    module: task
+    type: DTO
+    fields: [agentId, sourceSchemeId, catalogVersion, evaluationMode, evaluationType, riskTier, thresholdLevel, dimensionWeights, safetyVetoEnabled, stopOnSafetyFailure, scoringConfigJson, indicators, testCaseIds, createdBy]
+  SubmitMeasurementRequest:
+    file: SubmitMeasurementRequest.md
+    module: task
+    type: DTO
+    fields: [indicatorId, measurementType, rawValue, unit, measurementPayloadJson, sourceSystem, sourceReference, periodStart, periodEnd, collectedAt, submittedBy, remark]
+  ConfirmMeasurementRequest:
+    file: ConfirmMeasurementRequest.md
+    module: task
+    type: DTO
+    fields: [confirmedBy]
+  EvaluationTask:
+    file: EvaluationTask.md
+    module: task
+    type: VO
+    fields: [id, taskNo, agentId, schemeId, sourceType, agentSnapshot, schemeSnapshot, snapshotHash, evaluationMode, riskTier, evaluationType, thresholdLevel, status, progress, startedAt, finishedAt, interruptionReason, createdBy, createdAt, updatedAt, cases]
+  CreateEvaluationTaskResponse:
+    file: CreateEvaluationTaskResponse.md
+    module: task
+    type: VO
+    fields: [taskId, taskNo, status, sourceType, sourceSchemeId]
+  EvaluationTaskProgress:
+    file: EvaluationTaskProgress.md
+    module: task
+    type: VO
+    fields: [taskId, status, progress, totalCount, completedCount, successCount, failureCount]
+  RunTaskResponse:
+    file: RunTaskResponse.md
+    module: task
+    type: VO
+    fields: [taskId, status, progress, totalCount, completedCount, successCount, failureCount]
+  FinalizeResponse:
+    file: FinalizeResponse.md
+    module: task
+    type: VO
+    fields: [taskId, finalized]
+  EvaluationResultResponse:
+    file: EvaluationResultResponse.md
+    module: task
+    type: VO
+    fields: [taskId, taskStatus, agent, scheme, totalScore, grade, safetyVetoTriggered, safetyVetoReason, dimensions, categories, conclusion, reportStatus, incompleteReason, specialScore, specialPassed, entryConclusion, runningConclusion, entrySafetyVetoTriggered, entrySafetyVetoReason, runningSafetyVetoTriggered, runningSafetyVetoReason, coverage, createdAt, startedAt, finishedAt, generatedAt]
+  IndicatorResultResponse:
+    file: IndicatorResultResponse.md
+    module: task
+    type: VO
+    fields: [indicatorId, indicatorCode, indicatorName, dimensionCode, dimensionName, categoryCode, categoryName, rawValue, normalizedScore, weight, threshold, passed, status, entryThreshold, entryPassed, runningThreshold, runningPassed, completedCaseCount, applicableCaseCount, evidenceSummary, dataVersion, isoMappings]
+  CaseResultResponse:
+    file: CaseResultResponse.md
+    module: task
+    type: VO
+    fields: [taskCaseId, caseId, caseCode, caseName, indicatorId, sequenceNo, executionStatus, judgementStatus, score, passed, evidenceSummary, failureReason, invocationStartedAt, invocationFinishedAt, judgedAt, judgeType, aiScore, aiPassed, aiReason, aiConfidence, provider, profileRef, modelName, modelVersion, promptVersion, aiStatus, aiErrorType, reviewStatus]
+  AgentCallResponse:
+    file: AgentCallResponse.md
+    module: task
+    type: VO
+    fields: [callId, taskId, taskCaseId, sequenceNo, httpStatus, latencyMs, success, errorType, answerMasked, requestSummaryMasked, errorMessageMasked, createdAt]
+  EvaluationReportResponse:
+    file: EvaluationReportResponse.md
+    module: task
+    type: VO
+    fields: [taskId, taskStatus, reportStatus, totalScore, grade, specialScore, specialPassed, dimensions, safetyVetoTriggered, safetyVetoReason, conclusion, entryConclusion, runningConclusion, entrySafetyVetoTriggered, entrySafetyVetoReason, runningSafetyVetoTriggered, runningSafetyVetoReason, incompleteReason, agent, scheme, summary, remediation, reportVersion, generatedAt]
+  IndicatorMeasurementResponse:
+    file: IndicatorMeasurementResponse.md
+    module: task
+    type: VO
+    fields: [id, taskId, indicatorId, measurementType, status, rawValue, unit, measurementPayloadJson, sourceSystem, sourceReference, periodStart, periodEnd, collectedAt, submittedBy, confirmedBy, confirmedAt, remark, createdAt]
+  EvaluationSchemeRequest:
+    file: EvaluationSchemeRequest.md
+    module: scheme
+    type: DTO
+    fields: [schemeCode, schemeName, version, catalogVersion, evaluationMode, evaluationType, riskTier, thresholdLevel, dimensionWeights, safetyVetoEnabled, stopOnSafetyFailure, scoringConfigJson, categories, indicators, testCases]
+  EvaluationSchemeResponse:
+    file: EvaluationSchemeResponse.md
+    module: scheme
+    type: VO
+    fields: [id, schemeCode, schemeName, version, catalogVersion, status, evaluationMode, evaluationType, riskTier, thresholdLevel, dimensionWeights, safetyVetoEnabled, stopOnSafetyFailure, scoringConfigJson, createdAt, updatedAt, categories, indicators, testCases]
+  SchemeDeletionResult:
+    file: SchemeDeletionResult.md
+    module: scheme
+    type: VO
+    fields: [schemeId, originalStatus, action, taskReferenceCount, reportReferenceCount, resultingStatus]
+  SchemeDeletionImpact:
+    file: SchemeDeletionImpact.md
+    module: scheme
+    type: VO
+    fields: [schemeId, status, taskReferenceCount, reportReferenceCount, actionIfConfirmed]
+  SchemeValidationResult:
+    file: SchemeValidationResult.md
+    module: scheme
+    type: VO
+    fields: [errors]
+  ApiResponse:
+    file: ApiResponse.md
+    module: common
+    type: DTO
+    fields: [code, message, data, traceId]
+  PageResult:
+    file: PageResult.md
+    module: common
+    type: VO
+    fields: [items, page, pageSize, total]

@@ -1,0 +1,602 @@
+module: "system_part4"
+module_name: "系统管理模块-part4"
+base_url: "http://localhost:8080"
+
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers:
+    - name: "Authorization"
+      value: "${auth.token_prefix} ${auth.token}"
+    - name: "clientid"
+      value: "${auth.params.admin.clientId}"
+
+auth_setup:
+  type: bearer_token
+  login_endpoint: "/auth/login"
+  token_prefix: "Bearer "
+  params:
+    admin:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+    visitor:
+      clientId: "e5cd7e4891bf95d1d19206ce24a7b32e"
+      grantType: "password"
+      tenantId: "000000"
+  accounts:
+    admin:
+      username: "admin"
+      password: "admin123"
+    visitor:
+      username: "test"
+      password: "666666"
+  extracts:
+    token: "$.data.access_token"
+
+global_variables:
+  default_page_size: 10
+
+testcases:
+  - id: "TC_SYSTEM_PART4_001"
+    title: "GET /system/post/deptTree_无过滤条件_返回全量部门树"
+    method: "GET"
+    path: "/system/post/deptTree"
+    tags:
+      - "正常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params: {}
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "id"
+        - "name"
+
+  - id: "TC_SYSTEM_PART4_002"
+    title: "GET /system/post/deptTree_传入越权部门ID_部门数据权限校验失败"
+    method: "GET"
+    path: "/system/post/deptTree"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params:
+        deptId: 999999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_003"
+    title: "PUT /system/user/profile/updatePwd_旧密码正确_重置当前用户密码成功"
+    method: "PUT"
+    path: "/system/user/profile/updatePwd"
+    tags:
+      - "正常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        oldPassword: "admin123"
+        newPassword: "Admin@2026"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART4_004"
+    title: "PUT /system/user/profile/updatePwd_旧密码错误_修改密码失败"
+    method: "PUT"
+    path: "/system/user/profile/updatePwd"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        oldPassword: "wrongpassword"
+        newPassword: "Admin@2026"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_005"
+    title: "POST /system/user/profile/avatar_上传合法图片_头像更新成功"
+    method: "POST"
+    path: "/system/user/profile/avatar"
+    tags:
+      - "正常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      content_type: "multipart/form-data"
+      params:
+        avatarfile: "avatar.png"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "imgUrl"
+
+  - id: "TC_SYSTEM_PART4_006"
+    title: "POST /system/user/profile/avatar_上传非图片文件_文件格式不正确"
+    method: "POST"
+    path: "/system/user/profile/avatar"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      content_type: "multipart/form-data"
+      params:
+        avatarfile: "test.txt"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_007"
+    title: "GET /system/role/list_正常分页查询_返回角色列表"
+    method: "GET"
+    path: "/system/role/list"
+    tags:
+      - "正常"
+      - "回归"
+      - "冒烟"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params:
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "rows"
+
+  - id: "TC_SYSTEM_PART4_008"
+    title: "GET /system/role/list_排序参数格式错误_排序参数有误"
+    method: "GET"
+    path: "/system/role/list"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params:
+        pageNum: 1
+        pageSize: 10
+        orderByColumn: "1=1"
+        isAsc: "desc"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_009"
+    title: "GET /system/role/{roleId}_传入存在的角色ID_返回角色详情"
+    method: "GET"
+    path: "/system/role/{roleId}"
+    tags:
+      - "正常"
+      - "回归"
+      - "冒烟"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        roleId: 2
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "roleId"
+        - "roleName"
+
+  - id: "TC_SYSTEM_PART4_010"
+    title: "GET /system/role/{roleId}_传入无数据权限的角色ID_无权限访问"
+    method: "GET"
+    path: "/system/role/{roleId}"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        roleId: 999999
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_011"
+    title: "PUT /system/role/dataScope_传入普通角色_修改数据权限成功"
+    method: "PUT"
+    path: "/system/role/dataScope"
+    tags:
+      - "正常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        roleId: 2
+        dataScope: "2"
+        deptIds:
+          - 100
+          - 101
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART4_012"
+    title: "PUT /system/role/dataScope_传入超级管理员角色_不允许操作超级管理员角色"
+    method: "PUT"
+    path: "/system/role/dataScope"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        roleId: 1
+        dataScope: "2"
+        deptIds:
+          - 100
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_013"
+    title: "PUT /system/role/changeStatus_传入普通角色停用_状态修改成功"
+    method: "PUT"
+    path: "/system/role/changeStatus"
+    tags:
+      - "正常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        roleId: 2
+        status: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART4_014"
+    title: "PUT /system/role/changeStatus_传入超级管理员角色_不允许操作超级管理员角色"
+    method: "PUT"
+    path: "/system/role/changeStatus"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        roleId: 1
+        status: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_015"
+    title: "DELETE /system/role/{roleIds}_删除普通角色_删除成功"
+    method: "DELETE"
+    path: "/system/role/{roleIds}"
+    tags:
+      - "正常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        roleIds: "2"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART4_016"
+    title: "DELETE /system/role/{roleIds}_包含超级管理员角色_不允许操作超级管理员角色"
+    method: "DELETE"
+    path: "/system/role/{roleIds}"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      path_params:
+        roleIds: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_017"
+    title: "GET /system/role/optionselect_正常查询_返回角色下拉列表"
+    method: "GET"
+    path: "/system/role/optionselect"
+    tags:
+      - "正常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params: {}
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "roleId"
+
+  - id: "TC_SYSTEM_PART4_018"
+    title: "GET /system/role/optionselect_传入非法角色ID过滤_服务内部异常"
+    method: "GET"
+    path: "/system/role/optionselect"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params:
+        roleIds: "0"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_019"
+    title: "GET /system/role/authUser/allocatedList_正常分页查询_返回已分配用户列表"
+    method: "GET"
+    path: "/system/role/authUser/allocatedList"
+    tags:
+      - "正常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params:
+        roleId: 2
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "rows"
+
+  - id: "TC_SYSTEM_PART4_020"
+    title: "GET /system/role/authUser/allocatedList_排序参数格式错误_排序参数有误"
+    method: "GET"
+    path: "/system/role/authUser/allocatedList"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params:
+        roleId: 2
+        pageNum: 1
+        pageSize: 10
+        orderByColumn: "1=1"
+        isAsc: "asc"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_021"
+    title: "GET /system/role/authUser/unallocatedList_正常分页查询_返回未分配用户列表"
+    method: "GET"
+    path: "/system/role/authUser/unallocatedList"
+    tags:
+      - "正常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params:
+        roleId: 2
+        pageNum: 1
+        pageSize: 10
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists:
+        - "rows"
+
+  - id: "TC_SYSTEM_PART4_022"
+    title: "GET /system/role/authUser/unallocatedList_排序参数格式错误_排序参数有误"
+    method: "GET"
+    path: "/system/role/authUser/unallocatedList"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params:
+        roleId: 2
+        pageNum: 1
+        pageSize: 10
+        orderByColumn: "1=1"
+        isAsc: "asc"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_023"
+    title: "PUT /system/role/authUser/cancel_取消非当前用户授权_取消成功"
+    method: "PUT"
+    path: "/system/role/authUser/cancel"
+    tags:
+      - "正常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 2
+        roleId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART4_024"
+    title: "PUT /system/role/authUser/cancel_取消当前登录用户授权_不允许修改当前用户角色"
+    method: "PUT"
+    path: "/system/role/authUser/cancel"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      body:
+        userId: 1
+        roleId: 1
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_025"
+    title: "PUT /system/role/authUser/cancelAll_批量取消非当前用户授权_取消成功"
+    method: "PUT"
+    path: "/system/role/authUser/cancelAll"
+    tags:
+      - "正常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params:
+        roleId: 1
+        userIds: "2,3"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART4_026"
+    title: "PUT /system/role/authUser/cancelAll_批量取消包含当前用户_不允许修改当前用户角色"
+    method: "PUT"
+    path: "/system/role/authUser/cancelAll"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params:
+        roleId: 1
+        userIds: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500
+
+  - id: "TC_SYSTEM_PART4_027"
+    title: "PUT /system/role/authUser/selectAll_批量授权非当前用户_授权成功"
+    method: "PUT"
+    path: "/system/role/authUser/selectAll"
+    tags:
+      - "正常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params:
+        roleId: 1
+        userIds: "2,3"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 200
+      data_exists: []
+
+  - id: "TC_SYSTEM_PART4_028"
+    title: "PUT /system/role/authUser/selectAll_批量授权包含当前用户_不允许修改当前用户角色"
+    method: "PUT"
+    path: "/system/role/authUser/selectAll"
+    tags:
+      - "异常"
+      - "回归"
+    auth:
+      required: true
+      account: "admin"
+    request:
+      params:
+        roleId: 1
+        userIds: "1"
+    expected:
+      status_code: 200
+      response_type: "json"
+      business_code: 500

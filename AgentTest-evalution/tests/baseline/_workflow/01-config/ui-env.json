@@ -1,0 +1,44 @@
+{
+  "environment": {
+    "name": "dev",
+    "python": "C:\\Users\\17201\\AppData\\Local\\Programs\\Python\\Python312\\python.exe"
+  },
+  "frontend": {
+    "url": "http://localhost:5173",
+    "configured": true
+  },
+  "dependencies": {
+    "playwright": {
+      "installed": true,
+      "status": "installed (1.60.0)"
+    },
+    "pytest": {
+      "installed": true,
+      "status": "installed (9.0.3)"
+    },
+    "pytest-bdd": {
+      "installed": true,
+      "status": "installed (8.1.0)"
+    },
+    "pytest-playwright": {
+      "installed": true,
+      "status": "installed (0.8.0)"
+    }
+  },
+  "browsers": {
+    "chromium": {
+      "ready": true,
+      "status": "installed (chromium-1223, chromium_headless_shell-1223, ffmpeg-1011, winldd-1007)"
+    }
+  },
+  "summary": {
+    "ready": true,
+    "dependencies_ok": true,
+    "chromium_ready": true,
+    "message": "UI 测试环境就绪",
+    "fix_hint": [
+      "C:\\Users\\17201\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m pip install pytest-bdd",
+      "C:\\Users\\17201\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m playwright install chromium"
+    ]
+  }
+}

@@ -1,0 +1,634 @@
+# ============================================================
+# 评测方案模块 测试用例 YAML
+# 基于 tests/baseline/_workflow/03-api-docs/modules/05-评测方案模块.md 生成
+# 状态机链路: DRAFT -> PUBLISHED -> ARCHIVED
+# ============================================================
+module: scheme
+module_name: 评测方案模块
+base_url: http://localhost:8080
+
+# ──────────────────────────────────────────
+# 1. 全局变量预设 (供全局 ${} 引用)
+# ──────────────────────────────────────────
+global_variables:
+  default_page_size: 20
+
+# ──────────────────────────────────────────
+# 2. 全局请求头配置
+# ──────────────────────────────────────────
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers: []
+
+# ──────────────────────────────────────────
+# 3. 认证统一配置 (本项目无认证)
+# ──────────────────────────────────────────
+auth_setup:
+  type: none
+
+# ──────────────────────────────────────────
+# 4. 测试用例列表
+# ──────────────────────────────────────────
+testcases:
+  # ========== 接口 1: POST /api/evaluation-schemes 创建方案草稿 ==========
+  - id: TC_SCHEME_001
+    title: "POST /api/evaluation-schemes_创建方案草稿_返回DRAFT状态"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: POST
+    path: "/api/evaluation-schemes"
+    description: "创建评测方案草稿，必填项 schemeCode/schemeName/version/evaluationMode/riskTier 齐全，子选择完整，创建后状态固定为 DRAFT"
+    auth:
+      required: false
+    request:
+      body:
+        schemeCode: "SCHEME_IT_001"
+        schemeName: "接口测试年度评测方案"
+        version: "1.0"
+        catalogVersion: "V2"
+        evaluationMode: "COMPREHENSIVE"
+        riskTier: "B"
+        safetyVetoEnabled: true
+        stopOnSafetyFailure: true
+        dimensionWeights:
+          weights:
+            SAFETY_COMPLIANCE: 0.4
+            CAPABILITY: 0.25
+            INTENT_UNDERSTANDING: 0.2
+            USER_EXPERIENCE: 0.15
+        categories:
+          - categoryId: 101
+            required: true
+            applicable: true
+          - categoryId: 105
+            required: true
+            applicable: true
+          - categoryId: 110
+            required: true
+            applicable: true
+          - categoryId: 114
+            required: true
+            applicable: true
+        indicators:
+          - indicatorId: 1001
+            required: true
+            applicable: true
+          - indicatorId: 1011
+            required: true
+            applicable: true
+          - indicatorId: 1031
+            required: true
+            applicable: true
+          - indicatorId: 1048
+            required: true
+            applicable: true
+        testCases:
+          - testCaseId: 1
+            enabled: true
+          - testCaseId: 71
+            enabled: true
+          - testCaseId: 181
+            enabled: true
+          - testCaseId: 341
+            enabled: true
+    extracts:
+      scheme_id: "$.data.id"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "status"
+      data_equals:
+        "$.data.status": "DRAFT"
+
+  - id: TC_SCHEME_002
+    title: "POST /api/evaluation-schemes_缺少必填项schemeName_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-schemes"
+    description: "请求体缺少必填字段 schemeName，触发 @NotBlank 校验失败，返回 400 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      body:
+        schemeCode: "SCHEME_IT_MISSING_NAME"
+        version: "1.0"
+        evaluationMode: "COMPREHENSIVE"
+        riskTier: "B"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+
+  - id: TC_SCHEME_003
+    title: "POST /api/evaluation-schemes_version非法_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-schemes"
+    description: "version 传非数字格式（abc），触发 @Pattern 校验注解（regexp=\\d+(\\.\\d+)?），返回 400 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      body:
+        schemeCode: "SCHEME_IT_BAD_VERSION"
+        schemeName: "非法版本方案"
+        version: "abc"
+        evaluationMode: "COMPREHENSIVE"
+        riskTier: "B"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+
+  # ========== 接口 2: GET /api/evaluation-schemes 分页查询列表 ==========
+  - id: TC_SCHEME_004
+    title: "GET /api/evaluation-schemes_分页并按schemeCode模糊过滤_返回分页数据"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: GET
+    path: "/api/evaluation-schemes"
+    description: "分页查询方案列表（page=1，pageSize 取全局默认 20），按 schemeCode 模糊过滤（LIKE %SCHEME_IT%），返回分页结果"
+    auth:
+      required: false
+    request:
+      query:
+        page: 1
+        pageSize: "${global_variables.default_page_size}"
+        schemeCode: "SCHEME_IT"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "items"
+        - "total"
+    depends_on:
+      - "TC_SCHEME_001"
+
+  - id: TC_SCHEME_005
+    title: "GET /api/evaluation-schemes_status非法_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-schemes"
+    description: "查询参数 status 传非法枚举值（非 DRAFT/PUBLISHED/ARCHIVED），返回 400 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      query:
+        status: "INVALID_STATUS"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+
+  # ========== 接口 3: GET /api/evaluation-schemes/{id} 查询详情 ==========
+  - id: TC_SCHEME_006
+    title: "GET /api/evaluation-schemes/{id}_查询已创建方案详情_返回方案数据"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/evaluation-schemes/${TC_SCHEME_001.extracts.scheme_id}"
+    description: "按 ID 查询创建成功的方案详情，任意状态均可查询，返回完整方案数据（含子选择）"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_001.extracts.scheme_id}"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "schemeCode"
+    depends_on:
+      - "TC_SCHEME_001"
+
+  - id: TC_SCHEME_007
+    title: "GET /api/evaluation-schemes/{id}_id非数字_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-schemes/abc"
+    description: "路径参数 id 为非数字，返回 400 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "abc"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+
+  - id: TC_SCHEME_008
+    title: "GET /api/evaluation-schemes/{id}_方案不存在_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-schemes/999999999"
+    description: "查询不存在的方案 ID，返回 404 SCHEME_NOT_FOUND"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "999999999"
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "SCHEME_NOT_FOUND"
+      business_message: "Evaluation scheme not found"
+      data_exists: []
+
+  # ========== 接口 4: POST /api/evaluation-schemes/{id}/validate 校验草稿 ==========
+  - id: TC_SCHEME_009
+    title: "POST /api/evaluation-schemes/{id}/validate_校验DRAFT草稿_返回valid=true"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/api/evaluation-schemes/${TC_SCHEME_001.extracts.scheme_id}/validate"
+    description: "校验 DRAFT 状态草稿完整性（子选择齐全），返回 HTTP 200 且 errors 为空数组"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_001.extracts.scheme_id}"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "errors"
+    depends_on:
+      - "TC_SCHEME_001"
+
+  - id: TC_SCHEME_010
+    title: "POST /api/evaluation-schemes/{id}/validate_方案不存在_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-schemes/999999999/validate"
+    description: "校验不存在的方案 ID，返回 404 SCHEME_NOT_FOUND"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "999999999"
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "SCHEME_NOT_FOUND"
+      business_message: "Evaluation scheme not found"
+      data_exists: []
+
+  # ========== 接口 5: PUT /api/evaluation-schemes/{id} 更新草稿 ==========
+  - id: TC_SCHEME_011
+    title: "PUT /api/evaluation-schemes/{id}_更新DRAFT草稿_返回更新后方案"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: PUT
+    path: "/api/evaluation-schemes/${TC_SCHEME_001.extracts.scheme_id}"
+    description: "更新 DRAFT 状态草稿（仅 DRAFT 可更新），更新 schemeName/version 后状态保持 DRAFT"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_001.extracts.scheme_id}"
+      body:
+        schemeCode: "SCHEME_IT_001"
+        schemeName: "接口测试年度评测方案-修订版"
+        version: "1.1"
+        catalogVersion: "V2"
+        evaluationMode: "COMPREHENSIVE"
+        riskTier: "B"
+        safetyVetoEnabled: true
+        stopOnSafetyFailure: true
+        dimensionWeights:
+          weights:
+            SAFETY_COMPLIANCE: 0.4
+            CAPABILITY: 0.25
+            INTENT_UNDERSTANDING: 0.2
+            USER_EXPERIENCE: 0.15
+        categories:
+          - categoryId: 101
+            required: true
+            applicable: true
+          - categoryId: 105
+            required: true
+            applicable: true
+          - categoryId: 110
+            required: true
+            applicable: true
+          - categoryId: 114
+            required: true
+            applicable: true
+        indicators:
+          - indicatorId: 1001
+            required: true
+            applicable: true
+          - indicatorId: 1011
+            required: true
+            applicable: true
+          - indicatorId: 1031
+            required: true
+            applicable: true
+          - indicatorId: 1048
+            required: true
+            applicable: true
+        testCases:
+          - testCaseId: 1
+            enabled: true
+          - testCaseId: 71
+            enabled: true
+          - testCaseId: 181
+            enabled: true
+          - testCaseId: 341
+            enabled: true
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "version"
+      data_equals:
+        "$.data.status": "DRAFT"
+    depends_on:
+      - "TC_SCHEME_001"
+
+  - id: TC_SCHEME_012
+    title: "PUT /api/evaluation-schemes/{id}_version非法_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: PUT
+    path: "/api/evaluation-schemes/${TC_SCHEME_001.extracts.scheme_id}"
+    description: "更新时 version 传非数字格式（abc），触发 @Pattern 校验注解，返回 400 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_001.extracts.scheme_id}"
+      body:
+        schemeCode: "SCHEME_IT_001"
+        schemeName: "接口测试年度评测方案"
+        version: "abc"
+        evaluationMode: "COMPREHENSIVE"
+        riskTier: "B"
+        categories: []
+        indicators: []
+        testCases: []
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      business_message: "Validation failed"
+      data_exists: []
+    depends_on:
+      - "TC_SCHEME_001"
+
+  # ========== 接口 6: POST /api/evaluation-schemes/{id}/publish 发布方案 ==========
+  - id: TC_SCHEME_013
+    title: "POST /api/evaluation-schemes/{id}/publish_发布DRAFT方案_返回PUBLISHED"
+    priority: P0
+    tags: ["正常", "回归", "冒烟"]
+    method: POST
+    path: "/api/evaluation-schemes/${TC_SCHEME_001.extracts.scheme_id}/publish"
+    description: "发布 DRAFT 状态方案，发布前自动完整校验通过，状态流转 DRAFT → PUBLISHED"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_001.extracts.scheme_id}"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "status"
+      data_equals:
+        "$.data.status": "PUBLISHED"
+    depends_on:
+      - "TC_SCHEME_009"
+      - "TC_SCHEME_011"
+
+  - id: TC_SCHEME_014
+    title: "POST /api/evaluation-schemes/{id}/publish_重复发布_返回409"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-schemes/${TC_SCHEME_001.extracts.scheme_id}/publish"
+    description: "对已发布方案重复发布，违反业务规则【仅 DRAFT 可发布】，返回 409 SCHEME_409_STATUS"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_001.extracts.scheme_id}"
+    expected:
+      status_code: 409
+      response_type: json
+      business_code: "SCHEME_409_STATUS"
+      business_message: "Evaluation scheme status conflict"
+      data_exists: []
+    depends_on:
+      - "TC_SCHEME_013"
+
+  # ========== 接口 7: GET /api/evaluation-schemes/{id}/deletion-impact 删除影响预览 ==========
+  - id: TC_SCHEME_015
+    title: "GET /api/evaluation-schemes/{id}/deletion-impact_预览已发布方案删除影响_返回影响结构"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/evaluation-schemes/${TC_SCHEME_001.extracts.scheme_id}/deletion-impact"
+    description: "预览已发布方案的删除影响（只读不删除），返回引用统计与将执行的删除动作结构"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_001.extracts.scheme_id}"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "schemeId"
+        - "actionIfConfirmed"
+      data_equals:
+        "$.data.status": "PUBLISHED"
+    depends_on:
+      - "TC_SCHEME_013"
+
+  - id: TC_SCHEME_016
+    title: "GET /api/evaluation-schemes/{id}/deletion-impact_方案不存在_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/evaluation-schemes/999999999/deletion-impact"
+    description: "预览不存在的方案删除影响，返回 404 SCHEME_NOT_FOUND"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "999999999"
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "SCHEME_NOT_FOUND"
+      business_message: "Evaluation scheme not found"
+      data_exists: []
+
+  # ========== 接口 8: POST /api/evaluation-schemes/{id}/clone 克隆方案 ==========
+  - id: TC_SCHEME_017
+    title: "POST /api/evaluation-schemes/{id}/clone_克隆已发布方案_返回新DRAFT草稿"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/api/evaluation-schemes/${TC_SCHEME_001.extracts.scheme_id}/clone"
+    description: "克隆已发布方案为新草稿，新方案状态为 DRAFT、版本号自动递增，子选择深拷贝"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_001.extracts.scheme_id}"
+    extracts:
+      cloned_scheme_id: "$.data.id"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "status"
+      data_equals:
+        "$.data.status": "DRAFT"
+    depends_on:
+      - "TC_SCHEME_013"
+
+  - id: TC_SCHEME_018
+    title: "POST /api/evaluation-schemes/{id}/clone_克隆DRAFT草稿_返回409"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-schemes/${TC_SCHEME_017.extracts.cloned_scheme_id}/clone"
+    description: "克隆 DRAFT 状态草稿，违反业务规则【来源限制：仅 PUBLISHED/ARCHIVED 可克隆】，返回 409 SCHEME_409_STATUS"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_017.extracts.cloned_scheme_id}"
+    expected:
+      status_code: 409
+      response_type: json
+      business_code: "SCHEME_409_STATUS"
+      business_message: "Evaluation scheme status conflict"
+      data_exists: []
+    depends_on:
+      - "TC_SCHEME_017"
+
+  # ========== 接口 9: POST /api/evaluation-schemes/{id}/archive 归档方案 ==========
+  - id: TC_SCHEME_019
+    title: "POST /api/evaluation-schemes/{id}/archive_归档已发布方案_返回ARCHIVED"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/api/evaluation-schemes/${TC_SCHEME_001.extracts.scheme_id}/archive"
+    description: "显式归档已发布方案，状态流转 → ARCHIVED；前置确保删除影响预览（TC_SCHEME_015）已在发布态执行"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_001.extracts.scheme_id}"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "status"
+      data_equals:
+        "$.data.status": "ARCHIVED"
+    depends_on:
+      - "TC_SCHEME_015"
+
+  - id: TC_SCHEME_020
+    title: "POST /api/evaluation-schemes/{id}/archive_已归档再次归档_返回409"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/evaluation-schemes/${TC_SCHEME_001.extracts.scheme_id}/archive"
+    description: "对已归档方案再次归档，违反业务规则【幂等性：已归档方案再次归档 → 409】，返回 SCHEME_409_STATUS"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_001.extracts.scheme_id}"
+    expected:
+      status_code: 409
+      response_type: json
+      business_code: "SCHEME_409_STATUS"
+      business_message: "Evaluation scheme status conflict"
+      data_exists: []
+    depends_on:
+      - "TC_SCHEME_019"
+
+  # ========== 接口 10: DELETE /api/evaluation-schemes/{id} 删除方案 ==========
+  - id: TC_SCHEME_021
+    title: "DELETE /api/evaluation-schemes/{id}_删除未引用DRAFT草稿_物理删除"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: DELETE
+    path: "/api/evaluation-schemes/${TC_SCHEME_017.extracts.cloned_scheme_id}"
+    description: "删除克隆出的未引用 DRAFT 草稿，按删除决策逻辑【DRAFT 未引用 → 物理删除】，action=PHYSICALLY_DELETED"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_017.extracts.cloned_scheme_id}"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "action"
+        - "originalStatus"
+      data_equals:
+        "$.data.action": "PHYSICALLY_DELETED"
+    depends_on:
+      - "TC_SCHEME_017"
+      - "TC_SCHEME_018"
+
+  - id: TC_SCHEME_022
+    title: "DELETE /api/evaluation-schemes/{id}_删除已归档方案_返回409"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: DELETE
+    path: "/api/evaluation-schemes/${TC_SCHEME_001.extracts.scheme_id}"
+    description: "删除已归档方案，违反业务规则【幂等性：已归档方案再次删除 → 409】，返回 SCHEME_ALREADY_ARCHIVED"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_SCHEME_001.extracts.scheme_id}"
+    expected:
+      status_code: 409
+      response_type: json
+      business_code: "SCHEME_ALREADY_ARCHIVED"
+      business_message: "Evaluation scheme is already archived"
+      data_exists: []
+    depends_on:
+      - "TC_SCHEME_019"

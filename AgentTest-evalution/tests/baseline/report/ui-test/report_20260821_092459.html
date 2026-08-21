@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UI 测试报告</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg-card: #1e293b;
+    --bg-card-hover: #273449;
+    --border: #334155;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --accent-yellow: #f59e0b;
+    --accent-purple: #a78bfa;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); padding: 28px 32px; line-height: 1.6;
+  }
+  .report-header { margin-bottom: 24px; }
+  .report-header h1 { font-size: 1.6rem; font-weight: 700; }
+  .report-header .sub { color: var(--text-muted); font-size: .85rem; margin-top: 4px; }
+  .summary-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 24px; }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 14px; text-align: center; transition: transform .15s;
+  }
+  .card:hover { transform: translateY(-2px); background: var(--bg-card-hover); }
+  .card-icon { font-size: 1.3rem; }
+  .card-value { font-size: 1.8rem; font-weight: 700; margin: 4px 0; }
+  .card-label { color: var(--text-muted); font-size: .8rem; }
+  .module-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+  .module-section.section-passed { border-left: 4px solid var(--accent-green); }
+  .module-section.section-failed { border-left: 4px solid var(--accent-red); }
+  .section-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; }
+  .section-header:hover { background: var(--bg-card-hover); }
+  .section-icon { font-size: 1.1rem; }
+  .section-title { font-weight: 600; }
+  .section-badge { margin-left: auto; }
+  .section-stats { color: var(--text-muted); font-size: .8rem; }
+  .section-arrow { color: var(--text-muted); transition: transform .2s; }
+  .section-header.collapsed .section-arrow { transform: rotate(-90deg); }
+  .section-body { padding: 0; }
+  .section-body.hidden { display: none; }
+  .detail-table { width: 100%; border-collapse: collapse; }
+  .detail-table th {
+    text-align: left; padding: 10px 18px; font-size: .78rem; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); background: rgba(0,0,0,.15);
+  }
+  .detail-table td { padding: 12px 18px; border-bottom: 1px solid rgba(51,65,85,.5); font-size: .88rem; }
+  .case-row { cursor: pointer; }
+  .case-row:hover { background: var(--bg-card-hover); }
+  .col-status { width: 90px; }
+  .col-action { width: 100px; color: var(--text-muted); font-size: .8rem; text-align: right; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: .76rem; font-weight: 600; }
+  .badge-passed { background: rgba(16,185,129,.15); color: var(--accent-green); }
+  .badge-failed { background: rgba(239,68,68,.15); color: var(--accent-red); }
+  .badge-error { background: rgba(245,158,11,.15); color: var(--accent-yellow); }
+  .badge-skipped { background: rgba(148,163,184,.15); color: var(--text-muted); }
+  .detail-row td { background: rgba(0,0,0,.2); padding: 16px 18px; }
+  .case-detail { display: flex; flex-direction: column; gap: 12px; }
+  .lbl {
+    display: inline-block; min-width: 70px; color: var(--text-muted); font-size: .78rem;
+    font-weight: 600; margin-bottom: 6px;
+  }
+  .fail-reason { display: flex; align-items: flex-start; gap: 10px; }
+  .fail-reason .val {
+    color: var(--accent-red); font-size: .9rem; font-weight: 600; line-height: 1.5;
+    word-break: break-all;
+  }
+  .shot-box { display: flex; flex-direction: column; }
+  .shot-box img {
+    max-width: 100%; max-height: 420px; border: 1px solid var(--border); border-radius: 6px;
+    display: block; object-fit: contain;
+  }
+  .trace-box summary {
+    cursor: pointer; color: var(--text-muted); font-size: .78rem; user-select: none;
+    padding: 4px 0;
+  }
+  .trace-box summary:hover { color: var(--text); }
+  .trace-box pre {
+    background: rgba(0,0,0,.3); border: 1px solid var(--border); border-radius: 6px;
+    padding: 12px; font-size: .78rem; overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+    font-family: "SFMono-Regular", Consolas, "Courier New", monospace; margin-top: 8px;
+  }
+  .no-results { text-align: center; color: var(--text-muted); padding: 40px 0; }
+  @media (max-width: 900px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+</style>
+</head>
+<body>
+  <div class="report-header">
+    <h1>UI 测试报告</h1>
+    <div class="sub">生成时间: 2026-08-21 01:24:59 UTC</div>
+  </div>
+
+  
+    <div class="summary-grid">
+        <div class="card total"><div class="card-icon">&#9733;</div><div class="card-value">15</div><div class="card-label">场景总数</div></div>
+        <div class="card passed"><div class="card-icon">&#10003;</div><div class="card-value">15</div><div class="card-label">通过</div></div>
+        <div class="card failed"><div class="card-icon">&#10007;</div><div class="card-value">0</div><div class="card-label">失败</div></div>
+        <div class="card errors"><div class="card-icon">&#9888;</div><div class="card-value">0</div><div class="card-label">错误</div></div>
+        <div class="card skipped"><div class="card-icon">&#8212;</div><div class="card-value">0</div><div class="card-label">跳过</div></div>
+        <div class="card rate" style="background:#ecfdf5; border-color:#10b981;"><div class="card-value" style="color:#10b981;">100.0%</div><div class="card-label">通过率</div></div>
+        <div class="card time"><div class="card-icon">&#9202;</div><div class="card-value">76.6s</div><div class="card-label">总耗时</div></div>
+    </div>
+
+  
+        <div class="module-section section-passed" data-module="agent-projects">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-icon">&#10003;</span>
+                <span class="section-title">agent-projects</span>
+                <span class="section-badge"><span class="badge badge-passed">100.0%</span></span>
+                <span class="section-stats">5 scenarios | 21.2s
+                    
+                    
+                </span>
+                <span class="section-arrow">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <table class="detail-table">
+                    <thead><tr><th class="col-status">状态</th><th class="col-name">场景名称</th><th class="col-action">详情</th></tr></thead>
+                    <tbody>
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_list_and_view_agent_cards[chromium]">test_list_and_view_agent_cards[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_list_and_view_agent_cards_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_filter_agents_by_code[chromium]">test_filter_agents_by_code[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_filter_agents_by_code_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_create_agent[chromium]">test_create_agent[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_create_agent_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_edit_agent[chromium]">test_edit_agent[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_edit_agent_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_delete_agent[chromium]">test_delete_agent[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_delete_agent_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="module-section section-passed" data-module="evaluation-execution">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-icon">&#10003;</span>
+                <span class="section-title">evaluation-execution</span>
+                <span class="section-badge"><span class="badge badge-passed">100.0%</span></span>
+                <span class="section-stats">2 scenarios | 8.4s
+                    
+                    
+                </span>
+                <span class="section-arrow">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <table class="detail-table">
+                    <thead><tr><th class="col-status">状态</th><th class="col-name">场景名称</th><th class="col-action">详情</th></tr></thead>
+                    <tbody>
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_execution_empty_state[chromium]">test_execution_empty_state[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_execution_empty_state_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_reset_shows_unavailable_message[chromium]">test_reset_shows_unavailable_message[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_reset_shows_unavailable_message_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="module-section section-passed" data-module="indicator-config">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-icon">&#10003;</span>
+                <span class="section-title">indicator-config</span>
+                <span class="section-badge"><span class="badge badge-passed">100.0%</span></span>
+                <span class="section-stats">3 scenarios | 16.35s
+                    
+                    
+                </span>
+                <span class="section-arrow">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <table class="detail-table">
+                    <thead><tr><th class="col-status">状态</th><th class="col-name">场景名称</th><th class="col-action">详情</th></tr></thead>
+                    <tbody>
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_indicator_page_elements[chromium]">test_indicator_page_elements[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_indicator_page_elements_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_ai_expand_shows_unavailable_message[chromium]">test_ai_expand_shows_unavailable_message[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_ai_expand_shows_unavailable_message_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_add_test_case_opens_form_with_preselected_indicator[chromium]">test_add_test_case_opens_form_with_preselected_indicator[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_add_test_case_opens_form_with_preselected_indicator_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="module-section section-passed" data-module="overview">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-icon">&#10003;</span>
+                <span class="section-title">overview</span>
+                <span class="section-badge"><span class="badge badge-passed">100.0%</span></span>
+                <span class="section-stats">2 scenarios | 7.07s
+                    
+                    
+                </span>
+                <span class="section-arrow">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <table class="detail-table">
+                    <thead><tr><th class="col-status">状态</th><th class="col-name">场景名称</th><th class="col-action">详情</th></tr></thead>
+                    <tbody>
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_overview_navigation_elements[chromium]">test_overview_navigation_elements[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_overview_navigation_elements_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_navigate_to_agent_projects_via_quick_action[chromium]">test_navigate_to_agent_projects_via_quick_action[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_navigate_to_agent_projects_via_quick_action_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="module-section section-passed" data-module="result-board">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-icon">&#10003;</span>
+                <span class="section-title">result-board</span>
+                <span class="section-badge"><span class="badge badge-passed">100.0%</span></span>
+                <span class="section-stats">3 scenarios | 14.49s
+                    
+                    
+                </span>
+                <span class="section-arrow">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <table class="detail-table">
+                    <thead><tr><th class="col-status">状态</th><th class="col-name">场景名称</th><th class="col-action">详情</th></tr></thead>
+                    <tbody>
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_result_board_empty_state[chromium]">test_result_board_empty_state[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_result_board_empty_state_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_result_filters_visible[chromium]">test_result_filters_visible[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_result_filters_visible_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="test_navigate_back_to_overview[chromium]">test_navigate_back_to_overview[chromium]</td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_navigate_back_to_overview_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+<script>
+  function toggleSection(header) {
+    const body = header.nextElementSibling;
+    if (body) {
+      body.classList.toggle('hidden');
+      header.classList.toggle('collapsed');
+    }
+  }
+  function toggleDetail(row) {
+    const next = row.nextElementSibling;
+    if (next && next.classList.contains('detail-row')) {
+      next.style.display = next.style.display === 'none' ? '' : 'none';
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API 性能测试报告</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;500;600;700&display=swap');
+
+  :root {
+    --bg-deep: #0a0e1a;
+    --bg-panel: #111827;
+    --bg-card: #161d2e;
+    --border-subtle: #1e293b;
+    --text-primary: #e8edf5;
+    --text-secondary: #8896b0;
+    --text-muted: #5a6988;
+    --accent-blue: #4da8ff;
+    --accent-green: #22d695;
+    --accent-red: #ff4d6a;
+    --accent-amber: #f0a040;
+    --accent-purple: #a78bfa;
+    --accent-slate: #64748b;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', system-ui, sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(77, 168, 255, .06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(34, 214, 149, .04) 0%, transparent 60%),
+      linear-gradient(rgba(14, 18, 30, .97) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14, 18, 30, .97) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  .header { text-align: center; padding: 48px 0 40px; position: relative; }
+  .header::after {
+    content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 80px; height: 3px;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+    border-radius: 2px;
+  }
+  .header h1 {
+    font-size: 2.6rem; font-weight: 700; letter-spacing: -.5px;
+    background: linear-gradient(135deg, var(--text-primary) 0%, #b0c4de 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .header .subtitle {
+    margin-top: 8px; font-family: 'DM Mono', monospace; font-size: .85rem;
+    color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;
+  }
+
+  .summary-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px; margin-bottom: 36px;
+  }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border-subtle);
+    border-radius: 16px; padding: 22px 18px; text-align: center;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    cursor: default; position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; opacity: 0;
+    transition: opacity .25s ease;
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,.35); border-color: rgba(255,255,255,.12); }
+  .card:hover::before { opacity: 1; }
+  .card.total::before { background: var(--accent-blue); }
+  .card.passed::before { background: var(--accent-green); }
+  .card.failed::before { background: var(--accent-red); }
+  .card.rate::before { background: var(--accent-purple); }
+  .card.time::before { background: var(--accent-blue); }
+  .card.errors::before { background: var(--accent-amber); }
+
+  .card-icon { font-size: 1.5rem; margin-bottom: 6px; }
+  .card.total .card-icon { color: var(--accent-blue); }
+  .card.passed .card-icon { color: var(--accent-green); }
+  .card.failed .card-icon { color: var(--accent-red); }
+  .card.rate .card-icon { color: var(--accent-purple); }
+  .card.time .card-icon { color: var(--accent-blue); }
+  .card.errors .card-icon { color: var(--accent-amber); }
+
+  .card-value { font-size: 2rem; font-weight: 700; letter-spacing: -.5px; font-family: 'DM Mono', 'Outfit', monospace; }
+  .card.total .card-value { color: var(--accent-blue); }
+  .card.passed .card-value { color: var(--accent-green); }
+  .card.failed .card-value { color: var(--accent-red); }
+  .card.rate .card-value { color: var(--accent-purple); }
+  .card.time .card-value { font-size: 1.5rem; color: var(--text-primary); }
+  .card.errors .card-value { font-size: 1.5rem; color: var(--accent-amber); }
+  .card-label { font-size: .82rem; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
+
+  .section {
+    background: var(--bg-panel); border: 1px solid var(--border-subtle);
+    border-radius: 20px; padding: 28px 32px; margin-bottom: 36px;
+  }
+  .section-heading { font-size: 1.05rem; font-weight: 600; margin-bottom: 16px; }
+
+  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .chart-wrap { position: relative; height: 300px; }
+  @media (max-width: 768px) { .charts-row { grid-template-columns: 1fr; } }
+
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th {
+    text-align: left; padding: 10px 12px; font-size: .75rem; font-weight: 600;
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px;
+    border-bottom: 1px solid var(--border-subtle); background: rgba(0,0,0,.15);
+    white-space: nowrap;
+  }
+  td { padding: 10px 12px; border-bottom: 1px solid rgba(30, 41, 59, .5); color: var(--text-secondary); }
+  td.num { font-family: 'DM Mono', monospace; }
+  td.id { font-family: 'DM Mono', monospace; color: var(--accent-blue); }
+  td.title { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  td.method { color: var(--accent-purple); font-weight: 600; }
+  td.vio { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--accent-red); }
+
+  tr.row-pass td { background: rgba(34, 214, 149, .03); }
+  tr.row-fail td { background: rgba(255, 77, 106, .05); }
+
+  .badge {
+    display: inline-block; padding: 3px 12px; border-radius: 12px;
+    font-size: .78rem; font-weight: 600; letter-spacing: .3px; white-space: nowrap;
+  }
+  .badge-passed { background: rgba(34, 214, 149, .15); color: var(--accent-green); }
+  .badge-failed { background: rgba(255, 77, 106, .15); color: var(--accent-red); }
+
+  .table-wrap { overflow-x: auto; }
+
+  .footer {
+    text-align: center; margin-top: 48px; padding-top: 24px;
+    border-top: 1px solid var(--border-subtle); color: var(--text-muted);
+    font-size: .78rem; font-family: 'DM Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h1>API 性能测试报告</h1>
+    <div class="subtitle">2026-08-20 18:36:57 &middot; 19 场景</div>
+  </div>
+
+  
+    <div class="summary-grid">
+        <div class="card total"><div class="card-icon">&#9733;</div>
+            <div class="card-value">19</div><div class="card-label">场景数</div></div>
+        <div class="card passed"><div class="card-icon">&#10003;</div>
+            <div class="card-value">15</div><div class="card-label">达标</div></div>
+        <div class="card failed"><div class="card-icon">&#10007;</div>
+            <div class="card-value">4</div><div class="card-label">不达标</div></div>
+        <div class="card total"><div class="card-icon">&#8644;</div>
+            <div class="card-value">722298</div><div class="card-label">总请求数</div></div>
+        <div class="card time"><div class="card-icon">&#9203;</div>
+            <div class="card-value">3206ms</div><div class="card-label">平均 P95</div></div>
+        <div class="card errors"><div class="card-icon">&#9888;</div>
+            <div class="card-value">0.42%</div><div class="card-label">平均错误率</div></div>
+        <div class="card rate"><div class="card-icon">&#128200;</div>
+            <div class="card-value">78.9%</div><div class="card-label">达标率</div></div>
+    </div>
+
+  <div class="section">
+    <h2 class="section-heading">场景指标明细</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>场景 ID</th>
+            <th>标题</th>
+            <th>方法</th>
+            <th>并发</th>
+            <th>时长</th>
+            <th>样本</th>
+            <th>Avg</th>
+            <th>Min</th>
+            <th>Max</th>
+            <th>P90</th>
+            <th>P95</th>
+            <th>P99</th>
+            <th>RPS</th>
+            <th>错误率</th>
+            <th>结果</th>
+            <th>未达标项</th>
+          </tr>
+        </thead>
+        <tbody>
+          
+        <tr class="row-fail">
+            <td class="id">PERF_AGENT_001</td>
+            <td class="title" title="GET /api/agents_100并发_60s">GET /api/agents_100并发_60s</td>
+            <td class="method">GET</td>
+            <td class="num">100</td><td class="num">60s</td><td class="num">891</td><td class="num">6580ms</td><td class="num">595ms</td><td class="num">13775ms</td><td class="num">7435ms</td><td class="num">7545ms</td><td class="num">7772ms</td><td class="num">14.9</td><td class="num">0.00%</td>
+            <td><span class="badge badge-failed">不达标</span></td>
+            <td class="vio" title="p95=7545.0ms(阈值<=800.0)；min_rps=14.9req/s(阈值>=30.0)">p95=7545.0ms(阈值<=800.0)；min_rps=14.9req/s(阈值>=30.0)</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_AGENT_002</td>
+            <td class="title" title="POST /api/agents_50并发_60s">POST /api/agents_50并发_60s</td>
+            <td class="method">POST</td>
+            <td class="num">50</td><td class="num">60s</td><td class="num">77582</td><td class="num">37ms</td><td class="num">5ms</td><td class="num">470ms</td><td class="num">53ms</td><td class="num">66ms</td><td class="num">118ms</td><td class="num">1296.64</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_AGENT_003</td>
+            <td class="title" title="GET /api/agents/{id}_20并发_30s">GET /api/agents/{id}_20并发_30s</td>
+            <td class="method">GET</td>
+            <td class="num">20</td><td class="num">30s</td><td class="num">102715</td><td class="num">5ms</td><td class="num">1ms</td><td class="num">629ms</td><td class="num">8ms</td><td class="num">12ms</td><td class="num">25ms</td><td class="num">3449.01</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_INDICATOR_001</td>
+            <td class="title" title="GET /api/indicators_100并发_60s">GET /api/indicators_100并发_60s</td>
+            <td class="method">GET</td>
+            <td class="num">100</td><td class="num">60s</td><td class="num">29122</td><td class="num">189ms</td><td class="num">17ms</td><td class="num">2000ms</td><td class="num">288ms</td><td class="num">359ms</td><td class="num">605ms</td><td class="num">486.89</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_INDICATOR_002</td>
+            <td class="title" title="GET /api/indicator-dimensions_50并发_60s">GET /api/indicator-dimensions_50并发_60s</td>
+            <td class="method">GET</td>
+            <td class="num">50</td><td class="num">60s</td><td class="num">123794</td><td class="num">23ms</td><td class="num">3ms</td><td class="num">533ms</td><td class="num">44ms</td><td class="num">57ms</td><td class="num">102ms</td><td class="num">2067.92</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_INDICATOR_003</td>
+            <td class="title" title="GET /api/indicator-categories_20并发_30s">GET /api/indicator-categories_20并发_30s</td>
+            <td class="method">GET</td>
+            <td class="num">20</td><td class="num">30s</td><td class="num">47896</td><td class="num">12ms</td><td class="num">1ms</td><td class="num">278ms</td><td class="num">18ms</td><td class="num">24ms</td><td class="num">48ms</td><td class="num">1606.33</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_INDICATOR_004</td>
+            <td class="title" title="GET /api/indicator-catalog-versions_20并发_30s">GET /api/indicator-catalog-versions_20并发_30s</td>
+            <td class="method">GET</td>
+            <td class="num">20</td><td class="num">30s</td><td class="num">68939</td><td class="num">8ms</td><td class="num">2ms</td><td class="num">227ms</td><td class="num">12ms</td><td class="num">16ms</td><td class="num">33ms</td><td class="num">2310.75</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-fail">
+            <td class="id">PERF_SCHEME_001</td>
+            <td class="title" title="GET /api/evaluation-schemes_100并发_60s">GET /api/evaluation-schemes_100并发_60s</td>
+            <td class="method">GET</td>
+            <td class="num">100</td><td class="num">60s</td><td class="num">2832</td><td class="num">1983ms</td><td class="num">136ms</td><td class="num">5961ms</td><td class="num">2238ms</td><td class="num">2280ms</td><td class="num">4060ms</td><td class="num">47.45</td><td class="num">0.00%</td>
+            <td><span class="badge badge-failed">不达标</span></td>
+            <td class="vio" title="p95=2280.45ms(阈值<=800.0)">p95=2280.45ms(阈值<=800.0)</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_SCHEME_002</td>
+            <td class="title" title="POST /api/evaluation-schemes_50并发_60s">POST /api/evaluation-schemes_50并发_60s</td>
+            <td class="method">POST</td>
+            <td class="num">50</td><td class="num">60s</td><td class="num">16993</td><td class="num">170ms</td><td class="num">28ms</td><td class="num">1212ms</td><td class="num">305ms</td><td class="num">382ms</td><td class="num">566ms</td><td class="num">283.81</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_SCHEME_003</td>
+            <td class="title" title="GET /api/evaluation-schemes/{id}_50并发_60s">GET /api/evaluation-schemes/{id}_50并发_60s</td>
+            <td class="method">GET</td>
+            <td class="num">50</td><td class="num">60s</td><td class="num">81310</td><td class="num">35ms</td><td class="num">5ms</td><td class="num">719ms</td><td class="num">63ms</td><td class="num">86ms</td><td class="num">159ms</td><td class="num">1359.18</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_SCHEME_004</td>
+            <td class="title" title="POST /api/evaluation-schemes/{id}/validate_20并发_30s">POST /api/evaluation-schemes/{id}/validate_20并发_30s</td>
+            <td class="method">POST</td>
+            <td class="num">20</td><td class="num">30s</td><td class="num">14268</td><td class="num">40ms</td><td class="num">11ms</td><td class="num">399ms</td><td class="num">55ms</td><td class="num">68ms</td><td class="num">118ms</td><td class="num">478.01</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-fail">
+            <td class="id">PERF_TASK_001</td>
+            <td class="title" title="GET /api/evaluation-tasks_100并发_60s">GET /api/evaluation-tasks_100并发_60s</td>
+            <td class="method">GET</td>
+            <td class="num">100</td><td class="num">60s</td><td class="num">2995</td><td class="num">1874ms</td><td class="num">178ms</td><td class="num">5516ms</td><td class="num">2081ms</td><td class="num">2108ms</td><td class="num">3736ms</td><td class="num">50.09</td><td class="num">0.00%</td>
+            <td><span class="badge badge-failed">不达标</span></td>
+            <td class="vio" title="p95=2108.0ms(阈值<=800.0)">p95=2108.0ms(阈值<=800.0)</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_TASK_002</td>
+            <td class="title" title="POST /api/evaluation-tasks_50并发_60s">POST /api/evaluation-tasks_50并发_60s</td>
+            <td class="method">POST</td>
+            <td class="num">50</td><td class="num">60s</td><td class="num">13238</td><td class="num">218ms</td><td class="num">34ms</td><td class="num">903ms</td><td class="num">289ms</td><td class="num">405ms</td><td class="num">516ms</td><td class="num">221.24</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_TASK_003</td>
+            <td class="title" title="GET /api/evaluation-tasks/{id}_50并发_60s">GET /api/evaluation-tasks/{id}_50并发_60s</td>
+            <td class="method">GET</td>
+            <td class="num">50</td><td class="num">60s</td><td class="num">17548</td><td class="num">164ms</td><td class="num">21ms</td><td class="num">1398ms</td><td class="num">301ms</td><td class="num">395ms</td><td class="num">586ms</td><td class="num">293.14</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_TASK_004</td>
+            <td class="title" title="GET /api/evaluation-tasks/{id}/progress_20并发_30s">GET /api/evaluation-tasks/{id}/progress_20并发_30s</td>
+            <td class="method">GET</td>
+            <td class="num">20</td><td class="num">30s</td><td class="num">9557</td><td class="num">60ms</td><td class="num">12ms</td><td class="num">512ms</td><td class="num">89ms</td><td class="num">111ms</td><td class="num">182ms</td><td class="num">320.41</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-fail">
+            <td class="id">PERF_TESTCASE_001</td>
+            <td class="title" title="GET /api/test-cases_100并发_60s">GET /api/test-cases_100并发_60s</td>
+            <td class="method">GET</td>
+            <td class="num">100</td><td class="num">60s</td><td class="num">228</td><td class="num">29540ms</td><td class="num">3867ms</td><td class="num">56515ms</td><td class="num">41575ms</td><td class="num">46793ms</td><td class="num">53510ms</td><td class="num">3.9</td><td class="num">7.89%</td>
+            <td><span class="badge badge-failed">不达标</span></td>
+            <td class="vio" title="p95=46793.05ms(阈值<=800.0)；error_rate=0.0789(阈值<=0.01)；min_rps=3.9req/s(阈值>=30.0)">p95=46793.05ms(阈值<=800.0)；error_rate=0.0789(阈值<=0.01)；min_rps=3.9req/s(阈值>=30.0)</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_TESTCASE_002</td>
+            <td class="title" title="POST /api/test-cases_50并发_60s">POST /api/test-cases_50并发_60s</td>
+            <td class="method">POST</td>
+            <td class="num">50</td><td class="num">60s</td><td class="num">38367</td><td class="num">75ms</td><td class="num">12ms</td><td class="num">718ms</td><td class="num">115ms</td><td class="num">144ms</td><td class="num">261ms</td><td class="num">640.96</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_TESTCASE_003</td>
+            <td class="title" title="POST /api/test-cases/import_20并发_30s">POST /api/test-cases/import_20并发_30s</td>
+            <td class="method">POST</td>
+            <td class="num">10</td><td class="num">30s</td><td class="num">10985</td><td class="num">26ms</td><td class="num">13ms</td><td class="num">110ms</td><td class="num">34ms</td><td class="num">39ms</td><td class="num">52ms</td><td class="num">367.99</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+
+        <tr class="row-pass">
+            <td class="id">PERF_TESTCASE_004</td>
+            <td class="title" title="GET /api/test-cases/{id}_20并发_30s">GET /api/test-cases/{id}_20并发_30s</td>
+            <td class="method">GET</td>
+            <td class="num">20</td><td class="num">30s</td><td class="num">63038</td><td class="num">9ms</td><td class="num">2ms</td><td class="num">380ms</td><td class="num">15ms</td><td class="num">22ms</td><td class="num">45ms</td><td class="num">2112.39</td><td class="num">0.00%</td>
+            <td><span class="badge badge-passed">达标</span></td>
+            <td class="vio" title="—">—</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-heading">各场景 P95 响应时间 (ms)</h2>
+    <div class="chart-wrap"><canvas id="p95Chart"></canvas></div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-heading">各场景吞吐 RPS</h2>
+    <div class="chart-wrap"><canvas id="rpsChart"></canvas></div>
+  </div>
+
+  <div class="footer">
+    Generated by API Perf Runner &middot; JMeter + Chart.js
+  </div>
+
+</div>
+
+<script>
+(function initCharts() {
+  try {
+    if (typeof Chart === 'undefined') return;
+    const chartData = {"labels": ["ENT_001", "ENT_002", "ENT_003", "TOR_001", "TOR_002", "TOR_003", "TOR_004", "EME_001", "EME_002", "EME_003", "EME_004", "ASK_001", "ASK_002", "ASK_003", "ASK_004", "ASE_001", "ASE_002", "ASE_003", "ASE_004"], "p95": {"data": [7545.0, 66.0, 12.0, 359.0, 57.0, 24.0, 16.0, 2280.45, 382.0, 86.0, 68.0, 2108.0, 405.0, 395.0, 111.0, 46793.05, 144.0, 39.0, 22.0], "colors": ["#ff4d6a", "#22d695", "#22d695", "#22d695", "#22d695", "#22d695", "#22d695", "#ff4d6a", "#22d695", "#22d695", "#22d695", "#ff4d6a", "#22d695", "#22d695", "#22d695", "#ff4d6a", "#22d695", "#22d695", "#22d695"]}, "rps": [14.9, 1296.64, 3449.01, 486.89, 2067.92, 1606.33, 2310.75, 47.45, 283.81, 1359.18, 478.01, 50.09, 221.24, 293.14, 320.41, 3.9, 640.96, 367.99, 2112.39], "error_rate": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7.89, 0.0, 0.0, 0.0]};
+
+    const p95Ctx = document.getElementById('p95Chart');
+    if (p95Ctx) {
+      new Chart(p95Ctx.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: chartData.labels,
+          datasets: [{
+            label: 'P95 (ms)',
+            data: chartData.p95.data,
+            backgroundColor: chartData.p95.colors,
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(30,41,59,.5)' }, ticks: { color: '#5a6988' } },
+            x: { grid: { display: false }, ticks: { color: '#8896b0' } }
+          }
+        }
+      });
+    }
+
+    const rpsCtx = document.getElementById('rpsChart');
+    if (rpsCtx) {
+      new Chart(rpsCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: chartData.labels,
+          datasets: [{
+            label: 'RPS',
+            data: chartData.rps,
+            backgroundColor: '#4da8ff',
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: 'rgba(30,41,59,.5)' }, ticks: { color: '#5a6988' } },
+            x: { grid: { display: false }, ticks: { color: '#8896b0' } }
+          }
+        }
+      });
+    }
+  } catch (e) {
+    console.warn('Chart init failed:', e.message);
+  }
+})();
+</script>
+
+</body>
+</html>

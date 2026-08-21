@@ -1,0 +1,1803 @@
+{
+  "apis": [
+    {
+      "module": "agents",
+      "method": "GET",
+      "path": "/api/agents",
+      "description": "分页查询 Agent 配置列表，支持 code/name/riskTier/adapterType/enabled 过滤",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "request_params": {
+        "agentCode": { "type": "string", "required": false, "description": "Agent code 过滤" },
+        "agentName": { "type": "string", "required": false, "description": "Agent 名称过滤" },
+        "riskTier": { "type": "string", "required": false, "description": "风险等级过滤，A/B/C/D，非法值报 COMMON_400_VALIDATION" },
+        "adapterType": { "type": "string", "required": false, "description": "适配器类型，MINI_ZHEXIAOZHI/GENERIC_HTTP_JSON" },
+        "enabled": { "type": "string", "required": false, "description": "启用过滤，true/false（忽略大小写）" },
+        "page": { "type": "string", "required": true, "description": "页码，默认 1，必须为正整数" },
+        "pageSize": { "type": "string", "required": true, "description": "页大小，默认 20，1-100" }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID，取自 X-Trace-Id 或服务端生成" },
+        "data": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "description": "AgentResponse 列表",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "description": "Agent ID" },
+                  "agentCode": { "type": "string", "description": "Agent 编码" },
+                  "agentName": { "type": "string", "description": "名称" },
+                  "category": { "type": "string", "description": "业务分类" },
+                  "riskTier": { "type": "string", "description": "风险等级 A/B/C/D" },
+                  "department": { "type": "string", "description": "所属部门" },
+                  "version": { "type": "string", "description": "版本" },
+                  "agentType": { "type": "string", "description": "Agent 类型" },
+                  "adapterType": { "type": "string", "description": "适配器类型" },
+                  "endpoint": { "type": "string", "description": "调用端点" },
+                  "method": { "type": "string", "description": "HTTP 方法" },
+                  "requestTemplate": { "type": "string", "description": "请求模板" },
+                  "messageField": { "type": "string", "description": "消息字段路径" },
+                  "sessionField": { "type": "string", "description": "会话字段路径" },
+                  "answerField": { "type": "string", "description": "回答字段路径" },
+                  "successField": { "type": "string", "description": "成功字段路径" },
+                  "errorField": { "type": "string", "description": "错误字段路径" },
+                  "latencyField": { "type": "string", "description": "时延字段路径" },
+                  "tokenField": { "type": "string", "description": "Token 计数字段路径" },
+                  "toolTraceField": { "type": "string", "description": "工具追踪字段路径" },
+                  "timeoutMs": { "type": "integer", "description": "超时毫秒" },
+                  "enabled": { "type": "boolean", "description": "是否启用" },
+                  "headerSecretConfigured": { "type": "boolean", "description": "是否配置了密钥引用（值本身不返回）" },
+                  "createdAt": { "type": "string", "description": "创建时间，格式 yyyy-MM-dd'T'HH:mm:ssXXX" },
+                  "updatedAt": { "type": "string", "description": "更新时间" }
+                }
+              }
+            },
+            "page": { "type": "integer", "description": "当前页码" },
+            "pageSize": { "type": "integer", "description": "页大小" },
+            "total": { "type": "integer", "description": "总数" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "agents",
+      "method": "POST",
+      "path": "/api/agents",
+      "description": "创建 Agent 配置（无 @Valid 注解，必填项由 Controller 手工校验，失败报 COMMON_400_VALIDATION）",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": {
+        "type": "object",
+        "required": ["agentCode", "agentName", "category", "riskTier", "version", "agentType", "adapterType", "endpoint", "method", "timeoutMs"],
+        "properties": {
+          "agentCode": { "type": "string", "required": true, "description": "唯一 Agent 编码，pattern [A-Z0-9_]{2,64}" },
+          "agentName": { "type": "string", "required": true, "description": "显示名称" },
+          "category": { "type": "string", "required": true, "description": "业务分类" },
+          "riskTier": { "type": "string", "required": true, "description": "风险等级，枚举 A/B/C/D" },
+          "department": { "type": "string", "required": false, "description": "所属部门" },
+          "version": { "type": "string", "required": true, "description": "Agent 版本" },
+          "agentType": { "type": "string", "required": true, "description": "Agent 类型" },
+          "adapterType": { "type": "string", "required": true, "description": "适配器类型，枚举 MINI_ZHEXIAOZHI/GENERIC_HTTP_JSON" },
+          "endpoint": { "type": "string", "required": true, "description": "绝对 HTTP/HTTPS 端点" },
+          "method": { "type": "string", "required": true, "description": "HTTP 方法" },
+          "requestTemplate": { "type": "string", "required": false, "description": "请求体模板" },
+          "messageField": { "type": "string", "required": false, "description": "消息字段路径" },
+          "sessionField": { "type": "string", "required": false, "description": "会话字段路径" },
+          "answerField": { "type": "string", "required": false, "description": "回答字段路径，GENERIC_HTTP_JSON 必填" },
+          "successField": { "type": "string", "required": false, "description": "成功字段路径" },
+          "errorField": { "type": "string", "required": false, "description": "错误字段路径" },
+          "latencyField": { "type": "string", "required": false, "description": "时延字段路径" },
+          "tokenField": { "type": "string", "required": false, "description": "Token 计数字段路径" },
+          "toolTraceField": { "type": "string", "required": false, "description": "工具追踪字段路径" },
+          "headerSecretRef": { "type": "string", "required": false, "description": "密钥引用：env:NAME / secret:xxx / Dify app-xxxxxxxx，pattern (?:env:[A-Za-z_][A-Za-z0-9_]*|secret:[A-Za-z0-9][A-Za-z0-9._:/-]*|app-[A-Za-z0-9]{6,})" },
+          "timeoutMs": { "type": "string", "required": true, "description": "超时毫秒（字符串），100-120000" },
+          "enabled": { "type": "string", "required": false, "description": "启用标志，true/false，默认 true" }
+        }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "AgentResponse（同 GET /api/agents 的 items 元素结构）",
+          "properties": {
+            "id": { "type": "integer", "description": "Agent ID" },
+            "agentCode": { "type": "string", "description": "Agent 编码" },
+            "agentName": { "type": "string", "description": "名称" },
+            "category": { "type": "string", "description": "业务分类" },
+            "riskTier": { "type": "string", "description": "风险等级" },
+            "department": { "type": "string", "description": "所属部门" },
+            "version": { "type": "string", "description": "版本" },
+            "agentType": { "type": "string", "description": "Agent 类型" },
+            "adapterType": { "type": "string", "description": "适配器类型" },
+            "endpoint": { "type": "string", "description": "调用端点" },
+            "method": { "type": "string", "description": "HTTP 方法" },
+            "requestTemplate": { "type": "string", "description": "请求模板" },
+            "messageField": { "type": "string", "description": "消息字段路径" },
+            "sessionField": { "type": "string", "description": "会话字段路径" },
+            "answerField": { "type": "string", "description": "回答字段路径" },
+            "successField": { "type": "string", "description": "成功字段路径" },
+            "errorField": { "type": "string", "description": "错误字段路径" },
+            "latencyField": { "type": "string", "description": "时延字段路径" },
+            "tokenField": { "type": "string", "description": "Token 计数字段路径" },
+            "toolTraceField": { "type": "string", "description": "工具追踪字段路径" },
+            "timeoutMs": { "type": "integer", "description": "超时毫秒" },
+            "enabled": { "type": "boolean", "description": "是否启用" },
+            "headerSecretConfigured": { "type": "boolean", "description": "是否配置了密钥引用" },
+            "createdAt": { "type": "string", "description": "创建时间" },
+            "updatedAt": { "type": "string", "description": "更新时间" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "agents",
+      "method": "GET",
+      "path": "/api/agents/{id}",
+      "description": "按 ID 查询 Agent 配置；id 必须为正整数，不存在返回 404 COMMON_404_RESOURCE",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "AgentResponse（结构同 POST /api/agents 的 data）" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "agents",
+      "method": "PUT",
+      "path": "/api/agents/{id}",
+      "description": "更新 Agent 配置，请求体同 POST /api/agents（AgentRequest）",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": {
+        "type": "object",
+        "required": ["agentCode", "agentName", "category", "riskTier", "version", "agentType", "adapterType", "endpoint", "method", "timeoutMs"],
+        "properties": {
+          "agentCode": { "type": "string", "required": true, "description": "唯一 Agent 编码，pattern [A-Z0-9_]{2,64}" },
+          "agentName": { "type": "string", "required": true, "description": "显示名称" },
+          "category": { "type": "string", "required": true, "description": "业务分类" },
+          "riskTier": { "type": "string", "required": true, "description": "风险等级 A/B/C/D" },
+          "department": { "type": "string", "required": false, "description": "所属部门" },
+          "version": { "type": "string", "required": true, "description": "版本" },
+          "agentType": { "type": "string", "required": true, "description": "Agent 类型" },
+          "adapterType": { "type": "string", "required": true, "description": "适配器类型" },
+          "endpoint": { "type": "string", "required": true, "description": "调用端点" },
+          "method": { "type": "string", "required": true, "description": "HTTP 方法" },
+          "requestTemplate": { "type": "string", "required": false, "description": "请求模板" },
+          "messageField": { "type": "string", "required": false, "description": "消息字段路径" },
+          "sessionField": { "type": "string", "required": false, "description": "会话字段路径" },
+          "answerField": { "type": "string", "required": false, "description": "回答字段路径" },
+          "successField": { "type": "string", "required": false, "description": "成功字段路径" },
+          "errorField": { "type": "string", "required": false, "description": "错误字段路径" },
+          "latencyField": { "type": "string", "required": false, "description": "时延字段路径" },
+          "tokenField": { "type": "string", "required": false, "description": "Token 计数字段路径" },
+          "toolTraceField": { "type": "string", "required": false, "description": "工具追踪字段路径" },
+          "headerSecretRef": { "type": "string", "required": false, "description": "密钥引用（pattern 同 POST）" },
+          "timeoutMs": { "type": "string", "required": true, "description": "超时毫秒（字符串），100-120000" },
+          "enabled": { "type": "string", "required": false, "description": "启用标志，默认 true" }
+        }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "AgentResponse（结构同 POST /api/agents 的 data）" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "agents",
+      "method": "DELETE",
+      "path": "/api/agents/{id}",
+      "description": "禁用或删除 Agent 配置，成功返回 data=null",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "null", "description": "null" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "indicators",
+      "method": "GET",
+      "path": "/api/indicator-dimensions",
+      "description": "查询指标维度列表；catalogVersion 缺省使用唯一默认版本",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "request_params": {
+        "catalogVersion": { "type": "string", "required": false, "description": "目录版本，缺省用默认版本" }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "description": "维度 ID" },
+              "dimensionCode": { "type": "string", "description": "维度编码" },
+              "name": { "type": "string", "description": "维度名称" },
+              "defaultWeight": { "type": "number", "description": "默认权重" },
+              "sortOrder": { "type": "integer", "description": "排序号" },
+              "enabled": { "type": "boolean", "description": "是否启用" }
+            }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "indicators",
+      "method": "GET",
+      "path": "/api/indicator-categories",
+      "description": "查询指标分类列表，支持 dimensionCode/catalogVersion 过滤",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "request_params": {
+        "dimensionCode": { "type": "string", "required": false, "description": "维度编码过滤" },
+        "catalogVersion": { "type": "string", "required": false, "description": "目录版本，缺省用默认版本" }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "integer", "description": "分类 ID" },
+              "dimensionCode": { "type": "string", "description": "所属维度编码" },
+              "categoryCode": { "type": "string", "description": "分类编码" },
+              "name": { "type": "string", "description": "分类名称" },
+              "defaultWeight": { "type": "number", "description": "默认权重" },
+              "sortOrder": { "type": "integer", "description": "排序号" },
+              "enabled": { "type": "boolean", "description": "是否启用" }
+            }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "indicators",
+      "method": "GET",
+      "path": "/api/indicators",
+      "description": "分页查询指标，支持维度/分类/方向/采集方式/指标集/启用/目录版本过滤",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "request_params": {
+        "dimensionCode": { "type": "string", "required": false, "description": "维度编码过滤" },
+        "categoryCode": { "type": "string", "required": false, "description": "分类编码过滤" },
+        "direction": { "type": "string", "required": false, "description": "指标方向枚举 HIGHER_BETTER/LOWER_BETTER/SCORE_VALUE/RANGE_BETTER" },
+        "collectionMethod": { "type": "string", "required": false, "description": "采集方式枚举 AUTO_API/CONFIG_AUDIT/TOOL_TRACE/LLM_JUDGE/MANUAL_EXPERT/HISTORY_COMPARE/MONITORING/LOAD_TEST" },
+        "indicatorSet": { "type": "string", "required": true, "description": "指标集，默认 CORE" },
+        "enabled": { "type": "string", "required": false, "description": "启用过滤 true/false" },
+        "page": { "type": "string", "required": true, "description": "页码，默认 1" },
+        "pageSize": { "type": "string", "required": true, "description": "页大小，默认 20，1-100" },
+        "catalogVersion": { "type": "string", "required": false, "description": "目录版本，缺省用默认版本" }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "description": "IndicatorResponse 列表",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "description": "指标 ID" },
+                  "indicatorCode": { "type": "string", "description": "指标编码" },
+                  "indicatorName": { "type": "string", "description": "指标名称" },
+                  "indicatorSet": { "type": "string", "description": "指标集" },
+                  "dimensionCode": { "type": "string", "description": "维度编码" },
+                  "dimensionName": { "type": "string", "description": "维度名称" },
+                  "categoryCode": { "type": "string", "description": "分类编码" },
+                  "categoryName": { "type": "string", "description": "分类名称" },
+                  "definition": { "type": "string", "description": "指标定义" },
+                  "formulaDescription": { "type": "string", "description": "公式说明" },
+                  "unit": { "type": "string", "description": "单位" },
+                  "metricDirection": { "type": "string", "description": "指标方向枚举" },
+                  "calculatorType": { "type": "string", "description": "计算器类型枚举（13 种）" },
+                  "bestValue": { "type": "number", "description": "最优值" },
+                  "worstValue": { "type": "number", "description": "最差值" },
+                  "entryThreshold": { "type": "number", "description": "准入阈值" },
+                  "runningThreshold": { "type": "number", "description": "运行阈值" },
+                  "thresholdExpression": { "type": "string", "description": "阈值表达式" },
+                  "collectionMethod": { "type": "string", "description": "采集方式枚举" },
+                  "defaultWeight": { "type": "number", "description": "默认权重" },
+                  "required": { "type": "boolean", "description": "是否必选" },
+                  "vetoEnabled": { "type": "boolean", "description": "是否启用否决" },
+                  "dataVersion": { "type": "string", "description": "数据版本" },
+                  "sourceNote": { "type": "string", "description": "来源说明" },
+                  "enabled": { "type": "boolean", "description": "是否启用" },
+                  "sortOrder": { "type": "integer", "description": "排序号" },
+                  "isoMappings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer", "description": "映射 ID" },
+                        "isoClause": { "type": "string", "description": "ISO 条款" },
+                        "controlName": { "type": "string", "description": "控制项名称" },
+                        "evidenceRequirement": { "type": "string", "description": "证据要求" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "page": { "type": "integer", "description": "当前页码" },
+            "pageSize": { "type": "integer", "description": "页大小" },
+            "total": { "type": "integer", "description": "总数" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "indicators",
+      "method": "GET",
+      "path": "/api/indicators/{id}",
+      "description": "按 ID 查询指标详情；id 必须为正整数，不存在返回 404",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "IndicatorResponse（结构同 GET /api/indicators 的 items 元素）" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "indicators",
+      "method": "GET",
+      "path": "/api/indicator-catalog-versions",
+      "description": "查询已发布的指标目录版本列表",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "versionCode": { "type": "string", "description": "版本编码" },
+              "displayName": { "type": "string", "description": "显示名称" },
+              "status": { "type": "string", "description": "状态 DRAFT/PUBLISHED/RETIRED" },
+              "isDefault": { "type": "boolean", "description": "是否默认版本" },
+              "dimensionCount": { "type": "integer", "description": "维度数" },
+              "categoryCount": { "type": "integer", "description": "分类数" },
+              "indicatorCount": { "type": "integer", "description": "指标数" },
+              "riskWeights": { "type": "object", "description": "风险等级权重 Map<RiskTier, Map<dimensionCode, weight>>" },
+              "publishedAt": { "type": "string", "description": "发布时间" },
+              "createdAt": { "type": "string", "description": "创建时间" }
+            }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "test-cases",
+      "method": "GET",
+      "path": "/api/test-cases",
+      "description": "分页查询测试用例，支持 indicatorId/dimensionCode/categoryCode/caseType/enabled 过滤",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "request_params": {
+        "indicatorId": { "type": "string", "required": false, "description": "指标 ID 过滤，正整数" },
+        "dimensionCode": { "type": "string", "required": false, "description": "维度编码过滤" },
+        "categoryCode": { "type": "string", "required": false, "description": "分类编码过滤" },
+        "caseType": { "type": "string", "required": false, "description": "用例类型枚举 SINGLE_TURN/MULTI_TURN/TOOL_CALL/MANUAL_AUDIT" },
+        "enabled": { "type": "string", "required": false, "description": "启用过滤 true/false" },
+        "page": { "type": "string", "required": true, "description": "页码，默认 1" },
+        "pageSize": { "type": "string", "required": true, "description": "页大小，默认 20，1-100" }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "description": "TestCaseResponse 列表",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "description": "用例 ID" },
+                  "caseCode": { "type": "string", "description": "用例编码" },
+                  "caseName": { "type": "string", "description": "用例名称" },
+                  "indicatorId": { "type": "integer", "description": "指标 ID" },
+                  "caseType": { "type": "string", "description": "用例类型枚举" },
+                  "question": { "type": "string", "description": "问题" },
+                  "conversationTurns": { "type": "array", "items": { "type": "string" }, "description": "多轮对话" },
+                  "referenceAnswer": { "type": "string", "description": "参考答案" },
+                  "expectedBehavior": { "type": "string", "description": "预期行为" },
+                  "expectedIntent": { "type": "string", "description": "预期意图" },
+                  "expectedTool": { "type": "string", "description": "预期工具" },
+                  "expectedToolParameters": { "type": "object", "description": "预期工具参数" },
+                  "factReferences": { "type": "array", "items": { "type": "string" }, "description": "事实引用" },
+                  "weight": { "type": "number", "description": "权重" },
+                  "passScore": { "type": "number", "description": "通过分 0-100" },
+                  "scenarioType": { "type": "string", "description": "场景类型，默认 AUTO" },
+                  "version": { "type": "string", "description": "版本" },
+                  "enabled": { "type": "boolean", "description": "是否启用" },
+                  "createdAt": { "type": "string", "description": "创建时间" },
+                  "updatedAt": { "type": "string", "description": "更新时间" },
+                  "rules": {
+                    "type": "array",
+                    "description": "判定规则列表",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "integer", "description": "规则 ID" },
+                        "judgeType": { "type": "string", "description": "判定类型枚举（11 种）" },
+                        "ruleOrder": { "type": "integer", "description": "规则顺序" },
+                        "combineMode": { "type": "string", "description": "组合模式 ALL/ANY/WEIGHTED" },
+                        "ruleConfig": { "type": "object", "description": "规则配置" },
+                        "weight": { "type": "number", "description": "规则权重" },
+                        "required": { "type": "boolean", "description": "是否必选" },
+                        "enabled": { "type": "boolean", "description": "是否启用" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "page": { "type": "integer", "description": "当前页码" },
+            "pageSize": { "type": "integer", "description": "页大小" },
+            "total": { "type": "integer", "description": "总数" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "test-cases",
+      "method": "POST",
+      "path": "/api/test-cases",
+      "description": "创建测试用例（@Valid 校验，失败返回 400 + 字段错误 Map）",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": {
+        "type": "object",
+        "required": ["caseCode", "caseName", "indicatorId", "caseType", "weight", "passScore", "version", "combineMode", "rules"],
+        "properties": {
+          "caseCode": { "type": "string", "required": true, "description": "唯一用例编码，@NotBlank" },
+          "caseName": { "type": "string", "required": true, "description": "用例名称，@NotBlank" },
+          "indicatorId": { "type": "integer", "required": true, "description": "指标 ID，@NotNull @Positive" },
+          "caseType": { "type": "string", "required": true, "description": "用例类型枚举 SINGLE_TURN/MULTI_TURN/TOOL_CALL/MANUAL_AUDIT，@NotNull" },
+          "question": { "type": "string", "required": false, "description": "问题" },
+          "conversationTurns": { "type": "array", "required": false, "items": { "type": "string" }, "description": "多轮对话内容" },
+          "referenceAnswer": { "type": "string", "required": false, "description": "参考答案" },
+          "expectedBehavior": { "type": "string", "required": false, "description": "预期行为" },
+          "expectedIntent": { "type": "string", "required": false, "description": "预期意图" },
+          "expectedTool": { "type": "string", "required": false, "description": "预期工具" },
+          "expectedToolParameters": { "type": "object", "required": false, "description": "预期工具参数" },
+          "factReferences": { "type": "array", "required": false, "items": { "type": "string" }, "description": "事实引用" },
+          "weight": { "type": "number", "required": true, "description": "目录权重，@NotNull @DecimalMin(0, exclusive) 即 >0" },
+          "passScore": { "type": "number", "required": true, "description": "通过分，@NotNull @DecimalMin(0) @DecimalMax(100)" },
+          "scenarioType": { "type": "string", "required": false, "description": "场景类型，默认 AUTO" },
+          "version": { "type": "string", "required": true, "description": "版本，@NotBlank" },
+          "enabled": { "type": "boolean", "required": false, "description": "启用标志，默认 true" },
+          "combineMode": { "type": "string", "required": true, "description": "规则组合模式 ALL/ANY/WEIGHTED，@NotNull" },
+          "rules": {
+            "type": "array",
+            "required": true,
+            "description": "判定规则，@NotEmpty 至少 1 条",
+            "items": {
+              "type": "object",
+              "properties": {
+                "judgeType": { "type": "string", "required": true, "description": "判定类型，@NotNull，枚举 EXACT_MATCH/CONTAINS/REGEX_MATCH/REFUSAL/SENSITIVE_LEAK/LATENCY/HTTP_SUCCESS/JSON_PATH/NUMERIC_COMPARE/MANUAL_SCORE/AI_SEMANTIC_SCORE" },
+                "ruleOrder": { "type": "integer", "required": true, "description": "规则顺序，@NotNull @Positive" },
+                "weight": { "type": "number", "required": false, "description": "规则权重" },
+                "required": { "type": "boolean", "required": false, "description": "是否必选，默认 true" },
+                "enabled": { "type": "boolean", "required": false, "description": "是否启用，默认 true" },
+                "ruleConfig": { "type": "object", "required": true, "description": "规则配置，@NotNull" }
+              }
+            }
+          }
+        }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "TestCaseResponse（结构同 GET /api/test-cases 的 items 元素）" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "test-cases",
+      "method": "GET",
+      "path": "/api/test-cases/{id}",
+      "description": "按 ID 查询测试用例；不存在返回 404 TEST_CASE_NOT_FOUND",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "TestCaseResponse（结构同 GET /api/test-cases 的 items 元素）" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "test-cases",
+      "method": "PUT",
+      "path": "/api/test-cases/{id}",
+      "description": "更新测试用例，请求体同 POST /api/test-cases（TestCaseRequest）",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": {
+        "type": "object",
+        "required": ["caseCode", "caseName", "indicatorId", "caseType", "weight", "passScore", "version", "combineMode", "rules"],
+        "properties": {
+          "caseCode": { "type": "string", "required": true, "description": "唯一用例编码，@NotBlank" },
+          "caseName": { "type": "string", "required": true, "description": "用例名称，@NotBlank" },
+          "indicatorId": { "type": "integer", "required": true, "description": "指标 ID，@NotNull @Positive" },
+          "caseType": { "type": "string", "required": true, "description": "用例类型枚举，@NotNull" },
+          "question": { "type": "string", "required": false, "description": "问题" },
+          "conversationTurns": { "type": "array", "required": false, "items": { "type": "string" }, "description": "多轮对话内容" },
+          "referenceAnswer": { "type": "string", "required": false, "description": "参考答案" },
+          "expectedBehavior": { "type": "string", "required": false, "description": "预期行为" },
+          "expectedIntent": { "type": "string", "required": false, "description": "预期意图" },
+          "expectedTool": { "type": "string", "required": false, "description": "预期工具" },
+          "expectedToolParameters": { "type": "object", "required": false, "description": "预期工具参数" },
+          "factReferences": { "type": "array", "required": false, "items": { "type": "string" }, "description": "事实引用" },
+          "weight": { "type": "number", "required": true, "description": "目录权重，@NotNull @DecimalMin(0, exclusive)" },
+          "passScore": { "type": "number", "required": true, "description": "通过分，@NotNull @DecimalMin(0) @DecimalMax(100)" },
+          "scenarioType": { "type": "string", "required": false, "description": "场景类型，默认 AUTO" },
+          "version": { "type": "string", "required": true, "description": "版本，@NotBlank" },
+          "enabled": { "type": "boolean", "required": false, "description": "启用标志，默认 true" },
+          "combineMode": { "type": "string", "required": true, "description": "规则组合模式，@NotNull" },
+          "rules": {
+            "type": "array",
+            "required": true,
+            "description": "判定规则，@NotEmpty",
+            "items": {
+              "type": "object",
+              "properties": {
+                "judgeType": { "type": "string", "required": true, "description": "判定类型，@NotNull" },
+                "ruleOrder": { "type": "integer", "required": true, "description": "规则顺序，@NotNull @Positive" },
+                "weight": { "type": "number", "required": false, "description": "规则权重" },
+                "required": { "type": "boolean", "required": false, "description": "是否必选，默认 true" },
+                "enabled": { "type": "boolean", "required": false, "description": "是否启用，默认 true" },
+                "ruleConfig": { "type": "object", "required": true, "description": "规则配置，@NotNull" }
+              }
+            }
+          }
+        }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "TestCaseResponse" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "test-cases",
+      "method": "DELETE",
+      "path": "/api/test-cases/{id}",
+      "description": "软删除测试用例（保留历史引用），返回删除结果",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "TestCaseDeletionResult（domain 对象，含删除后状态信息）" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "test-cases",
+      "method": "POST",
+      "path": "/api/test-cases/import",
+      "description": "批量导入测试用例（JSON 数组，行级校验；有错误时返回 400 及 ImportError 列表，全部成功返回 200 与导入结果列表）",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": {
+        "type": "array",
+        "description": "TestCaseRequest 数组（行级校验：caseCode 重复报 COMMON_409_CONFLICT，规则非法报 TEST_CASE_400_RULE，字段校验失败报 COMMON_400_VALIDATION）",
+        "items": {
+          "type": "object",
+          "properties": {
+            "caseCode": { "type": "string", "required": true, "description": "唯一用例编码" },
+            "caseName": { "type": "string", "required": true, "description": "用例名称" },
+            "indicatorId": { "type": "integer", "required": true, "description": "指标 ID" },
+            "caseType": { "type": "string", "required": true, "description": "用例类型枚举" },
+            "question": { "type": "string", "required": false, "description": "问题" },
+            "conversationTurns": { "type": "array", "required": false, "items": { "type": "string" }, "description": "多轮对话" },
+            "referenceAnswer": { "type": "string", "required": false, "description": "参考答案" },
+            "expectedBehavior": { "type": "string", "required": false, "description": "预期行为" },
+            "expectedIntent": { "type": "string", "required": false, "description": "预期意图" },
+            "expectedTool": { "type": "string", "required": false, "description": "预期工具" },
+            "expectedToolParameters": { "type": "object", "required": false, "description": "预期工具参数" },
+            "factReferences": { "type": "array", "required": false, "items": { "type": "string" }, "description": "事实引用" },
+            "weight": { "type": "number", "required": true, "description": "目录权重 >0" },
+            "passScore": { "type": "number", "required": true, "description": "通过分 0-100" },
+            "scenarioType": { "type": "string", "required": false, "description": "场景类型，默认 AUTO" },
+            "version": { "type": "string", "required": true, "description": "版本" },
+            "enabled": { "type": "boolean", "required": false, "description": "启用标志" },
+            "combineMode": { "type": "string", "required": true, "description": "组合模式" },
+            "rules": {
+              "type": "array",
+              "required": true,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "judgeType": { "type": "string", "required": true, "description": "判定类型" },
+                  "ruleOrder": { "type": "integer", "required": true, "description": "规则顺序" },
+                  "weight": { "type": "number", "required": false, "description": "规则权重" },
+                  "required": { "type": "boolean", "required": false, "description": "是否必选" },
+                  "enabled": { "type": "boolean", "required": false, "description": "是否启用" },
+                  "ruleConfig": { "type": "object", "required": true, "description": "规则配置" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功 200 / 有行错误 400 COMMON_400_VALIDATION" },
+        "message": { "type": "string", "description": "success 或 Validation failed" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "成功时：imported 的 TestCaseResponse 列表；失败时：ImportError 列表",
+          "properties": {
+            "rowIndex": { "type": "integer", "description": "错误行号（从 0 开始）" },
+            "field": { "type": "string", "description": "错误字段" },
+            "errorCode": { "type": "string", "description": "错误码（COMMON_400_VALIDATION/COMMON_409_CONFLICT/TEST_CASE_400_RULE）" },
+            "message": { "type": "string", "description": "错误消息" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "test-cases",
+      "method": "POST",
+      "path": "/api/test-cases/import/excel",
+      "description": "Excel 导入测试用例（multipart/form-data）；文件为空/解析失败返回 400 + ImportError 列表",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": {
+        "type": "object",
+        "contentType": "multipart/form-data",
+        "required": ["file"],
+        "properties": {
+          "file": { "type": "file", "required": true, "description": "Excel 工作簿文件（.xlsx），非空" },
+          "indicatorId": { "type": "integer", "required": false, "description": "默认指标 ID，应用于没有 indicatorId 列的行" }
+        }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功 200 / 失败 400 COMMON_400_VALIDATION" },
+        "message": { "type": "string", "description": "success / Validation failed / Excel file is required / Unable to read the Excel file" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "成功时：imported 的 TestCaseResponse 列表；失败时：ImportError 列表（rowIndex/field/errorCode/message）"
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "test-cases",
+      "method": "GET",
+      "path": "/api/test-cases/import/template",
+      "description": "下载 Excel 导入模板（.xlsx 附件，非 JSON 响应），响应头 Content-Disposition: attachment",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "description": "二进制 .xlsx 文件流，Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet；文件名 test-case-import-template.xlsx"
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-tasks",
+      "method": "POST",
+      "path": "/api/evaluation-tasks",
+      "description": "创建评估任务（快照 Agent + 已发布方案，不执行）；任务状态 CREATED",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": {
+        "type": "object",
+        "required": ["agentId", "schemeId"],
+        "properties": {
+          "agentId": { "type": "integer", "required": true, "description": "Agent ID，@NotNull @Positive" },
+          "schemeId": { "type": "integer", "required": true, "description": "已发布方案 ID，@NotNull @Positive" },
+          "createdBy": { "type": "string", "required": false, "description": "创建人标识，@Size(max=100)，默认 api" }
+        }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "EvaluationTask（任务详情，含快照）",
+          "properties": {
+            "id": { "type": "integer", "description": "任务 ID" },
+            "taskNo": { "type": "string", "description": "任务编号" },
+            "agentId": { "type": "integer", "description": "Agent ID" },
+            "schemeId": { "type": "integer", "description": "方案 ID" },
+            "sourceSchemeId": { "type": "integer", "description": "来源方案 ID（同 schemeId）" },
+            "sourceType": { "type": "string", "description": "来源类型 SCHEME/AD_HOC" },
+            "agentSnapshot": { "type": "object", "description": "Agent 配置快照" },
+            "schemeSnapshot": { "type": "object", "description": "方案快照（含 dimensions/categories/indicators/testCases 快照）" },
+            "snapshotHash": { "type": "string", "description": "快照哈希" },
+            "evaluationMode": { "type": "string", "description": "评测模式 COMPREHENSIVE/SPECIAL" },
+            "riskTier": { "type": "string", "description": "风险等级" },
+            "evaluationType": { "type": "string", "description": "旧生命周期类型（弃用）" },
+            "thresholdLevel": { "type": "string", "description": "旧阈值级别（弃用）" },
+            "status": { "type": "string", "description": "任务状态 CREATED/RUNNING/COMPLETED/FAILED" },
+            "progress": { "type": "number", "description": "进度" },
+            "startedAt": { "type": "string", "description": "开始时间" },
+            "finishedAt": { "type": "string", "description": "结束时间" },
+            "interruptionReason": { "type": "string", "description": "中断原因" },
+            "createdBy": { "type": "string", "description": "创建人" },
+            "createdAt": { "type": "string", "description": "创建时间" },
+            "updatedAt": { "type": "string", "description": "更新时间" },
+            "cases": {
+              "type": "array",
+              "description": "任务用例列表",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "description": "任务用例 ID" },
+                  "taskId": { "type": "integer", "description": "任务 ID" },
+                  "testCaseId": { "type": "integer", "description": "用例 ID" },
+                  "indicatorId": { "type": "integer", "description": "指标 ID" },
+                  "sequenceNo": { "type": "integer", "description": "序号" },
+                  "status": { "type": "string", "description": "执行状态" },
+                  "attemptCount": { "type": "integer", "description": "尝试次数" },
+                  "sessionKey": { "type": "string", "description": "会话键" },
+                  "currentResultId": { "type": "integer", "description": "当前结果 ID" },
+                  "startedAt": { "type": "string", "description": "开始时间" },
+                  "finishedAt": { "type": "string", "description": "结束时间" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-tasks",
+      "method": "POST",
+      "path": "/api/evaluation-tasks/ad-hoc",
+      "description": "基于当前配置创建临场（ad-hoc）任务，不保存方案；返回 CreateEvaluationTaskResponse",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": {
+        "type": "object",
+        "required": ["agentId", "evaluationMode", "riskTier", "indicators", "testCaseIds"],
+        "properties": {
+          "agentId": { "type": "integer", "required": true, "description": "Agent ID，@NotNull @Positive" },
+          "sourceSchemeId": { "type": "integer", "required": false, "description": "来源方案 ID，@Positive" },
+          "catalogVersion": { "type": "string", "required": false, "description": "指标目录版本" },
+          "evaluationMode": { "type": "string", "required": true, "description": "评测模式 COMPREHENSIVE/SPECIAL，@NotNull" },
+          "evaluationType": { "type": "string", "required": false, "description": "旧生命周期类型（弃用）" },
+          "riskTier": { "type": "string", "required": true, "description": "风险等级 A/B/C/D，@NotNull" },
+          "thresholdLevel": { "type": "string", "required": false, "description": "旧阈值级别（弃用）" },
+          "dimensionWeights": { "type": "object", "required": false, "description": "维度权重（Map<维度编码, 权重> 或 {safety,capability,evolution}）" },
+          "safetyVetoEnabled": { "type": "boolean", "required": false, "description": "启用安全否决，默认 true" },
+          "stopOnSafetyFailure": { "type": "boolean", "required": false, "description": "安全失败时停止，默认 true" },
+          "scoringConfigJson": { "type": "string", "required": false, "description": "评分配置 JSON" },
+          "indicators": {
+            "type": "array",
+            "required": true,
+            "description": "指标选择列表，@NotEmpty",
+            "items": {
+              "type": "object",
+              "properties": {
+                "indicatorId": { "type": "integer", "required": true, "description": "指标 ID，@NotNull @Positive" },
+                "weightOverride": { "type": "number", "required": false, "description": "权重覆盖，@DecimalMin(0, exclusive)" },
+                "thresholdOverride": { "type": "number", "required": false, "description": "阈值覆盖（弃用），@DecimalMin(0, exclusive)" },
+                "normalizationOverrideJson": { "type": "string", "required": false, "description": "归一化覆盖 JSON" },
+                "required": { "type": "boolean", "required": false, "description": "是否必选" }
+              }
+            }
+          },
+          "testCaseIds": { "type": "array", "required": true, "description": "用例 ID 列表，@NotEmpty 且元素 @Positive", "items": { "type": "integer" } },
+          "createdBy": { "type": "string", "required": false, "description": "创建人，@Size(max=100)" }
+        }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "CreateEvaluationTaskResponse",
+          "properties": {
+            "taskId": { "type": "integer", "description": "任务 ID" },
+            "taskNo": { "type": "string", "description": "任务编号" },
+            "status": { "type": "string", "description": "任务状态" },
+            "sourceType": { "type": "string", "description": "来源类型，固定 AD_HOC" },
+            "sourceSchemeId": { "type": "integer", "description": "来源方案 ID（可空）" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-tasks",
+      "method": "GET",
+      "path": "/api/evaluation-tasks",
+      "description": "分页查询任务列表，支持 status 过滤",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "request_params": {
+        "status": { "type": "string", "required": false, "description": "任务状态 CREATED/RUNNING/COMPLETED/FAILED" },
+        "page": { "type": "string", "required": true, "description": "页码，默认 1" },
+        "pageSize": { "type": "string", "required": true, "description": "页大小，默认 20，1-100" }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "properties": {
+            "items": { "type": "array", "description": "EvaluationTask 列表（结构同 POST /api/evaluation-tasks 的 data）" },
+            "page": { "type": "integer", "description": "当前页码" },
+            "pageSize": { "type": "integer", "description": "页大小" },
+            "total": { "type": "integer", "description": "总数" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-tasks",
+      "method": "GET",
+      "path": "/api/evaluation-tasks/{id}",
+      "description": "按 ID 查询任务详情；不存在返回 404",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "EvaluationTask（结构同 POST /api/evaluation-tasks 的 data）" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-tasks",
+      "method": "GET",
+      "path": "/api/evaluation-tasks/{id}/progress",
+      "description": "查询任务持久化进度计数",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "EvaluationTaskProgress",
+          "properties": {
+            "taskId": { "type": "integer", "description": "任务 ID" },
+            "status": { "type": "string", "description": "任务状态" },
+            "progress": { "type": "number", "description": "进度 0-1" },
+            "totalCount": { "type": "integer", "description": "总用例数" },
+            "completedCount": { "type": "integer", "description": "已完成数" },
+            "successCount": { "type": "integer", "description": "成功数" },
+            "failureCount": { "type": "integer", "description": "失败数" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-tasks",
+      "method": "POST",
+      "path": "/api/evaluation-tasks/{id}/run",
+      "description": "启动任务执行；成功返回 HTTP 202 Accepted；执行器队列不可用返回 503 TASK_503_EXECUTOR",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200（HTTP 202）" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "RunTaskResponse",
+          "properties": {
+            "taskId": { "type": "integer", "description": "任务 ID" },
+            "status": { "type": "string", "description": "任务状态" },
+            "progress": { "type": "number", "description": "进度" },
+            "totalCount": { "type": "integer", "description": "总用例数" },
+            "completedCount": { "type": "integer", "description": "已完成数" },
+            "successCount": { "type": "integer", "description": "成功数" },
+            "failureCount": { "type": "integer", "description": "失败数" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-schemes",
+      "method": "GET",
+      "path": "/api/evaluation-schemes",
+      "description": "分页查询评测方案列表，支持 code/name/status/mode/type/riskTier 过滤",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "request_params": {
+        "schemeCode": { "type": "string", "required": false, "description": "方案编码过滤" },
+        "schemeName": { "type": "string", "required": false, "description": "方案名称过滤" },
+        "status": { "type": "string", "required": false, "description": "状态 DRAFT/PUBLISHED/ARCHIVED" },
+        "evaluationMode": { "type": "string", "required": false, "description": "评测模式 COMPREHENSIVE/SPECIAL" },
+        "evaluationType": { "type": "string", "required": false, "description": "类型 ENTRY/REGRESSION/RUNNING/SECURITY_SPECIAL" },
+        "riskTier": { "type": "string", "required": false, "description": "风险等级 A/B/C/D" },
+        "page": { "type": "string", "required": true, "description": "页码，默认 1" },
+        "pageSize": { "type": "string", "required": true, "description": "页大小，默认 20，1-100" }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "description": "EvaluationSchemeResponse 列表",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "description": "方案 ID" },
+                  "schemeCode": { "type": "string", "description": "方案编码" },
+                  "schemeName": { "type": "string", "description": "方案名称" },
+                  "version": { "type": "string", "description": "版本" },
+                  "catalogVersion": { "type": "string", "description": "指标目录版本" },
+                  "status": { "type": "string", "description": "状态 DRAFT/PUBLISHED/ARCHIVED" },
+                  "evaluationMode": { "type": "string", "description": "评测模式" },
+                  "evaluationType": { "type": "string", "description": "类型（弃用）" },
+                  "riskTier": { "type": "string", "description": "风险等级" },
+                  "thresholdLevel": { "type": "string", "description": "阈值级别（弃用）" },
+                  "dimensionWeights": { "type": "object", "description": "维度权重" },
+                  "safetyVetoEnabled": { "type": "boolean", "description": "安全否决启用" },
+                  "stopOnSafetyFailure": { "type": "boolean", "description": "安全失败停止" },
+                  "scoringConfigJson": { "type": "string", "description": "评分配置 JSON" },
+                  "createdAt": { "type": "string", "description": "创建时间" },
+                  "updatedAt": { "type": "string", "description": "更新时间" },
+                  "categories": { "type": "array", "description": "分类选择（SchemeCategory）" },
+                  "indicators": { "type": "array", "description": "指标选择（SchemeIndicator）" },
+                  "testCases": { "type": "array", "description": "用例选择（SchemeTestCase）" }
+                }
+              }
+            },
+            "page": { "type": "integer", "description": "当前页码" },
+            "pageSize": { "type": "integer", "description": "页大小" },
+            "total": { "type": "integer", "description": "总数" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-schemes",
+      "method": "POST",
+      "path": "/api/evaluation-schemes",
+      "description": "创建评测方案草稿",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": {
+        "type": "object",
+        "required": ["schemeCode", "schemeName", "version", "evaluationMode", "riskTier"],
+        "properties": {
+          "schemeCode": { "type": "string", "required": true, "description": "唯一方案编码，@NotBlank" },
+          "schemeName": { "type": "string", "required": true, "description": "方案名称，@NotBlank" },
+          "version": { "type": "string", "required": true, "description": "数字点分版本号，@NotBlank @Size(max=64) @Pattern(数字点分)" },
+          "catalogVersion": { "type": "string", "required": false, "description": "指标目录版本，缺省用默认版本" },
+          "evaluationMode": { "type": "string", "required": true, "description": "评测模式 COMPREHENSIVE/SPECIAL，@NotNull" },
+          "evaluationType": { "type": "string", "required": false, "description": "类型（弃用）" },
+          "riskTier": { "type": "string", "required": true, "description": "风险等级 A/B/C/D，@NotNull" },
+          "thresholdLevel": { "type": "string", "required": false, "description": "阈值级别（弃用）" },
+          "dimensionWeights": { "type": "object", "required": false, "description": "维度权重" },
+          "safetyVetoEnabled": { "type": "boolean", "required": false, "description": "安全否决启用，默认 true" },
+          "stopOnSafetyFailure": { "type": "boolean", "required": false, "description": "安全失败停止，默认 true" },
+          "scoringConfigJson": { "type": "string", "required": false, "description": "评分配置 JSON" },
+          "categories": {
+            "type": "array",
+            "required": false,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer", "description": "记录 ID（更新时）" },
+                "categoryId": { "type": "integer", "description": "分类 ID" },
+                "weightOverride": { "type": "number", "description": "权重覆盖" },
+                "required": { "type": "boolean", "description": "是否必选" },
+                "applicable": { "type": "boolean", "description": "是否适用" }
+              }
+            }
+          },
+          "indicators": {
+            "type": "array",
+            "required": false,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer", "description": "记录 ID（更新时）" },
+                "indicatorId": { "type": "integer", "description": "指标 ID" },
+                "weightOverride": { "type": "number", "description": "权重覆盖" },
+                "thresholdOverride": { "type": "number", "description": "阈值覆盖（弃用）" },
+                "normalizationOverrideJson": { "type": "string", "description": "归一化覆盖 JSON" },
+                "required": { "type": "boolean", "description": "是否必选" },
+                "applicable": { "type": "boolean", "description": "是否适用" },
+                "notApplicableReason": { "type": "string", "description": "不适用原因" }
+              }
+            }
+          },
+          "testCases": {
+            "type": "array",
+            "required": false,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "integer", "description": "记录 ID（更新时）" },
+                "testCaseId": { "type": "integer", "description": "用例 ID" },
+                "weightOverride": { "type": "number", "description": "权重覆盖" },
+                "enabled": { "type": "boolean", "description": "是否启用" }
+              }
+            }
+          }
+        }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "EvaluationSchemeResponse（结构同 GET /api/evaluation-schemes 的 items 元素）" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-schemes",
+      "method": "GET",
+      "path": "/api/evaluation-schemes/{id}",
+      "description": "按 ID 查询方案详情；不存在返回 404 SCHEME_NOT_FOUND",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "EvaluationSchemeResponse" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-schemes",
+      "method": "PUT",
+      "path": "/api/evaluation-schemes/{id}",
+      "description": "更新方案草稿，请求体同 POST /api/evaluation-schemes",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": {
+        "type": "object",
+        "required": ["schemeCode", "schemeName", "version", "evaluationMode", "riskTier"],
+        "properties": {
+          "schemeCode": { "type": "string", "required": true, "description": "唯一方案编码，@NotBlank" },
+          "schemeName": { "type": "string", "required": true, "description": "方案名称，@NotBlank" },
+          "version": { "type": "string", "required": true, "description": "数字点分版本号，@NotBlank @Size(max=64) @Pattern" },
+          "catalogVersion": { "type": "string", "required": false, "description": "指标目录版本" },
+          "evaluationMode": { "type": "string", "required": true, "description": "评测模式，@NotNull" },
+          "evaluationType": { "type": "string", "required": false, "description": "类型（弃用）" },
+          "riskTier": { "type": "string", "required": true, "description": "风险等级，@NotNull" },
+          "thresholdLevel": { "type": "string", "required": false, "description": "阈值级别（弃用）" },
+          "dimensionWeights": { "type": "object", "required": false, "description": "维度权重" },
+          "safetyVetoEnabled": { "type": "boolean", "required": false, "description": "安全否决启用，默认 true" },
+          "stopOnSafetyFailure": { "type": "boolean", "required": false, "description": "安全失败停止，默认 true" },
+          "scoringConfigJson": { "type": "string", "required": false, "description": "评分配置 JSON" },
+          "categories": { "type": "array", "required": false, "description": "分类选择（结构同 POST）" },
+          "indicators": { "type": "array", "required": false, "description": "指标选择（结构同 POST）" },
+          "testCases": { "type": "array", "required": false, "description": "用例选择（结构同 POST）" }
+        }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "EvaluationSchemeResponse" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-schemes",
+      "method": "DELETE",
+      "path": "/api/evaluation-schemes/{id}",
+      "description": "删除方案：未引用草稿物理删除，被引用的已发布方案转为归档；返回删除决策结果",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "SchemeDeletionResult",
+          "properties": {
+            "schemeId": { "type": "integer", "description": "方案 ID" },
+            "originalStatus": { "type": "string", "description": "原状态" },
+            "action": { "type": "string", "description": "动作 PHYSICALLY_DELETED/ARCHIVED" },
+            "taskReferenceCount": { "type": "integer", "description": "任务引用数" },
+            "reportReferenceCount": { "type": "integer", "description": "报告引用数" },
+            "resultingStatus": { "type": "string", "description": "处理后状态" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-schemes",
+      "method": "GET",
+      "path": "/api/evaluation-schemes/{id}/deletion-impact",
+      "description": "预览方案删除的事务性影响（不执行删除）",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "SchemeDeletionImpact",
+          "properties": {
+            "schemeId": { "type": "integer", "description": "方案 ID" },
+            "status": { "type": "string", "description": "当前状态" },
+            "taskReferenceCount": { "type": "integer", "description": "任务引用数" },
+            "reportReferenceCount": { "type": "integer", "description": "报告引用数" },
+            "actionIfConfirmed": { "type": "string", "description": "确认后的动作" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-schemes",
+      "method": "POST",
+      "path": "/api/evaluation-schemes/{id}/validate",
+      "description": "校验方案草稿；校验失败返回 400 SCHEME_400_INVALID + ValidationError 列表",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功 200（code=200）/ 失败 400 SCHEME_400_INVALID" },
+        "message": { "type": "string", "description": "success / Invalid evaluation scheme" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "SchemeValidationResult",
+          "properties": {
+            "errors": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": { "type": "string", "description": "错误字段" },
+                  "errorCode": { "type": "string", "description": "错误码" },
+                  "message": { "type": "string", "description": "错误消息" }
+                }
+              }
+            },
+            "valid": { "type": "boolean", "description": "是否通过校验" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-schemes",
+      "method": "POST",
+      "path": "/api/evaluation-schemes/{id}/publish",
+      "description": "发布方案（草稿→已发布）；状态冲突返回 409 SCHEME_409_STATUS",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "EvaluationSchemeResponse" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-schemes",
+      "method": "POST",
+      "path": "/api/evaluation-schemes/{id}/clone",
+      "description": "克隆方案为草稿",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "EvaluationSchemeResponse（新草稿）" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "evaluation-schemes",
+      "method": "POST",
+      "path": "/api/evaluation-schemes/{id}/archive",
+      "description": "显式归档方案；已归档返回 409 SCHEME_ALREADY_ARCHIVED",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "EvaluationSchemeResponse" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "results",
+      "method": "POST",
+      "path": "/api/evaluation-tasks/{id}/finalize",
+      "description": "对已完成但结果不完整的任务，基于已确认证据显式重算评分",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "FinalizeResponse",
+          "properties": {
+            "taskId": { "type": "integer", "description": "任务 ID" },
+            "finalized": { "type": "boolean", "description": "是否完成重算，固定 true" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "results",
+      "method": "GET",
+      "path": "/api/evaluation-tasks/{id}/results",
+      "description": "查询任务评测结果汇总（持久化结果，不重算）；未就绪返回 409 TASK_409_RESULT_NOT_READY",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "EvaluationResultResponse",
+          "properties": {
+            "taskId": { "type": "integer", "description": "任务 ID" },
+            "taskStatus": { "type": "string", "description": "任务状态" },
+            "agent": { "type": "object", "description": "Agent 摘要 {id, code, name, version}" },
+            "scheme": { "type": "object", "description": "方案摘要 {id, code, name, version, catalogVersion, evaluationMode}" },
+            "totalScore": { "type": "number", "description": "总分" },
+            "grade": { "type": "string", "description": "评级" },
+            "safetyVetoTriggered": { "type": "boolean", "description": "安全否决触发（弃用）" },
+            "safetyVetoReason": { "type": "string", "description": "安全否决原因（弃用）" },
+            "dimensions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "description": "维度 ID" },
+                  "code": { "type": "string", "description": "维度编码" },
+                  "name": { "type": "string", "description": "维度名称" },
+                  "score": { "type": "number", "description": "得分" },
+                  "weight": { "type": "number", "description": "权重" },
+                  "status": { "type": "string", "description": "状态" },
+                  "vetoTriggered": { "type": "boolean", "description": "是否触发否决" }
+                }
+              }
+            },
+            "categories": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "integer", "description": "分类 ID" },
+                  "dimensionCode": { "type": "string", "description": "维度编码" },
+                  "code": { "type": "string", "description": "分类编码" },
+                  "name": { "type": "string", "description": "分类名称" },
+                  "score": { "type": "number", "description": "得分" },
+                  "completedIndicatorCount": { "type": "integer", "description": "已完成指标数" },
+                  "applicableIndicatorCount": { "type": "integer", "description": "适用指标数" },
+                  "status": { "type": "string", "description": "状态" }
+                }
+              }
+            },
+            "conclusion": { "type": "string", "description": "旧结论（弃用）" },
+            "reportStatus": { "type": "string", "description": "报告状态" },
+            "incompleteReason": { "type": "string", "description": "不完整原因" },
+            "specialScore": { "type": "number", "description": "专项得分（可空）" },
+            "specialPassed": { "type": "boolean", "description": "专项是否通过（可空）" },
+            "entryConclusion": { "type": "string", "description": "准入结论 PASSED/FAILED/UNDETERMINED" },
+            "runningConclusion": { "type": "string", "description": "运行结论 PASSED/FAILED/UNDETERMINED" },
+            "entrySafetyVetoTriggered": { "type": "boolean", "description": "准入安全否决（可空）" },
+            "entrySafetyVetoReason": { "type": "string", "description": "准入安全否决原因（可空）" },
+            "runningSafetyVetoTriggered": { "type": "boolean", "description": "运行安全否决（可空）" },
+            "runningSafetyVetoReason": { "type": "string", "description": "运行安全否决原因（可空）" },
+            "coverage": { "type": "object", "description": "覆盖率" },
+            "createdAt": { "type": "string", "description": "创建时间" },
+            "startedAt": { "type": "string", "description": "开始时间" },
+            "finishedAt": { "type": "string", "description": "结束时间" },
+            "generatedAt": { "type": "string", "description": "生成时间（Instant）" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "results",
+      "method": "GET",
+      "path": "/api/evaluation-tasks/{id}/results/indicators",
+      "description": "分页查询持久化指标结果，支持 status/dimensionCode 过滤",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "request_params": {
+        "status": { "type": "string", "required": false, "description": "结果状态（16 个白名单值，非法值报 COMMON_400_VALIDATION）" },
+        "dimensionCode": { "type": "string", "required": false, "description": "任务快照中的维度编码" },
+        "page": { "type": "string", "required": true, "description": "页码，默认 1" },
+        "pageSize": { "type": "string", "required": true, "description": "页大小，默认 20，1-100" }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "description": "IndicatorResultResponse 列表",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "indicatorId": { "type": "integer", "description": "指标 ID" },
+                  "indicatorCode": { "type": "string", "description": "指标编码" },
+                  "indicatorName": { "type": "string", "description": "指标名称" },
+                  "dimensionCode": { "type": "string", "description": "维度编码" },
+                  "dimensionName": { "type": "string", "description": "维度名称" },
+                  "categoryCode": { "type": "string", "description": "分类编码" },
+                  "categoryName": { "type": "string", "description": "分类名称" },
+                  "rawValue": { "type": "number", "description": "原始值" },
+                  "normalizedScore": { "type": "number", "description": "归一化得分" },
+                  "weight": { "type": "number", "description": "权重" },
+                  "threshold": { "type": "number", "description": "旧单阈值（弃用）" },
+                  "passed": { "type": "boolean", "description": "旧单判定（弃用）" },
+                  "status": { "type": "string", "description": "状态" },
+                  "entryThreshold": { "type": "number", "description": "准入阈值" },
+                  "entryPassed": { "type": "boolean", "description": "准入是否通过" },
+                  "runningThreshold": { "type": "number", "description": "运行阈值" },
+                  "runningPassed": { "type": "boolean", "description": "运行是否通过" },
+                  "completedCaseCount": { "type": "integer", "description": "已完成用例数" },
+                  "applicableCaseCount": { "type": "integer", "description": "适用用例数" },
+                  "evidenceSummary": { "type": "string", "description": "证据摘要" },
+                  "dataVersion": { "type": "string", "description": "数据版本" },
+                  "isoMappings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "isoClause": { "type": "string", "description": "ISO 条款" },
+                        "controlName": { "type": "string", "description": "控制项名称" },
+                        "evidenceRequirement": { "type": "string", "description": "证据要求" }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "page": { "type": "integer", "description": "当前页码" },
+            "pageSize": { "type": "integer", "description": "页大小" },
+            "total": { "type": "integer", "description": "总数" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "results",
+      "method": "GET",
+      "path": "/api/evaluation-tasks/{id}/case-results",
+      "description": "分页查询持久化用例判定结果，支持 indicatorId/status/passed 过滤",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "request_params": {
+        "indicatorId": { "type": "string", "required": false, "description": "指标 ID 过滤，正整数" },
+        "status": { "type": "string", "required": false, "description": "执行/判定状态（16 个白名单值）" },
+        "passed": { "type": "string", "required": false, "description": "通过过滤 true/false" },
+        "page": { "type": "string", "required": true, "description": "页码，默认 1" },
+        "pageSize": { "type": "string", "required": true, "description": "页大小，默认 20，1-100" }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "description": "CaseResultResponse 列表",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "taskCaseId": { "type": "integer", "description": "任务用例 ID" },
+                  "caseId": { "type": "integer", "description": "用例 ID" },
+                  "caseCode": { "type": "string", "description": "用例编码" },
+                  "caseName": { "type": "string", "description": "用例名称" },
+                  "indicatorId": { "type": "integer", "description": "指标 ID" },
+                  "sequenceNo": { "type": "integer", "description": "序号" },
+                  "executionStatus": { "type": "string", "description": "执行状态" },
+                  "judgementStatus": { "type": "string", "description": "判定状态" },
+                  "score": { "type": "number", "description": "最终得分（待判定/复核时为 null）" },
+                  "passed": { "type": "boolean", "description": "是否通过（待判定/复核时为 null）" },
+                  "evidenceSummary": { "type": "string", "description": "证据摘要" },
+                  "failureReason": { "type": "string", "description": "失败原因" },
+                  "invocationStartedAt": { "type": "string", "description": "调用开始时间" },
+                  "invocationFinishedAt": { "type": "string", "description": "调用结束时间" },
+                  "judgedAt": { "type": "string", "description": "判定时间（Instant）" },
+                  "judgeType": { "type": "string", "description": "判定类型，AI_SEMANTIC_SCORE 表示 AI 判定" },
+                  "aiScore": { "type": "number", "description": "AI 得分（等待 AI/人工复核时为 null）" },
+                  "aiPassed": { "type": "boolean", "description": "AI 是否通过（可空）" },
+                  "aiReason": { "type": "string", "description": "AI 判定原因（可空）" },
+                  "aiConfidence": { "type": "number", "description": "AI 置信度（可空）" },
+                  "provider": { "type": "string", "description": "AI 服务提供方（可空）" },
+                  "profileRef": { "type": "string", "description": "判分 Profile 标识（可空）" },
+                  "modelName": { "type": "string", "description": "模型名称（可空）" },
+                  "modelVersion": { "type": "string", "description": "模型版本（可空）" },
+                  "promptVersion": { "type": "string", "description": "提示词版本（可空）" },
+                  "aiStatus": { "type": "string", "description": "AI 证据状态（可空）" },
+                  "aiErrorType": { "type": "string", "description": "结构化 AI 错误类型（可空）" },
+                  "reviewStatus": { "type": "string", "description": "复核状态 WAITING_AI_JUDGE/WAITING_REVIEW（可空）" }
+                }
+              }
+            },
+            "page": { "type": "integer", "description": "当前页码" },
+            "pageSize": { "type": "integer", "description": "页大小" },
+            "total": { "type": "integer", "description": "总数" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "results",
+      "method": "GET",
+      "path": "/api/evaluation-tasks/{id}/calls",
+      "description": "分页查询持久化的 Agent 调用记录（已脱敏），支持 success/errorType 过滤",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "request_params": {
+        "success": { "type": "string", "required": false, "description": "调用成功过滤 true/false" },
+        "errorType": { "type": "string", "required": false, "description": "调用错误类型枚举（10 种，不含 NONE）" },
+        "page": { "type": "string", "required": true, "description": "页码，默认 1" },
+        "pageSize": { "type": "string", "required": true, "description": "页大小，默认 20，1-100" }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "description": "AgentCallResponse 列表",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "callId": { "type": "integer", "description": "调用 ID" },
+                  "taskId": { "type": "integer", "description": "任务 ID" },
+                  "taskCaseId": { "type": "integer", "description": "任务用例 ID" },
+                  "sequenceNo": { "type": "integer", "description": "序号" },
+                  "httpStatus": { "type": "integer", "description": "HTTP 状态码（可空）" },
+                  "latencyMs": { "type": "integer", "description": "时延毫秒" },
+                  "success": { "type": "boolean", "description": "是否成功" },
+                  "errorType": { "type": "string", "description": "错误类型（可空）" },
+                  "answerMasked": { "type": "string", "description": "脱敏回答" },
+                  "requestSummaryMasked": { "type": "string", "description": "脱敏请求摘要" },
+                  "errorMessageMasked": { "type": "string", "description": "脱敏错误消息" },
+                  "createdAt": { "type": "string", "description": "创建时间（Instant）" }
+                }
+              }
+            },
+            "page": { "type": "integer", "description": "当前页码" },
+            "pageSize": { "type": "integer", "description": "页大小" },
+            "total": { "type": "integer", "description": "总数" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "results",
+      "method": "GET",
+      "path": "/api/evaluation-tasks/{id}/report",
+      "description": "查询唯一持久化评测报告；未就绪返回 409 TASK_409_RESULT_NOT_READY",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": null,
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "EvaluationReportResponse",
+          "properties": {
+            "taskId": { "type": "integer", "description": "任务 ID" },
+            "taskStatus": { "type": "string", "description": "任务状态" },
+            "reportStatus": { "type": "string", "description": "报告状态" },
+            "totalScore": { "type": "number", "description": "总分" },
+            "grade": { "type": "string", "description": "评级" },
+            "specialScore": { "type": "number", "description": "专项得分（可空）" },
+            "specialPassed": { "type": "boolean", "description": "专项通过（可空）" },
+            "dimensions": { "type": "array", "description": "维度结果（同 results 接口）" },
+            "safetyVetoTriggered": { "type": "boolean", "description": "安全否决触发（弃用）" },
+            "safetyVetoReason": { "type": "string", "description": "安全否决原因（弃用）" },
+            "conclusion": { "type": "string", "description": "旧结论（弃用）" },
+            "entryConclusion": { "type": "string", "description": "准入结论" },
+            "runningConclusion": { "type": "string", "description": "运行结论" },
+            "entrySafetyVetoTriggered": { "type": "boolean", "description": "准入安全否决（可空）" },
+            "entrySafetyVetoReason": { "type": "string", "description": "准入安全否决原因（可空）" },
+            "runningSafetyVetoTriggered": { "type": "boolean", "description": "运行安全否决（可空）" },
+            "runningSafetyVetoReason": { "type": "string", "description": "运行安全否决原因（可空）" },
+            "incompleteReason": { "type": "string", "description": "不完整原因" },
+            "agent": { "type": "object", "description": "Agent 摘要" },
+            "scheme": { "type": "object", "description": "方案摘要" },
+            "summary": { "type": "string", "description": "报告摘要" },
+            "remediation": { "type": "string", "description": "整改建议" },
+            "reportVersion": { "type": "string", "description": "报告版本" },
+            "generatedAt": { "type": "string", "description": "生成时间（Instant）" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "measurements",
+      "method": "POST",
+      "path": "/api/evaluation-tasks/{taskId}/measurements",
+      "description": "提交指标测量值作为草稿证据（DRAFT 状态），无校验注解，字段均可选",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "indicatorId": { "type": "integer", "required": false, "description": "指标 ID" },
+          "measurementType": { "type": "string", "required": false, "description": "测量类型" },
+          "rawValue": { "type": "number", "required": false, "description": "原始值" },
+          "unit": { "type": "string", "required": false, "description": "单位" },
+          "measurementPayloadJson": { "type": "string", "required": false, "description": "测量载荷 JSON" },
+          "sourceSystem": { "type": "string", "required": false, "description": "来源系统" },
+          "sourceReference": { "type": "string", "required": false, "description": "来源引用" },
+          "periodStart": { "type": "string", "required": false, "description": "周期开始时间（LocalDateTime）" },
+          "periodEnd": { "type": "string", "required": false, "description": "周期结束时间（LocalDateTime）" },
+          "collectedAt": { "type": "string", "required": false, "description": "采集时间（LocalDateTime）" },
+          "submittedBy": { "type": "string", "required": false, "description": "提交人" },
+          "remark": { "type": "string", "required": false, "description": "备注" }
+        }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": {
+          "type": "object",
+          "description": "IndicatorMeasurementResponse",
+          "properties": {
+            "id": { "type": "integer", "description": "测量记录 ID" },
+            "taskId": { "type": "integer", "description": "任务 ID" },
+            "indicatorId": { "type": "integer", "description": "指标 ID" },
+            "measurementType": { "type": "string", "description": "测量类型" },
+            "status": { "type": "string", "description": "状态 DRAFT/CONFIRMED/REJECTED" },
+            "rawValue": { "type": "number", "description": "原始值" },
+            "unit": { "type": "string", "description": "单位" },
+            "measurementPayloadJson": { "type": "string", "description": "测量载荷 JSON" },
+            "sourceSystem": { "type": "string", "description": "来源系统" },
+            "sourceReference": { "type": "string", "description": "来源引用" },
+            "periodStart": { "type": "string", "description": "周期开始" },
+            "periodEnd": { "type": "string", "description": "周期结束" },
+            "collectedAt": { "type": "string", "description": "采集时间" },
+            "submittedBy": { "type": "string", "description": "提交人" },
+            "confirmedBy": { "type": "string", "description": "确认人（可空）" },
+            "confirmedAt": { "type": "string", "description": "确认时间（可空）" },
+            "remark": { "type": "string", "description": "备注" },
+            "createdAt": { "type": "string", "description": "创建时间" }
+          }
+        }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    },
+    {
+      "module": "measurements",
+      "method": "POST",
+      "path": "/api/evaluation-tasks/{taskId}/measurements/{measurementId}/confirm",
+      "description": "确认草稿测量证据（DRAFT→CONFIRMED）；重复确认返回 409，任务/记录不存在返回 404",
+      "requires_auth": false,
+      "permissions": [],
+      "request_body": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "confirmedBy": { "type": "string", "required": false, "description": "确认人" }
+        }
+      },
+      "response_fields": {
+        "code": { "type": "string", "description": "成功时固定 200" },
+        "message": { "type": "string", "description": "成功时固定 success" },
+        "traceId": { "type": "string", "description": "链路追踪 ID" },
+        "data": { "type": "object", "description": "IndicatorMeasurementResponse（确认后 status=CONFIRMED）" }
+      },
+      "required_headers": {},
+      "method_verified": true,
+      "route_source": "CodeGraph route index"
+    }
+  ],
+  "auth": {
+    "type": "none",
+    "login_endpoint": null,
+    "token_header": null,
+    "token_prefix": null
+  },
+  "interceptors": [
+    {
+      "name": "TraceIdFilter",
+      "type": "OncePerRequestFilter (Filter)",
+      "path_prefix": "所有路径（@Component + @Order(HIGHEST_PRECEDENCE)，全局生效）",
+      "required_headers": [],
+      "optional_headers": ["X-Trace-Id"]
+    }
+  ],
+  "analyzed_at": "2026-08-19T00:00:00+08:00"
+}

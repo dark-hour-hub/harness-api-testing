@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API 测试报告</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@300;500;600;700&display=swap');
+
+  :root {
+    --bg-deep: #0a0e1a;
+    --bg-panel: #111827;
+    --bg-card: #161d2e;
+    --border-subtle: #1e293b;
+    --text-primary: #e8edf5;
+    --text-secondary: #8896b0;
+    --text-muted: #5a6988;
+    --accent-blue: #4da8ff;
+    --accent-green: #22d695;
+    --accent-red: #ff4d6a;
+    --accent-amber: #f0a040;
+    --accent-purple: #a78bfa;
+    --accent-slate: #64748b;
+    --glow-green: 0 0 20px rgba(34, 214, 149, .25);
+    --glow-red: 0 0 20px rgba(255, 77, 106, .25);
+    --glow-blue: 0 0 20px rgba(77, 168, 255, .2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', system-ui, sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(77, 168, 255, .06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(34, 214, 149, .04) 0%, transparent 60%),
+      linear-gradient(rgba(14, 18, 30, .97) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14, 18, 30, .97) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    padding: 48px 0 40px;
+    position: relative;
+  }
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 80px; height: 3px;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+    border-radius: 2px;
+  }
+  .header h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: -.5px;
+    background: linear-gradient(135deg, var(--text-primary) 0%, #b0c4de 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header .subtitle {
+    margin-top: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: .85rem;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ── Summary Cards ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 22px 18px;
+    text-align: center;
+    transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    opacity: 0;
+    transition: opacity .25s ease;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0,0,0,.35);
+    border-color: rgba(255,255,255,.12);
+  }
+  .card:hover::before { opacity: 1; }
+
+  .card.total::before { background: var(--accent-blue); }
+  .card.passed::before { background: var(--accent-green); }
+  .card.failed::before { background: var(--accent-red); }
+  .card.errors::before { background: var(--accent-amber); }
+  .card.skipped::before { background: var(--accent-slate); }
+  .card.rate::before { background: var(--accent-purple); }
+  .card.time::before { background: var(--accent-blue); }
+
+  .card-icon { font-size: 1.5rem; margin-bottom: 6px; }
+  .card.total .card-icon { color: var(--accent-blue); }
+  .card.passed .card-icon { color: var(--accent-green); }
+  .card.failed .card-icon { color: var(--accent-red); }
+  .card.errors .card-icon { color: var(--accent-amber); }
+  .card.skipped .card-icon { color: var(--accent-slate); }
+  .card.time .card-icon { color: var(--accent-blue); }
+
+  .card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -.5px;
+    font-family: 'DM Mono', 'Outfit', monospace;
+  }
+  .card.total .card-value { color: var(--accent-blue); }
+  .card.passed .card-value { color: var(--accent-green); }
+  .card.failed .card-value { color: var(--accent-red); }
+  .card.errors .card-value { color: var(--accent-amber); }
+  .card.skipped .card-value { color: var(--accent-slate); }
+  .card.rate .card-value { font-size: 2.2rem; }
+  .card.time .card-value { font-size: 1.5rem; color: var(--text-primary); }
+
+  .card-label {
+    font-size: .82rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+    font-weight: 500;
+    letter-spacing: .3px;
+  }
+
+  /* ── Charts Section ── */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 36px;
+  }
+
+  .chart-panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+  }
+  .chart-panel h3 {
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    letter-spacing: .3px;
+  }
+  .chart-wrap { position: relative; height: 280px; }
+
+  /* ── Filter Bar ── */
+  .filter-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 9px 22px;
+    border-radius: 24px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-family: 'Outfit', sans-serif;
+    font-size: .88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s ease;
+    letter-spacing: .3px;
+  }
+  .filter-btn:hover {
+    border-color: rgba(255,255,255,.2);
+    color: var(--text-primary);
+  }
+  .filter-btn.active {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: #fff;
+    box-shadow: var(--glow-blue);
+  }
+
+  /* ── Module Sections ── */
+  .module-section {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    margin-bottom: 18px;
+    transition: border-color .2s ease;
+  }
+  .module-section:hover { border-color: rgba(255,255,255,.1); }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .2s ease;
+  }
+  .section-header:hover { background: rgba(255,255,255,.02); }
+
+  .section-icon { font-size: 1.1rem; }
+  .section-passed .section-icon { color: var(--accent-green); }
+  .section-failed .section-icon { color: var(--accent-red); }
+
+  .section-title {
+    font-weight: 600;
+    font-size: .95rem;
+    flex: 1;
+    font-family: 'DM Mono', 'Outfit', monospace;
+    color: var(--text-primary);
+  }
+  .section-stats {
+    font-size: .82rem;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+  }
+  .section-arrow {
+    color: var(--text-muted);
+    transition: transform .3s ease;
+    font-size: .8rem;
+  }
+  .section-header.collapsed .section-arrow { transform: rotate(-90deg); }
+
+  .section-body { transition: max-height .35s ease; overflow: hidden; }
+.section-body.expanded { overflow-y: auto; }
+  .section-body.hidden { max-height: 0; }
+
+  /* ── Detail Table ── */
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .86rem;
+  }
+  .detail-table th {
+    text-align: left;
+    padding: 10px 24px;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: rgba(0,0,0,.15);
+  }
+  .detail-table td {
+    padding: 11px 24px;
+    border-bottom: 1px solid rgba(30, 41, 59, .5);
+    color: var(--text-secondary);
+  }
+
+  .case-row { cursor: pointer; transition: background .15s ease; }
+  .case-row:hover { background: rgba(255,255,255,.025); }
+  .case-row.status-failed { background: rgba(255, 77, 106, .04); }
+  .case-row.status-error { background: rgba(240, 160, 64, .04); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 12px;
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .3px;
+  }
+  .badge-passed { background: rgba(34, 214, 149, .15); color: var(--accent-green); }
+  .badge-failed { background: rgba(255, 77, 106, .15); color: var(--accent-red); }
+  .badge-error { background: rgba(240, 160, 64, .15); color: var(--accent-amber); }
+  .badge-skipped { background: rgba(100, 116, 139, .15); color: var(--accent-slate); }
+
+  .col-status { width: 80px; }
+  .col-name { max-width: 560px; white-space: normal; }
+  /* col-module removed — module name now shown in section header */
+  .col-time { width: 70px; font-family: 'DM Mono', monospace; }
+  .col-action { width: 84px; font-size: .78rem; color: var(--accent-blue); }
+
+  /* section badge */
+.section-badge { margin: 0 8px; }
+.section-badge .badge { font-size: .75rem; padding: 2px 10px; }
+
+/* module summary table */
+.ms-name { font-weight: 600; font-size: .88rem; }
+.ms-num { font-family: 'DM Mono', monospace; font-size: .85rem; }
+.mod-summary-row { cursor: pointer; transition: background .15s ease; }
+.mod-summary-row:hover { background: rgba(77, 168, 255, .06); }
+
+.trace-box {
+    background: rgba(0,0,0,.25);
+    border-left: 3px solid var(--accent-red);
+    margin: 4px 24px 12px;
+    padding: 16px 20px;
+    border-radius: 0 10px 10px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: .8rem;
+    line-height: 1.6;
+  }
+  .trace-box strong { color: var(--accent-red); display: block; margin-bottom: 8px; }
+  .trace-box pre {
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  /* ── 用例详情面板（标题/步骤/预期/断言/实际） ── */
+  .case-title {
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: normal;
+    line-height: 1.45;
+  }
+  .case-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: .72rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .trace-box.case-detail {
+    border-left-color: var(--accent-blue);
+    background: rgba(10, 14, 26, .55);
+    font-family: 'Outfit', 'DM Mono', sans-serif;
+    font-size: .84rem;
+    line-height: 1.7;
+  }
+  .case-detail .d-section {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed rgba(30, 41, 59, .6);
+  }
+  .case-detail .d-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+  .case-detail .d-title {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    letter-spacing: .6px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .case-detail .d-desc { color: var(--text-secondary); }
+  .case-detail .d-steps { list-style: none; }
+  .case-detail .d-steps li {
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+  }
+  .case-detail .d-steps pre, .case-detail pre {
+    background: rgba(0,0,0,.3);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: .78rem;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .case-detail .d-req {
+    display: inline-block;
+    padding: 1px 10px;
+    border-radius: 6px;
+    background: rgba(77, 168, 255, .15);
+    color: var(--accent-blue);
+    font-family: 'DM Mono', monospace;
+    font-size: .8rem;
+    margin-right: 8px;
+  }
+  .case-detail .d-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .8rem;
+  }
+  .case-detail .d-table td {
+    padding: 5px 10px;
+    border-bottom: 1px solid rgba(30, 41, 59, .5);
+    vertical-align: top;
+  }
+  .case-detail .d-table td.d-k {
+    width: 150px;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent-amber);
+  }
+  .case-detail .d-table pre { margin: 0; border: none; background: transparent; padding: 0; }
+  .case-detail .d-actual { font-weight: 600; }
+  .case-detail .d-actual.pass { color: var(--accent-green); }
+  .case-detail .d-actual.fail { color: var(--accent-red); }
+  .case-detail .d-trace {
+    color: var(--text-muted);
+    max-height: 320px;
+  }
+  .case-detail .d-resp { margin-top: 10px; }
+  .case-detail .d-resp-code {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 6px;
+    background: rgba(34, 214, 149, .12);
+    color: var(--accent-green);
+    font-family: 'DM Mono', monospace;
+    font-size: .78rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .case-detail .d-resp pre {
+    background: rgba(0,0,0,.3);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: .78rem;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  /* ── Pagination ── */
+  .pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-top: 1px solid var(--border-subtle);
+    flex-wrap: wrap;
+  }
+  .pagination-bar select {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-family: 'Outfit', sans-serif;
+    font-size: .82rem;
+    cursor: pointer;
+  }
+  .page-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-family: 'Outfit', sans-serif;
+    font-size: .82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s ease;
+  }
+  .page-btn:hover:not(:disabled) {
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+  }
+  .page-btn:disabled {
+    opacity: .35;
+    cursor: default;
+  }
+  .page-info {
+    font-size: .82rem;
+    color: var(--text-muted);
+    font-family: 'DM Mono', monospace;
+    min-width: 100px;
+    text-align: center;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-size: .78rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .header h1 { font-size: 1.8rem; }
+    .summary-grid { grid-template-columns: repeat(3, 1fr); }
+    .charts-row { grid-template-columns: 1fr; }
+    .chart-wrap { height: 220px; }
+    .detail-table th, .detail-table td { padding: 8px 10px; font-size: .78rem; }
+    .col-action { display: none; }
+  }
+
+  @media (max-width: 480px) {
+    .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    .container { padding: 16px 10px; }
+  }
+
+  /* ── Failure Analysis ── */
+  .failure-section {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 36px;
+  }
+  .section-heading {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .failure-total {
+    font-size: .82rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    font-family: 'DM Mono', monospace;
+  }
+  .failure-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .failure-cat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .failure-cat-name {
+    font-weight: 600;
+    font-size: .9rem;
+  }
+  .failure-cat-count {
+    font-family: 'DM Mono', monospace;
+    font-size: .85rem;
+    color: var(--text-secondary);
+  }
+  .failure-bar-wrap {
+    height: 8px;
+    background: rgba(255,255,255,.05);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .failure-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width .6s ease;
+  }
+  .failure-cases {
+    font-size: .78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-family: 'DM Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>API 测试报告</h1>
+    <div class="subtitle">{{REPORT_TIME}}</div>
+  </div>
+
+  <!-- Summary Cards -->
+  {{SUMMARY_CARDS}}
+
+  <!-- Failure Analysis -->
+  {{FAILURE_ANALYSIS}}
+
+  <!-- Module Summary -->
+  {{MODULE_SUMMARY}}
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <div class="chart-panel">
+      <h3>通过率分布</h3>
+      <div class="chart-wrap"><canvas id="pieChart"></canvas></div>
+    </div>
+    <div class="chart-panel">
+      <h3>Top 15 耗时用例 (秒)</h3>
+      <div class="chart-wrap"><canvas id="timeChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterCases('all', this)">全部</button>
+    <button class="filter-btn" onclick="filterCases('passed', this)">&#10003; 通过</button>
+    <button class="filter-btn" onclick="filterCases('failed', this)">&#10007; 失败</button>
+    <button class="filter-btn" onclick="filterCases('error', this)">&#9888; 错误</button>
+  </div>
+
+  <!-- Detail Results -->
+  <div id="results-container">
+    {{MODULE_SECTIONS}}
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Generated by API Test Runner &middot; pytest + Chart.js
+  </div>
+
+</div>
+
+<script>
+// ── Section Toggle ──
+function toggleSection(header) {
+  header.classList.toggle('collapsed');
+  const body = header.nextElementSibling;
+  if (body.classList.contains('hidden')) {
+    body.classList.remove('hidden');
+    body.style.maxHeight = body.scrollHeight + 'px';
+    body.classList.add('expanded');
+    // 展开后刷新分页
+    const sid = body.dataset.sectionId;
+    const rows = body.querySelectorAll('tbody .case-row');
+    if (sid && paginationState[sid] && rows.length > 0) {
+      renderPage(sid, rows);
+    }
+  } else {
+    body.classList.remove('expanded');
+    body.style.maxHeight = body.scrollHeight + 'px';
+    requestAnimationFrame(() => {
+      body.classList.add('hidden');
+      body.style.maxHeight = '0px';
+    });
+  }
+}
+
+// ── Trace Toggle ──
+function toggleTrace(el) {
+  const row = el.nextElementSibling;
+  if (row && row.classList.contains('trace-row')) {
+    row.style.display = row.style.display === 'none' ? 'table-row' : 'none';
+    // trace 展开/收起后更新父 section-body 高度
+    const body = row.closest('.section-body');
+    if (body && body.classList.contains('expanded')) {
+      body.style.maxHeight = body.scrollHeight + 'px';
+    }
+  }
+}
+
+// ── Filter ──
+let currentFilter = 'all';
+
+function filterCases(status, btn) {
+  currentFilter = status;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  // 标记行可见性（用 class 而非直接设 style.display）
+  document.querySelectorAll('.case-row').forEach(row => {
+    if (status === 'all') { row.classList.remove('filtered-out'); return; }
+    if (row.classList.contains('status-' + status)) {
+      row.classList.remove('filtered-out');
+    } else {
+      row.classList.add('filtered-out');
+    }
+  });
+
+  // 重置所有分页到第 1 页
+  Object.keys(paginationState).forEach(sid => { paginationState[sid].page = 1; });
+
+  // 刷新每个 section 的分页
+  document.querySelectorAll('.section-body[data-section-id]').forEach(body => {
+    const sid = body.dataset.sectionId;
+    const allRows = body.querySelectorAll('tbody .case-row');
+    if (allRows.length > 0) renderPage(sid, allRows);
+  });
+
+  // 隐藏空的 section
+  document.querySelectorAll('.module-section').forEach(section => {
+    const rows = section.querySelectorAll('.case-row');
+    const visible = section.querySelectorAll('.case-row:not(.filtered-out)');
+    section.style.display = (status === 'all') ? '' : (visible.length === 0 ? 'none' : '');
+  });
+
+  // 收起所有 trace
+  document.querySelectorAll('.trace-row').forEach(r => r.style.display = 'none');
+
+  // 更新所有已展开 section 的高度
+  document.querySelectorAll('.section-body.expanded').forEach(body => {
+    body.style.maxHeight = body.scrollHeight + 'px';
+  });
+}
+
+// ── Pagination ──
+const PAGE_SIZES = [10, 20, 50, -1];
+let paginationState = {};
+
+function initPagination() {
+  document.querySelectorAll('.section-body table.detail-table').forEach(table => {
+    const sectionBody = table.closest('.section-body');
+    const sectionId = sectionBody.dataset.sectionId || Math.random().toString(36).slice(2);
+    sectionBody.dataset.sectionId = sectionId;
+    const allRows = table.querySelectorAll('tbody .case-row');
+    if (allRows.length === 0) return;
+
+    // 用例数 <= 最小分页数时不创建分页控件
+    if (allRows.length <= PAGE_SIZES[0]) return;
+
+    const bar = document.createElement('div');
+    bar.className = 'pagination-bar';
+    bar.id = 'pager-' + sectionId;
+    bar.innerHTML = `
+      <button class="page-btn" data-action="first">&#171;</button>
+      <button class="page-btn" data-action="prev">&#8249;</button>
+      <span class="page-info"></span>
+      <button class="page-btn" data-action="next">&#8250;</button>
+      <button class="page-btn" data-action="last">&#187;</button>
+      <select class="page-size-select">
+        ${PAGE_SIZES.map(s => `<option value="${s}">${s === -1 ? '全部' : s + '条/页'}</option>`).join('')}
+      </select>
+    `;
+    sectionBody.appendChild(bar);
+
+    paginationState[sectionId] = { page: 1, pageSize: 20 };
+    renderPage(sectionId, allRows);
+    bindPager(sectionId, bar, allRows);
+  });
+}
+
+function renderPage(sectionId, rows) {
+  const state = paginationState[sectionId];
+  if (!state) return;
+
+  // 只对未被 filter 隐藏的行做分页
+  const activeRows = Array.from(rows).filter(r => !r.classList.contains('filtered-out'));
+  const pageSize = state.pageSize === -1 ? activeRows.length : state.pageSize;
+  const totalPages = Math.ceil(activeRows.length / pageSize) || 1;
+  if (state.page > totalPages) state.page = totalPages;
+  const start = (state.page - 1) * pageSize;
+  const end = state.pageSize === -1 ? activeRows.length : Math.min(start + pageSize, activeRows.length);
+
+  rows.forEach(row => { row.style.display = 'none'; });
+  activeRows.slice(start, end).forEach(row => { row.style.display = ''; });
+
+  // 收起关联 trace 行
+  rows.forEach(row => {
+    const next = row.nextElementSibling;
+    if (next && next.classList.contains('trace-row')) next.style.display = 'none';
+  });
+
+  const info = document.querySelector('#pager-' + sectionId + ' .page-info');
+  if (info) info.textContent = state.page + ' / ' + totalPages;
+
+  const bar = document.getElementById('pager-' + sectionId);
+  if (bar) {
+    bar.querySelector('[data-action="first"]').disabled = state.page <= 1;
+    bar.querySelector('[data-action="prev"]').disabled = state.page <= 1;
+    bar.querySelector('[data-action="next"]').disabled = state.page >= totalPages;
+    bar.querySelector('[data-action="last"]').disabled = state.page >= totalPages;
+  }
+}
+
+function bindPager(sectionId, bar, rows) {
+  bar.querySelector('[data-action="first"]').addEventListener('click', () => {
+    paginationState[sectionId].page = 1;
+    renderPage(sectionId, rows);
+  });
+  bar.querySelector('[data-action="prev"]').addEventListener('click', () => {
+    if (paginationState[sectionId].page > 1) {
+      paginationState[sectionId].page--;
+      renderPage(sectionId, rows);
+    }
+  });
+  bar.querySelector('[data-action="next"]').addEventListener('click', () => {
+    const activeRows = Array.from(rows).filter(r => !r.classList.contains('filtered-out'));
+    const pageSize = paginationState[sectionId].pageSize === -1 ? activeRows.length : paginationState[sectionId].pageSize;
+    const totalPages = Math.ceil(activeRows.length / pageSize) || 1;
+    if (paginationState[sectionId].page < totalPages) {
+      paginationState[sectionId].page++;
+      renderPage(sectionId, rows);
+    }
+  });
+  bar.querySelector('[data-action="last"]').addEventListener('click', () => {
+    const activeRows = Array.from(rows).filter(r => !r.classList.contains('filtered-out'));
+    const pageSize = paginationState[sectionId].pageSize === -1 ? activeRows.length : paginationState[sectionId].pageSize;
+    paginationState[sectionId].page = Math.ceil(activeRows.length / pageSize) || 1;
+    renderPage(sectionId, rows);
+  });
+  bar.querySelector('.page-size-select').addEventListener('change', e => {
+    paginationState[sectionId].pageSize = parseInt(e.target.value);
+    paginationState[sectionId].page = 1;
+    renderPage(sectionId, rows);
+  });
+}
+
+// ── Chart Data & Rendering ──
+// 图表渲染可能因 CDN 不可达而失败，不得阻断页面交互。
+(function initCharts() {
+  try {
+    if (typeof Chart === 'undefined') return;
+    const chartData = {{CHART_DATA}};
+
+    const pieCtx = document.getElementById('pieChart');
+    if (pieCtx) {
+      new Chart(pieCtx.getContext('2d'), {
+        type: 'doughnut',
+        data: {
+          labels: chartData.pie.labels,
+          datasets: [{
+            data: chartData.pie.data,
+            backgroundColor: chartData.pie.colors,
+            borderColor: '#111827',
+            borderWidth: 3,
+            hoverBorderColor: '#1e293b',
+            hoverBorderWidth: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '62%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#8896b0', padding: 18, font: { family: 'Outfit', size: 12 }, usePointStyle: true, pointStyleWidth: 10 }
+            }
+          }
+        }
+      });
+    }
+
+    const timeCtx = document.getElementById('timeChart');
+    if (timeCtx) {
+      const barColors = chartData.time.data.map(function(v) { return v > 2 ? '#ff4d6a' : v > 1 ? '#f0a040' : '#4da8ff'; });
+      new Chart(timeCtx.getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: chartData.time.labels,
+          datasets: [{
+            data: chartData.time.data,
+            backgroundColor: barColors,
+            borderRadius: 6,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: { legend: { display: false } },
+          scales: {
+            x: {
+              grid: { color: 'rgba(30,41,59,.5)' },
+              ticks: { color: '#5a6988', font: { family: 'DM Mono', size: 10 } }
+            },
+            y: {
+              grid: { display: false },
+              ticks: {
+                color: '#8896b0',
+                font: { family: 'DM Mono', size: 10 },
+                callback: function(v) { return v.length > 35 ? v.substr(0,35)+'...' : v; }
+              }
+            }
+          }
+        }
+      });
+    }
+  } catch (e) {
+    // Chart 初始化抛错时不阻断页面其它交互功能
+    console.warn('Chart init failed, page interaction still works:', e.message);
+  }
+})();
+
+// ── Init section heights ──
+// 只对默认展开（非 hidden）的 section 设置初始高度
+document.querySelectorAll('.section-body:not(.hidden)').forEach(body => {
+  body.style.maxHeight = body.scrollHeight + 'px';
+});
+
+// ── Init pagination ──
+initPagination();
+</script>
+
+</body>
+</html>

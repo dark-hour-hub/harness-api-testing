@@ -1,0 +1,550 @@
+# ============================================================
+# 智能体模块测试用例 YAML
+# ============================================================
+module: agents
+module_name: "智能体模块"
+base_url: "http://localhost:8080"
+
+# 全局变量预设
+global_variables:
+  default_page_size: 20
+
+# 全局请求头配置（无认证）
+headers_config:
+  public_headers:
+    - name: "Content-Type"
+      value: "application/json"
+  auth_headers: []
+
+# 认证统一配置（本项目无认证）
+auth_setup:
+  type: none
+
+# 测试用例列表
+testcases:
+  # ──────────────────────────────────────────
+  # 1. GET /api/agents 查询智能体列表（分页）
+  # ──────────────────────────────────────────
+  - id: TC_AGENT_001
+    title: "GET /api/agents_分页查询智能体列表_返回分页数据"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/agents"
+    description: "验证分页查询智能体列表，返回分页结构数据（items/page/pageSize/total）"
+    auth:
+      required: false
+    request:
+      query:
+        page: "1"
+        pageSize: "${global_variables.default_page_size}"
+      body: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "items"
+        - "total"
+
+  - id: TC_AGENT_002
+    title: "GET /api/agents_组合过滤条件查询_返回分页数据"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/agents"
+    description: "验证 agentCode/agentName 模糊过滤与 riskTier/adapterType/enabled 精确过滤多条件组合生效"
+    auth:
+      required: false
+    request:
+      query:
+        agentCode: "AGENT"
+        agentName: "智能体"
+        riskTier: "B"
+        adapterType: "GENERIC_HTTP_JSON"
+        enabled: "true"
+        page: "1"
+        pageSize: "20"
+      body: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "items"
+        - "total"
+
+  - id: TC_AGENT_003
+    title: "GET /api/agents_page越界_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/agents"
+    description: "验证 page 小于 1（越界）时返回 400 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      query:
+        page: "0"
+        pageSize: "20"
+      body: {}
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      data_exists: []
+
+  - id: TC_AGENT_004
+    title: "GET /api/agents_riskTier非法_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/agents"
+    description: "验证 riskTier 传非法枚举值（如 X）时返回 400 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      query:
+        riskTier: "X"
+        page: "1"
+        pageSize: "20"
+      body: {}
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      data_exists: []
+
+  # ──────────────────────────────────────────
+  # 2. POST /api/agents 创建智能体
+  # ──────────────────────────────────────────
+  - id: TC_AGENT_005
+    title: "POST /api/agents_创建智能体_返回创建详情"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: POST
+    path: "/api/agents"
+    description: "验证使用合法 AgentRequest 请求体创建智能体成功，返回创建后的完整配置"
+    auth:
+      required: false
+    request:
+      query: {}
+      body:
+        agentCode: "AGENT_TC_001"
+        agentName: "接口测试智能体"
+        category: "customer_service"
+        riskTier: "B"
+        department: "AI 研发部"
+        version: "1.0.0"
+        agentType: "chat"
+        adapterType: "GENERIC_HTTP_JSON"
+        endpoint: "https://agent.example.com/api/chat"
+        method: "POST"
+        requestTemplate: "{\"query\":\"{message}\"}"
+        messageField: "$.query"
+        sessionField: "$.session_id"
+        answerField: "$.answer"
+        successField: "$.success"
+        errorField: "$.error"
+        latencyField: "$.latency_ms"
+        tokenField: "$.tokens"
+        toolTraceField: "$.tool_calls"
+        headerSecretRef: "env:AGENT_HEADER"
+        timeoutMs: "30000"
+        enabled: "true"
+    extracts:
+      created_agent_id: "$.data.id"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "agentCode"
+
+  - id: TC_AGENT_006
+    title: "POST /api/agents_缺少必填agentCode_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/agents"
+    description: "验证缺少必填字段 agentCode 时返回 400 AGENT_400_CONFIG"
+    auth:
+      required: false
+    request:
+      query: {}
+      body:
+        agentName: "接口测试智能体"
+        category: "customer_service"
+        riskTier: "B"
+        department: "AI 研发部"
+        version: "1.0.0"
+        agentType: "chat"
+        adapterType: "GENERIC_HTTP_JSON"
+        endpoint: "https://agent.example.com/api/chat"
+        method: "POST"
+        requestTemplate: "{\"query\":\"{message}\"}"
+        messageField: "$.query"
+        sessionField: "$.session_id"
+        answerField: "$.answer"
+        successField: "$.success"
+        errorField: "$.error"
+        latencyField: "$.latency_ms"
+        tokenField: "$.tokens"
+        toolTraceField: "$.tool_calls"
+        headerSecretRef: "env:AGENT_HEADER"
+        timeoutMs: "30000"
+        enabled: "true"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "AGENT_400_CONFIG"
+      data_exists: []
+
+  - id: TC_AGENT_007
+    title: "POST /api/agents_agentCode重复_返回409"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/agents"
+    description: "验证重复提交已存在 agentCode 时返回 409 COMMON_409_CONFLICT（依赖 TC_AGENT_005 创建的数据）"
+    depends_on:
+      - "TC_AGENT_005"
+    auth:
+      required: false
+    request:
+      query: {}
+      body:
+        agentCode: "AGENT_TC_001"
+        agentName: "接口测试智能体"
+        category: "customer_service"
+        riskTier: "B"
+        department: "AI 研发部"
+        version: "1.0.0"
+        agentType: "chat"
+        adapterType: "GENERIC_HTTP_JSON"
+        endpoint: "https://agent.example.com/api/chat"
+        method: "POST"
+        requestTemplate: "{\"query\":\"{message}\"}"
+        messageField: "$.query"
+        sessionField: "$.session_id"
+        answerField: "$.answer"
+        successField: "$.success"
+        errorField: "$.error"
+        latencyField: "$.latency_ms"
+        tokenField: "$.tokens"
+        toolTraceField: "$.tool_calls"
+        headerSecretRef: "env:AGENT_HEADER"
+        timeoutMs: "30000"
+        enabled: "true"
+    expected:
+      status_code: 409
+      response_type: json
+      business_code: "COMMON_409_CONFLICT"
+      data_exists: []
+
+  - id: TC_AGENT_008
+    title: "POST /api/agents_timeoutMs越界_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: POST
+    path: "/api/agents"
+    description: "验证 timeoutMs 低于下限 100 时返回 400 AGENT_400_CONFIG"
+    auth:
+      required: false
+    request:
+      query: {}
+      body:
+        agentCode: "AGENT_TC_002"
+        agentName: "接口测试智能体"
+        category: "customer_service"
+        riskTier: "B"
+        department: "AI 研发部"
+        version: "1.0.0"
+        agentType: "chat"
+        adapterType: "GENERIC_HTTP_JSON"
+        endpoint: "https://agent.example.com/api/chat"
+        method: "POST"
+        requestTemplate: "{\"query\":\"{message}\"}"
+        messageField: "$.query"
+        sessionField: "$.session_id"
+        answerField: "$.answer"
+        successField: "$.success"
+        errorField: "$.error"
+        latencyField: "$.latency_ms"
+        tokenField: "$.tokens"
+        toolTraceField: "$.tool_calls"
+        headerSecretRef: "env:AGENT_HEADER"
+        timeoutMs: "50"
+        enabled: "true"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "AGENT_400_CONFIG"
+      data_exists: []
+
+  # ──────────────────────────────────────────
+  # 3. GET /api/agents/{id} 查询智能体详情
+  # ──────────────────────────────────────────
+  - id: TC_AGENT_009
+    title: "GET /api/agents/{id}_查询智能体详情_返回配置详情"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: GET
+    path: "/api/agents/{id}"
+    description: "验证按 ID 查询智能体详情成功，返回完整 Agent 配置（依赖 TC_AGENT_005 创建的数据）"
+    depends_on:
+      - "TC_AGENT_005"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_AGENT_005.extracts.created_agent_id}"
+      query: {}
+      body: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "agentCode"
+
+  - id: TC_AGENT_010
+    title: "GET /api/agents/{id}_id不存在_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/agents/{id}"
+    description: "验证查询不存在的 Agent ID 时返回 404 COMMON_404_RESOURCE"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "999999999"
+      query: {}
+      body: {}
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "COMMON_404_RESOURCE"
+      data_exists: []
+
+  - id: TC_AGENT_011
+    title: "GET /api/agents/{id}_id非数字_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: GET
+    path: "/api/agents/{id}"
+    description: "验证路径参数 id 为非数字时返回 400 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "abc"
+      query: {}
+      body: {}
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      data_exists: []
+
+  # ──────────────────────────────────────────
+  # 4. PUT /api/agents/{id} 更新智能体
+  # ──────────────────────────────────────────
+  - id: TC_AGENT_012
+    title: "PUT /api/agents/{id}_更新智能体_返回更新详情"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: PUT
+    path: "/api/agents/{id}"
+    description: "验证全量更新智能体配置成功，返回更新后的完整配置（依赖 TC_AGENT_005 创建的数据）"
+    depends_on:
+      - "TC_AGENT_005"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_AGENT_005.extracts.created_agent_id}"
+      query: {}
+      body:
+        agentCode: "AGENT_TC_001"
+        agentName: "接口测试智能体（更新版）"
+        category: "customer_service"
+        riskTier: "B"
+        department: "AI 研发部"
+        version: "2.0.0"
+        agentType: "chat"
+        adapterType: "GENERIC_HTTP_JSON"
+        endpoint: "https://agent.example.com/api/chat"
+        method: "POST"
+        requestTemplate: "{\"query\":\"{message}\"}"
+        messageField: "$.query"
+        sessionField: "$.session_id"
+        answerField: "$.answer"
+        successField: "$.success"
+        errorField: "$.error"
+        latencyField: "$.latency_ms"
+        tokenField: "$.tokens"
+        toolTraceField: "$.tool_calls"
+        headerSecretRef: "env:AGENT_HEADER"
+        timeoutMs: "30000"
+        enabled: "true"
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists:
+        - "id"
+        - "agentCode"
+
+  - id: TC_AGENT_013
+    title: "PUT /api/agents/{id}_id不存在_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: PUT
+    path: "/api/agents/{id}"
+    description: "验证更新不存在的 Agent ID 时返回 404 COMMON_404_RESOURCE"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "999999999"
+      query: {}
+      body:
+        agentCode: "AGENT_TC_999"
+        agentName: "接口测试智能体"
+        category: "customer_service"
+        riskTier: "B"
+        department: "AI 研发部"
+        version: "1.0.0"
+        agentType: "chat"
+        adapterType: "GENERIC_HTTP_JSON"
+        endpoint: "https://agent.example.com/api/chat"
+        method: "POST"
+        requestTemplate: "{\"query\":\"{message}\"}"
+        messageField: "$.query"
+        sessionField: "$.session_id"
+        answerField: "$.answer"
+        successField: "$.success"
+        errorField: "$.error"
+        latencyField: "$.latency_ms"
+        tokenField: "$.tokens"
+        toolTraceField: "$.tool_calls"
+        headerSecretRef: "env:AGENT_HEADER"
+        timeoutMs: "30000"
+        enabled: "true"
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "COMMON_404_RESOURCE"
+      data_exists: []
+
+  - id: TC_AGENT_014
+    title: "PUT /api/agents/{id}_id非数字_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: PUT
+    path: "/api/agents/{id}"
+    description: "验证更新时路径参数 id 为非数字返回 400 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "abc"
+      query: {}
+      body:
+        agentCode: "AGENT_TC_001"
+        agentName: "接口测试智能体"
+        category: "customer_service"
+        riskTier: "B"
+        department: "AI 研发部"
+        version: "1.0.0"
+        agentType: "chat"
+        adapterType: "GENERIC_HTTP_JSON"
+        endpoint: "https://agent.example.com/api/chat"
+        method: "POST"
+        requestTemplate: "{\"query\":\"{message}\"}"
+        messageField: "$.query"
+        sessionField: "$.session_id"
+        answerField: "$.answer"
+        successField: "$.success"
+        errorField: "$.error"
+        latencyField: "$.latency_ms"
+        tokenField: "$.tokens"
+        toolTraceField: "$.tool_calls"
+        headerSecretRef: "env:AGENT_HEADER"
+        timeoutMs: "30000"
+        enabled: "true"
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      data_exists: []
+
+  # ──────────────────────────────────────────
+  # 5. DELETE /api/agents/{id} 删除智能体
+  # ──────────────────────────────────────────
+  - id: TC_AGENT_015
+    title: "DELETE /api/agents/{id}_删除智能体_返回成功"
+    priority: P0
+    tags: ["正常", "回归"]
+    method: DELETE
+    path: "/api/agents/{id}"
+    description: "验证删除智能体成功，返回 code=200、data 为 null（依赖 TC_AGENT_005 创建、TC_AGENT_012 更新的数据）"
+    depends_on:
+      - "TC_AGENT_005"
+      - "TC_AGENT_012"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "${TC_AGENT_005.extracts.created_agent_id}"
+      query: {}
+      body: {}
+    expected:
+      status_code: 200
+      response_type: json
+      business_code: "200"
+      data_exists: []
+
+  - id: TC_AGENT_016
+    title: "DELETE /api/agents/{id}_id不存在_返回404"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: DELETE
+    path: "/api/agents/{id}"
+    description: "验证删除不存在的 Agent ID 时返回 404 COMMON_404_RESOURCE"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "999999999"
+      query: {}
+      body: {}
+    expected:
+      status_code: 404
+      response_type: json
+      business_code: "COMMON_404_RESOURCE"
+      data_exists: []
+
+  - id: TC_AGENT_017
+    title: "DELETE /api/agents/{id}_id非数字_返回400"
+    priority: P1
+    tags: ["异常", "回归"]
+    method: DELETE
+    path: "/api/agents/{id}"
+    description: "验证删除时路径参数 id 为非数字返回 400 COMMON_400_VALIDATION"
+    auth:
+      required: false
+    request:
+      path_params:
+        id: "abc"
+      query: {}
+      body: {}
+    expected:
+      status_code: 400
+      response_type: json
+      business_code: "COMMON_400_VALIDATION"
+      data_exists: []

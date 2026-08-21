@@ -1,0 +1,35 @@
+{
+  "tools": {
+    "python": {
+      "configured_path": "C:/Users/17201/AppData/Local/Python/bin",
+      "exists": true,
+      "status": "exists"
+    },
+    "jmeter": {
+      "configured_path": "D:/Jmeter/apache-jmeter-5.6.3/bin",
+      "exists": true,
+      "status": "exists"
+    },
+    "git": {
+      "configured_path": "D:/Git/Git/bin",
+      "exists": true,
+      "status": "exists"
+    }
+  },
+  "dependencies": {
+    "pytest": {
+      "installed": true,
+      "status": "installed"
+    },
+    "playwright": {
+      "installed": true,
+      "status": "installed"
+    }
+  },
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "message": "检查完成：通过 5 项，失败 0 项"
+  }
+}
