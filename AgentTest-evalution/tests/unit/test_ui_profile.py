@@ -93,6 +93,15 @@ def test_resolve_first_strategy_hit():
     assert loc is not None and idx == 0
 
 
+def test_resolve_stops_at_first_hit():
+    page = FakePage({
+        "data-testid:agent-code-input": True,
+        "placeholder:例如：BANK_AGENT": True,
+    })
+    loc, idx = resolve_element(page, ELEMENT_DEF, timeout_ms=500)
+    assert loc is not None and idx == 0
+
+
 def test_resolve_fallback_to_second_strategy():
     page = FakePage({"placeholder:例如：BANK_AGENT": True})
     loc, idx = resolve_element(page, ELEMENT_DEF, timeout_ms=500)
@@ -107,6 +116,6 @@ def test_resolve_all_strategies_fail():
 
 def test_resolve_skips_unknown_strategy_type():
     page = FakePage({"placeholder:例如：BANK_AGENT": True})
-    weird = {"strategies": [{"type": "unknown-type", "value": "x"}, ELEMENT_DEF["strategies"][1]]}
-    loc, idx = resolve_element(page, weird, timeout_ms=500)
+    element_def_with_unknown_type = {"strategies": [{"type": "unknown-type", "value": "x"}, ELEMENT_DEF["strategies"][1]]}
+    loc, idx = resolve_element(page, element_def_with_unknown_type, timeout_ms=500)
     assert loc is not None and idx == 1
