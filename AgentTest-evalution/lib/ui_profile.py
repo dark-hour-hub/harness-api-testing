@@ -12,8 +12,14 @@ ui_profile.py — ui-profile 配置加载与元素定位解析（确定性执行
 """
 from __future__ import annotations
 
+import datetime
+import fnmatch
 from pathlib import Path
+import random
+import re
+import string
 from typing import Optional
+import uuid
 
 import yaml
 
@@ -97,3 +103,44 @@ def resolve_element(page, element_def: dict, timeout_ms: int = 5000):
         except Exception:
             continue
     return None, -1
+
+
+_VAR_RE = re.compile(r"\$\{(rand|uuid|ts|date)(?::([^}]*))?\}")
+
+
+def expand_vars(value, base_time=None):
+    """场景值中的动态值占位符展开（确定性执行层）：
+
+    - ${rand:8}    N 位随机大写字母数字（默认 8）
+    - ${uuid}      UUID 前 12 位大写（去连字符）
+    - ${ts}        13 位毫秒时间戳
+    - ${date:+Nd}  相对日期 yyyy-MM-dd（+N/-N 天，可省略）
+    """
+    if not isinstance(value, str):
+        return value
+    base = base_time or datetime.datetime.now()
+
+    def _repl(m):
+        kind, arg = m.group(1), m.group(2)
+        if kind == "rand":
+            n = int(arg) if arg and arg.isdigit() else 8
+            return "".join(random.choices(string.ascii_uppercase + string.digits, k=n))
+        if kind == "uuid":
+            return str(uuid.uuid4()).replace("-", "")[:12].upper()
+        if kind == "ts":
+            return str(int(base.timestamp() * 1000))
+        if kind == "date":
+            days = 0
+            if arg and arg[0] in "+-" and arg[1:].rstrip("dD").isdigit():
+                days = int(arg.rstrip("dD"))
+            return (base + datetime.timedelta(days=days)).strftime("%Y-%m-%d")
+        return m.group(0)
+
+    return _VAR_RE.sub(_repl, value)
+
+
+def seed_protected(value, protected_seeds):
+    """值命中种子保护清单（支持 fnmatch 通配）→ True"""
+    if not protected_seeds or not isinstance(value, str):
+        return False
+    return any(fnmatch.fnmatch(value, p) or value == p for p in protected_seeds)
