@@ -1,12 +1,37 @@
 # ui-profile 元素地图 —— 智能体评测平台（绑定项目）
-# 阶段 1 预填子集：覆盖现有 04-ui-scenarios/02-agent-projects.feature 的关键元素
+# 覆盖 04-ui-scenarios/*.feature 的关键元素（2026-08-24 全流程重走时扩展）
 elements:
   智能体编码:
     strategies:
       - { type: placeholder, value: "例如：BANK_AGENT" }
+  智能体编码筛选:
+    strategies:
+      - { type: label, value: "智能体编码筛选" }
+      - { type: placeholder, value: "智能体编码" }
   请输入智能体名称:
     strategies:
       - { type: placeholder, value: "请输入智能体名称" }
+  例如：CUSTOMER_SERVICE:
+    strategies:
+      - { type: placeholder, value: "例如：CUSTOMER_SERVICE" }
+  请输入所属部门:
+    strategies:
+      - { type: placeholder, value: "请输入所属部门" }
+  例如：1.0.0:
+    strategies:
+      - { type: placeholder, value: "例如：1.0.0" }
+  例如：CHAT:
+    strategies:
+      - { type: placeholder, value: "例如：CHAT" }
+  https://host/path:
+    strategies:
+      - { type: placeholder, value: "https://host/path" }
+  100 - 120000:
+    strategies:
+      - { type: placeholder, value: "100 - 120000" }
+  $.answer:
+    strategies:
+      - { type: placeholder, value: "$.answer" }
   风险等级:
     strategies:
       - { type: data-testid, value: agent-risk-tier }
@@ -25,3 +50,30 @@ elements:
   保存:
     strategies:
       - { type: role, role: button, name: "保存" }
+  保存为方案:
+    strategies:
+      - { type: role, role: button, name: "保存为方案" }
+  保存为草稿:
+    strategies:
+      - { type: role, role: button, name: "保存为草稿" }
+  保存并发布:
+    strategies:
+      - { type: role, role: button, name: "保存并发布" }
+  重置:
+    strategies:
+      - { type: role, role: button, name: "重置" }
+  请从指标配置页启动:
+    strategies:
+      - { type: role, role: button, name: "请从指标配置页启动" }
+  选择评测:
+    strategies:
+      - { type: role, role: button, name: "选择评测" }
+  详情:
+    strategies:
+      - { type: role, role: button, name: "详情" }
+  编辑:
+    strategies:
+      - { type: role, role: button, name: "编辑" }
+  删除:
+    strategies:
+      - { type: role, role: button, name: "删除" }

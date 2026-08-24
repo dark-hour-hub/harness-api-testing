@@ -1,9 +1,9 @@
 # 指标配置
-# 业务需求: 模块 2/3/4（指标目录浏览、测试用例管理、评测方案保存入口）
-# 页面: /indicators（指标维度面板 + 测试用例表格 + 底部操作区）
+# 业务需求来源: 模块 2（2.1 指标维度浏览 2.2 分类浏览 2.3 指标列表 2.4 详情 2.5 目录版本）；无登录
+# 页面路由: /indicators（IndicatorsView.vue —— IndicatorDimensionPanel 维度卡片 + IndicatorCategoryPanel 指标大类 + 测试用例区）
 
 Feature: 指标配置
-  指标目录按维度展示并支持用例管理；未选指标操作给出前置校验提示
+  指标目录按维度展示并支持用例管理；未就绪功能给出后端暂未提供提示
 
   Scenario: indicator page elements
     Given 打开首页
@@ -16,18 +16,14 @@ Feature: 指标配置
     And 应看到按钮 "保存为方案"
     And 应看到按钮 "开始评测"
 
+  Scenario: indicator dimension default weight shown
+    Given 打开首页
+    When 点击链接 "指标配置"
+    And 等待 1 秒
+    Then 页面应包含 "风险默认权重"
+
   Scenario: ai expand shows unavailable message
     Given 打开首页
     When 点击链接 "指标配置"
     When 点击按钮 "AI扩充"
     Then 应看到提示 "当前后端暂未提供AI扩充接口。"
-
-  Scenario: add test case opens form with pre-selected indicator
-    # 页面初始化自动选中第一个启用的维度/指标（IndicatorsView.initializeIndicatorsPage），
-    # 「未选择指标」校验在当前前端版本不会触发；点击后直接打开新增用例表单。
-    # 注意：初始化为异步，点击过快会命中未初始化竞态（偶发只弹提示不弹表单），
-    # 因此使用「点击新增用例并等待表单打开」组合步骤（内部自动重试）。
-    Given 打开首页
-    When 点击链接 "指标配置"
-    When 点击新增用例并等待表单打开
-    Then 应看到提示 "新增评测用例"

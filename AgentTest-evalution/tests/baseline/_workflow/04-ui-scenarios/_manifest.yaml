@@ -1,7 +1,8 @@
 # UI 场景清单 _manifest.yaml
-# 生成阶段: ui-scenario-design（场景设计）
-# 生成日期: 2026-08-20
-# 需求来源: tests/baseline/_workflow/00-requirements/ui-requirements.md（7 模块，已确认）
+# 生成阶段: ui-scenario-design（场景设计，基于真实前端源码重写）
+# 生成日期: 2026-08-24
+# 需求来源: tests/baseline/_workflow/00-requirements/ui-requirements.md（7 模块）
+# 前端源码: D:\AI评测\智能体评测平台\agent-evaluation-platform-frontend
 
 system:
   name: agent-evaluation-platform（智能体评测平台）
@@ -23,8 +24,7 @@ system:
 custom_steps:
   - step: '选择下拉框 "<名称>" 的选项 "<文本>"'
     file: steps/common_steps.py
-    reason: "AgentFormDialog 使用原生 <select>（风险等级/适配器类型/HTTP 方法），通用步骤库未覆盖 select_option；同时为 el-select 提供兜底"
-    registered_by: "test_*.py 中 import steps.common_steps"
+    reason: "AgentFormDialog 使用原生 <select>（风险等级/适配器类型/HTTP 方法），通用步骤库未覆盖 select_option；conftest 内已内建 testid 映射兜底"
 
 features:
   - module: 总览
@@ -39,19 +39,20 @@ features:
       - list and view agent cards
       - filter agents by code
       - create agent
-      - edit agent
-      - delete agent
+      - create agent missing required fields
 
   - module: 指标配置
     file: 03-indicator-config.feature
     scenarios:
       - indicator page elements
+      - indicator dimension default weight shown
       - ai expand shows unavailable message
-      - add test case requires selected indicator
 
-  - module: 评测执行
+  - module: 评测执行（测试用例 + 评测方案 + 评测任务）
     file: 04-evaluation-execution.feature
     scenarios:
+      - add test case opens form with pre-selected indicator
+      - save scheme dialog validates required fields
       - execution empty state
       - reset shows unavailable message
 
@@ -60,4 +61,3 @@ features:
     scenarios:
       - result board empty state
       - result filters visible
-      - navigate back to overview
