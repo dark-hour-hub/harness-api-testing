@@ -1,0 +1,6 @@
+busy_indicators: [".el-loading-mask", ".loading"]
+timeouts:
+  action: 5000
+  busy: 15000
+  assertion: 10000
+  api_sync: 15000

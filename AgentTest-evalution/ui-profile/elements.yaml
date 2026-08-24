@@ -1,0 +1,30 @@
+# ui-profile 元素地图 —— 智能体评测平台（绑定项目）
+# 阶段 1 预填子集：覆盖现有 04-ui-scenarios/02-agent-projects.feature 的关键元素
+elements:
+  智能体编码:
+    strategies:
+      - { type: placeholder, value: "例如：BANK_AGENT" }
+  请输入智能体名称:
+    strategies:
+      - { type: placeholder, value: "请输入智能体名称" }
+  风险等级:
+    strategies:
+      - { type: data-testid, value: agent-risk-tier }
+      - { type: combobox, name: "风险等级" }
+  适配器类型:
+    strategies:
+      - { type: data-testid, value: agent-adapter-type }
+      - { type: combobox, name: "适配器类型" }
+  HTTP 方法:
+    strategies:
+      - { type: data-testid, value: agent-method }
+      - { type: combobox, name: "HTTP 方法" }
+  新增智能体:
+    strategies:
+      - { type: role, role: button, name: "新增智能体" }
+  筛选:
+    strategies:
+      - { type: role, role: button, name: "筛选" }
+  保存:
+    strategies:
+      - { type: role, role: button, name: "保存" }
