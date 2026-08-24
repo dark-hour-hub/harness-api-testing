@@ -304,7 +304,7 @@ def resolve_element(page, element_def: dict, timeout_ms: int = 5000):
 - [ ] **Step 2: 运行测试确认通过**
 
 Run: `C:/Users/17201/AppData/Local/Programs/Python/Python312/python.exe -m pytest tests/unit/test_ui_profile.py -v`
-Expected: 7 passed
+Expected: 8 passed（含 test_resolve_stops_at_first_hit）
 
 - [ ] **Step 3: 提交**
 
@@ -596,7 +596,7 @@ Expected: `collection succeeded`，无 `StepDefinitionNotFoundError`，无 impor
 - [ ] **Step 3: 重跑单元测试确认回归无损**
 
 Run: `C:/Users/17201/AppData/Local/Programs/Python/Python312/python.exe -m pytest tests/unit/test_ui_profile.py -v`
-Expected: 7 passed
+Expected: 11 passed（8 原始 + 3 扁平格式双格式兼容测试）
 
 - [ ] **Step 4: （可选，需前端环境）真实运行一个场景验证地图命中**
 
