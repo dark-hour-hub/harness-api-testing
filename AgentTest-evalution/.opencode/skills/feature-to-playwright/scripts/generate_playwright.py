@@ -10,6 +10,7 @@ test_{module}.py（scenarios 绑定），并复制 conftest.py（含通用步骤
     python generate_playwright.py --feature-dir <dir> --output-dir <dir>
 """
 import argparse
+import os
 import shutil
 import sys
 from pathlib import Path
@@ -17,6 +18,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
 SKILL_DIR = Path(__file__).resolve().parent.parent
 CONFTEST_SRC = SKILL_DIR / "template" / "conftest.py"
+UI_PROFILE_MODULE_SRC = PROJECT_ROOT / "lib" / "ui_profile.py"
 
 MODE_PATHS = {
     "baseline": {
@@ -40,12 +42,13 @@ def slug_module(name: str) -> str:
 def generate_test_file(feature_file: Path, feature_dir: Path, output_dir: Path) -> str:
     """为一个 feature 生成 test_{module}.py"""
     module = slug_module(feature_file.name)
+    rel = os.path.relpath(feature_dir, output_dir).replace("\\", "/")
     content = (
         "# -*- coding: utf-8 -*-\n"
         "# 由 feature-to-playwright skill 自动生成，请勿手动修改\n"
         "from pathlib import Path\n"
         "from pytest_bdd import scenarios\n\n"
-        f'FEATURE_DIR = Path(r"{feature_dir.as_posix()}")\n'
+        f'FEATURE_DIR = Path(__file__).resolve().parent / "{rel}"\n'
         f'scenarios(str(FEATURE_DIR / "{feature_file.name}"))\n'
     )
     out_file = output_dir / f"test_{module}.py"
@@ -90,6 +93,10 @@ def main():
         print(f"[generate_playwright] 错误: conftest 模板不存在: {CONFTEST_SRC}")
         sys.exit(1)
     shutil.copy(CONFTEST_SRC, output_dir / "conftest.py")
+
+    if UI_PROFILE_MODULE_SRC.exists():
+        shutil.copy(UI_PROFILE_MODULE_SRC, output_dir / "ui_profile.py")
+        print("[generate_playwright] [OK] ui_profile.py 已复制")
 
     print(f"[generate_playwright] feature 目录: {feature_dir}")
     print(f"[generate_playwright] 输出目录: {output_dir}")
