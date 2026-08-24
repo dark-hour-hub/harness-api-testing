@@ -39,10 +39,26 @@ def _locate_profile_dir() -> str:
 
 
 PROFILE_DIR = _locate_profile_dir()
+
+try:
+    from ui_profile import load_profile, resolve_element, expand_vars, seed_protected
+except Exception:
+    def load_profile(*_a, **_k):
+        return None
+
+    def resolve_element(*_a, **_k):
+        return None, -1
+
+    def expand_vars(v):
+        return v
+
+    def seed_protected(v, s):
+        return False
+
 PROFILE = None
 try:
-    from ui_profile import load_profile, resolve_element
-    PROFILE = load_profile(Path(PROFILE_DIR))
+    if load_profile is not None:
+        PROFILE = load_profile(Path(PROFILE_DIR))
 except Exception:
     PROFILE = None
     import warnings
@@ -60,6 +76,15 @@ def _action_timeout() -> int:
     if PROFILE is None:
         return 5000
     return PROFILE["business"].get("timeouts", {}).get("action", 5000)
+
+
+def _assert_not_seed(text: str) -> None:
+    """操作目标命中种子保护清单 → 直接报错拦截（企业经验库第 11 条硬约束化）"""
+    if PROFILE is None:
+        return
+    seeds = PROFILE["business"].get("protected_seeds", [])
+    if seed_protected(text, seeds):
+        raise AssertionError(f"禁止操作种子数据（protected_seeds 命中）: {text}")
 
 
 def _load_frontend_url() -> str:
@@ -206,33 +231,112 @@ def _fill_input(page, name, value):
 
 
 def _click_button(page, text):
-    """点击第一个 enabled 的按钮（跳过 disabled）；元素地图优先"""
-    if PROFILE is not None:
-        el = PROFILE["map"].lookup(text)
-        if el is not None:
-            loc, idx = resolve_element(page, el, _action_timeout())
-            if loc is not None:
-                _record_hit(text, idx)
-                for candidate in loc.all():
-                    try:
-                        if candidate.is_enabled():
-                            candidate.click()
-                            return
-                    except Exception:
-                        continue
-                raise AssertionError(f"未找到可点击的按钮「{text}」")
-    loc = page.get_by_role("button", name=text)
-    for candidate in loc.all():
+    """点击第一个 enabled 的按钮（跳过 disabled）；元素地图优先；失败确定性重试"""
+    _assert_not_seed(text)
+    attempts = _retry_count() + 1
+    last_err = None
+    for _ in range(attempts):
         try:
-            if candidate.is_enabled():
-                candidate.click()
-                return
+            if PROFILE is not None:
+                el = PROFILE["map"].lookup(text)
+                if el is not None:
+                    loc, idx = resolve_element(page, el, _action_timeout())
+                    if loc is not None:
+                        _record_hit(text, idx)
+                        _click_enabled_with_sync(page, loc, text)
+                        return
+            loc = page.get_by_role("button", name=text)
+            _click_enabled_with_sync(page, loc, text)
+            return
+        except AssertionError:
+            raise
+        except Exception as e:
+            last_err = e
+            page.wait_for_timeout(500)
+    if last_err is not None:
+        raise last_err
+    raise AssertionError(f"未找到可点击的按钮「{text}」")
+
+
+def _wait_busy_gone(page):
+    """等待所有 busy 指示器消失（business.yaml busy_indicators）"""
+    if PROFILE is None:
+        return
+    busy = PROFILE["business"].get("busy_indicators", [])
+    if not busy:
+        return
+    timeout = PROFILE["business"].get("timeouts", {}).get("busy", 15000)
+    for sel in busy:
+        try:
+            page.locator(sel).first.wait_for(state="detached", timeout=timeout)
         except Exception:
-            continue
+            pass
+
+
+def _api_rule(step_text):
+    """查 api_sync_rules，返回 (method, path)；无规则返回 None"""
+    if PROFILE is None:
+        return None
+    rule = PROFILE["business"].get("api_sync_rules", {}).get(step_text)
+    if not rule:
+        return None
+    return rule.get("method", "GET"), rule.get("path", "")
+
+
+def _api_timeout() -> int:
+    if PROFILE is None:
+        return 15000
+    return int(PROFILE["business"].get("timeouts", {}).get("api_sync", 15000))
+
+
+def _click_enabled_with_sync(page, loc, text):
+    """点击第一个 enabled 候选；有 api 规则时先注册 expect_response 再点击（防漏快响应）。
+
+    同步失败 fail-open（不重试、不抛错），避免已派发点击的重复提交。
+    """
+    rule = _api_rule(text)
+    if rule is None:
+        for candidate in loc.all():
+            try:
+                if candidate.is_enabled():
+                    candidate.click()
+                    _wait_busy_gone(page)
+                    return
+            except Exception:
+                continue
+        loc.first.click(timeout=_action_timeout())
+        _wait_busy_gone(page)
+        return
+    method, path = rule
+    clicked = False
     try:
-        loc.first.click()
+        with page.expect_response(
+            lambda r: r.request.method == method and path in r.url,
+            timeout=_api_timeout(),
+        ) as info:
+            for candidate in loc.all():
+                try:
+                    if candidate.is_enabled():
+                        candidate.click()
+                        clicked = True
+                        break
+                except Exception:
+                    continue
+            if not clicked:
+                loc.first.click(timeout=_action_timeout())
+                clicked = True
+        info.value
     except Exception:
-        raise AssertionError(f"未找到可点击的按钮「{text}」") from None
+        pass
+    if not clicked:
+        raise AssertionError(f"未找到可点击的按钮「{text}」")
+    _wait_busy_gone(page)
+
+
+def _retry_count() -> int:
+    if PROFILE is None:
+        return 1
+    return int(PROFILE["business"].get("retry", 1))
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -271,6 +375,7 @@ def click_menu(page, text):
     except Exception:
         raise AssertionError(f"未找到菜单「{text}」") from None
     page.wait_for_load_state("networkidle")
+    _wait_busy_gone(page)
 
 
 @given(parsers.parse('点击按钮 "{text}"'))
@@ -282,13 +387,15 @@ def click_button(page, text):
 @given(parsers.parse('点击链接 "{text}"'))
 @when(parsers.parse('点击链接 "{text}"'))
 def click_link(page, text):
+    _assert_not_seed(text)
     page.get_by_role("link", name=text).first.click()
+    _wait_busy_gone(page)
 
 
 @given(parsers.parse('在 "{field}" 输入框中输入 "{value}"'))
 @when(parsers.parse('在 "{field}" 输入框中输入 "{value}"'))
 def fill_field(page, field, value):
-    _fill_input(page, field, value)
+    _fill_input(page, field, expand_vars(value))
 
 
 @when(parsers.parse('等待 {seconds:d} 秒'))
@@ -360,8 +467,46 @@ def select_dropdown_option(page, name, option):
 
 @when(parsers.parse('在智能体卡片 "{code}" 中点击 "{btn}"'))
 def click_in_agent_card(page, code, btn):
+    _assert_not_seed(code)
     card = page.locator(".agent-card", has_text=code).first
     card.get_by_role("button", name=btn).click(timeout=5000)
+    _wait_busy_gone(page)
+
+
+@when(parsers.parse('在表格行包含 "{row_text}" 中点击 "{btn}"'))
+def click_in_row(page, row_text, btn):
+    _assert_not_seed(row_text)
+    row = page.get_by_role("row", name=re.compile(re.escape(row_text))).first
+    row.get_by_role("button", name=btn).first.click(timeout=5000)
+    _wait_busy_gone(page)
+
+
+@when(parsers.parse('在对话框 "{title}" 中点击 "{btn}"'))
+def click_in_dialog(page, title, btn):
+    dialog = page.get_by_role("dialog").or_(page.get_by_role("alertdialog")).filter(has_text=title).first
+    dialog.get_by_role("button", name=btn).first.click(timeout=5000)
+    _wait_busy_gone(page)
+
+
+@when(parsers.parse('上传文件到 "{field}" 文件 "{path}"'))
+def upload_file(page, field, path):
+    if PROFILE is not None:
+        el = PROFILE["map"].lookup(field)
+        if el is not None:
+            loc, idx = resolve_element(page, el, _action_timeout())
+            if loc is not None:
+                _record_hit(field, idx)
+                file_input = loc.first.locator("xpath=.//input[@type='file']")
+                if file_input.count() == 0:
+                    file_input = page.locator('input[type="file"]').first
+                file_input.set_input_files(str(_project_root() / path))
+                return
+    page.locator('input[type="file"]').first.set_input_files(str(_project_root() / path))
+
+
+@when(parsers.parse('在 "{field}" 选择日期 "{value}"'))
+def fill_date(page, field, value):
+    _fill_input(page, field, expand_vars(value))
 
 
 @when("点击新增用例并等待表单打开")

@@ -308,23 +308,28 @@ def _click_enabled_with_sync(page, loc, text):
         _wait_busy_gone(page)
         return
     method, path = rule
-    with page.expect_response(
-        lambda r: r.request.method == method and path in r.url,
-        timeout=_api_timeout(),
-    ) as info:
-        for candidate in loc.all():
-            try:
-                if candidate.is_enabled():
-                    candidate.click()
-                    break
-            except Exception:
-                continue
-        else:
-            loc.first.click(timeout=_action_timeout())
+    clicked = False
     try:
+        with page.expect_response(
+            lambda r: r.request.method == method and path in r.url,
+            timeout=_api_timeout(),
+        ) as info:
+            for candidate in loc.all():
+                try:
+                    if candidate.is_enabled():
+                        candidate.click()
+                        clicked = True
+                        break
+                except Exception:
+                    continue
+            if not clicked:
+                loc.first.click(timeout=_action_timeout())
+                clicked = True
         info.value
     except Exception:
         pass
+    if not clicked:
+        raise AssertionError(f"未找到可点击的按钮「{text}」")
     _wait_busy_gone(page)
 
 
