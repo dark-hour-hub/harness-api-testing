@@ -243,6 +243,7 @@ def _click_button(page, text):
                     try:
                         if candidate.is_enabled():
                             candidate.click()
+                            _wait_busy_gone(page)
                             return
                     except Exception:
                         continue
@@ -252,13 +253,30 @@ def _click_button(page, text):
         try:
             if candidate.is_enabled():
                 candidate.click()
+                _wait_busy_gone(page)
                 return
         except Exception:
             continue
     try:
         loc.first.click()
+        _wait_busy_gone(page)
     except Exception:
         raise AssertionError(f"未找到可点击的按钮「{text}」") from None
+
+
+def _wait_busy_gone(page):
+    """等待所有 busy 指示器消失（business.yaml busy_indicators）"""
+    if PROFILE is None:
+        return
+    busy = PROFILE["business"].get("busy_indicators", [])
+    if not busy:
+        return
+    timeout = PROFILE["business"].get("timeouts", {}).get("busy", 15000)
+    for sel in busy:
+        try:
+            page.locator(sel).first.wait_for(state="detached", timeout=timeout)
+        except Exception:
+            pass
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -297,6 +315,7 @@ def click_menu(page, text):
     except Exception:
         raise AssertionError(f"未找到菜单「{text}」") from None
     page.wait_for_load_state("networkidle")
+    _wait_busy_gone(page)
 
 
 @given(parsers.parse('点击按钮 "{text}"'))
@@ -308,7 +327,9 @@ def click_button(page, text):
 @given(parsers.parse('点击链接 "{text}"'))
 @when(parsers.parse('点击链接 "{text}"'))
 def click_link(page, text):
+    _assert_not_seed(text)
     page.get_by_role("link", name=text).first.click()
+    _wait_busy_gone(page)
 
 
 @given(parsers.parse('在 "{field}" 输入框中输入 "{value}"'))
@@ -386,8 +407,46 @@ def select_dropdown_option(page, name, option):
 
 @when(parsers.parse('在智能体卡片 "{code}" 中点击 "{btn}"'))
 def click_in_agent_card(page, code, btn):
+    _assert_not_seed(code)
     card = page.locator(".agent-card", has_text=code).first
     card.get_by_role("button", name=btn).click(timeout=5000)
+    _wait_busy_gone(page)
+
+
+@when(parsers.parse('在表格行包含 "{row_text}" 中点击 "{btn}"'))
+def click_in_row(page, row_text, btn):
+    _assert_not_seed(row_text)
+    row = page.get_by_role("row", name=re.compile(re.escape(row_text))).first
+    row.get_by_role("button", name=btn).first.click(timeout=5000)
+    _wait_busy_gone(page)
+
+
+@when(parsers.parse('在对话框 "{title}" 中点击 "{btn}"'))
+def click_in_dialog(page, title, btn):
+    dialog = page.get_by_role("dialog").filter(has_text=title).first
+    dialog.get_by_role("button", name=btn).first.click(timeout=5000)
+    _wait_busy_gone(page)
+
+
+@when(parsers.parse('上传文件到 "{field}" 文件 "{path}"'))
+def upload_file(page, field, path):
+    if PROFILE is not None:
+        el = PROFILE["map"].lookup(field)
+        if el is not None:
+            loc, idx = resolve_element(page, el, _action_timeout())
+            if loc is not None:
+                _record_hit(field, idx)
+                file_input = loc.first.locator("xpath=ancestor-or-self::*[@type='file']")
+                if file_input.count() == 0:
+                    file_input = page.locator('input[type="file"]').first
+                file_input.set_input_files(str(_project_root() / path))
+                return
+    page.locator('input[type="file"]').first.set_input_files(str(_project_root() / path))
+
+
+@when(parsers.parse('在 "{field}" 选择日期 "{value}"'))
+def fill_date(page, field, value):
+    _fill_input(page, field, expand_vars(value))
 
 
 @when("点击新增用例并等待表单打开")
