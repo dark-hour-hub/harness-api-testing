@@ -45,6 +45,8 @@ try:
     PROFILE = load_profile(Path(PROFILE_DIR))
 except Exception:
     PROFILE = None
+    import warnings
+    warnings.warn(f"ui-profile 加载失败，回退文本直搜: {PROFILE_DIR}", stacklevel=2)
 
 _HIT_LOG: dict = {}
 
@@ -124,6 +126,11 @@ def _record_bdd_step(request, step, status):
             rec["status"] = status
             return
     steps.append({"name": name, "status": status})
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_bdd_before_scenario(request, feature, scenario):
+    _HIT_LOG.clear()
 
 
 @pytest.hookimpl(tryfirst=True)
