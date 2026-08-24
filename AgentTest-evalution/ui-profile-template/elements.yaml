@@ -6,12 +6,12 @@
 #   - 由 ui-element-map skill 自动生成草稿，人工确认后入库（阶段 2）
 elements:
   # 示例条目（新项目绑定时删除注释，按项目实际填写）：
-  # agentCodeInput:
+  # 智能体编码:
   #   strategies:
   #     - { type: data-testid, value: agent-code-input }
   #     - { type: placeholder, value: "例如：BANK_AGENT" }
   #     - { type: role, role: textbox, name: "智能体编码" }
-  # saveButton:
+  # 保存:
   #   strategies:
   #     - { type: role, role: button, name: "保存" }
   #     - { type: text, value: "保存" }
