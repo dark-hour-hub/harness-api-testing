@@ -41,6 +41,17 @@ description: 测试报告产出后，询问用户是否分析本次失败的用�
 - Perf：`report/<api-perf>/.cache/result_*.jtl`（错误码/responseMessage 分布）
 - 必要时对照被测系统源码 / 响应报文（curl 只读探针）
 
+### 步骤 1.5：定位失败 → 地图修复建议（新增）
+
+当失败原因为定位类（找不到按钮/输入框/元素超时）时，额外执行：
+
+1. 只读获取目标页面当前 DOM（curl 或 playwright probe，禁止重跑用例）
+2. 对照失败步骤文案与 `ui-profile/elements.yaml` 现有条目，判断：文案变更？策略失效？缺失条目？
+3. 输出「地图修复建议」：`文案 → { type: xxx, value: xxx }`（新策略），与失败分析一并提交用户确认
+4. 用户确认后写入 `ui-profile/elements.yaml`，并运行 `python scripts/validate_elements.py` 校验
+
+铁律：AI 只产出建议，**不经确认禁止修改元素地图**（执行层确定性边界）。
+
 ### 步骤 2：归因分类
 对每个失败用例，归因到以下三类之一：
 

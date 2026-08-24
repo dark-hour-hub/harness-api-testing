@@ -202,6 +202,7 @@ def parse_junit_xml(xml_path: str, module_name: str = "") -> dict:
                 "message": "",
                 "trace": "",
                 "screenshot": "",
+                "element_hits": {},
             }
             # 读取 screenshot property（由 conftest 自动截图 hook 写入）
             props = tc.find("properties")
@@ -215,6 +216,11 @@ def parse_junit_xml(xml_path: str, module_name: str = "") -> dict:
                             case["steps_result"] = {s["name"]: s["status"] for s in steps}
                         except Exception:
                             case["steps_result"] = {}
+                    elif prop.attrib.get("name") == "element_hits":
+                        try:
+                            case["element_hits"] = json.loads(prop.attrib.get("value", "{}"))
+                        except Exception:
+                            case["element_hits"] = {}
             failure = tc.find("failure")
             error = tc.find("error")
             skipped = tc.find("skipped")
@@ -411,6 +417,27 @@ def build_case_rows(cases: list) -> str:
     return "\n".join(rows)
 
 
+def build_element_hit_report(cases: list) -> str:
+    """聚合全部用例的 element_hits：元素 → 最高命中级别；未记录 = 走回退（脆弱点）"""
+    best = {}
+    for case in cases:
+        for name, level in (case.get("element_hits") or {}).items():
+            best[name] = max(best.get(name, -1), level)
+    if not best:
+        return ""
+    rows = []
+    for name in sorted(best):
+        level = best[name]
+        status = "地图命中" if level >= 0 else "回退"
+        color = "#10b981" if level == 0 else ("#f59e0b" if level == 1 else "#ef4444")
+        rows.append(
+            f"<tr><td>{html_escape(name)}</td><td style='color:{color}'>{status}</td>"
+            f"<td>策略第 {level + 1} 级</td></tr>")
+    return (f'<div class="d-section"><div class="d-title">元素地图命中报告（本运行）</div>'
+            f'<table class="detail-table"><thead><tr><th>元素</th><th>命中方式</th><th>策略级别</th></tr></thead>'
+            f'<tbody>{"".join(rows)}</tbody></table></div>')
+
+
 def build_sections(suites: list) -> str:
     sections = []
     for suite in suites:
@@ -455,6 +482,7 @@ def generate_report(data: dict, output_dir: str) -> str:
     html = template.replace("{{REPORT_TIME}}", report_time)
     html = html.replace("{{SUMMARY_CARDS}}", build_summary_cards(summary))
     html = html.replace("{{SECTIONS}}", build_sections(suites))
+    html = html.replace("{{ELEMENT_HITS}}", build_element_hit_report(data.get("cases", [])))
 
     os.makedirs(output_dir, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
