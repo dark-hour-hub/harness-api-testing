@@ -13,7 +13,7 @@ ui_profile.py — ui-profile 配置加载与元素定位解析（确定性执行
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 import yaml
 
@@ -53,7 +53,12 @@ def load_profile(profile_dir: Path) -> dict:
 
 
 def _build_locator(page, strategy: dict):
-    """按策略类型构造 locator；未知类型返回 None"""
+    """按策略类型构造 locator；未知类型返回 None。
+
+    兼容两种 YAML 写法：
+    - 嵌套：{ type: role, value: { role: textbox, name: "xx" } }
+    - 扁平：{ type: role, role: textbox, name: "xx" } / { type: combobox, name: "xx" }
+    """
     stype = strategy.get("type")
     value = strategy.get("value")
     if stype == "data-testid":
@@ -63,9 +68,12 @@ def _build_locator(page, strategy: dict):
     if stype == "label":
         return page.get_by_label(value)
     if stype == "role":
-        return page.get_by_role(value.get("role", "button"), name=value.get("name"))
+        if isinstance(value, dict):
+            return page.get_by_role(value.get("role", "button"), name=value.get("name"))
+        return page.get_by_role(strategy.get("role", "button"), name=strategy.get("name"))
     if stype == "combobox":
-        return page.get_by_role("combobox", name=value)
+        name = value if isinstance(value, str) else strategy.get("name")
+        return page.get_by_role("combobox", name=name)
     if stype == "css":
         return page.locator(value)
     if stype == "text":
