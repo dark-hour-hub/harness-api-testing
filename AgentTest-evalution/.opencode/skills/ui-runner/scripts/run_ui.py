@@ -478,6 +478,7 @@ def main():
     parser.add_argument("-k", "--keyword", default=None)
     parser.add_argument("--parallel", type=int, default=2, help="并行执行的 feature 进程数（默认 2）")
     parser.add_argument("--tags", default=None, help="pytest -m 表达式（如 smoke）")
+    parser.add_argument("--no-fingerprint", action="store_true", help="跳过前端版本指纹检查")
     args = parser.parse_args()
 
     mode_config = MODE_PATHS[args.mode]
@@ -499,6 +500,17 @@ def main():
     os.makedirs(screenshot_dir, exist_ok=True)
 
     print(f"{'=' * 60}")
+    if not args.no_fingerprint:
+        fp_script = PROJECT_ROOT / "scripts" / "ui_fingerprint.py"
+        if fp_script.exists():
+            store = os.path.join(cache_dir, "ui_fingerprint.txt")
+            fp_result = subprocess.run(
+                [find_python(), str(fp_script), "--store", store],
+                capture_output=True, text=True, encoding="utf-8", errors="replace",
+            )
+            fp_out = (fp_result.stdout or "").strip()
+            if fp_result.returncode == 2:
+                print(f"[run_ui] 注意: 前端已变更（{fp_out}），若元素地图失效请先跑探针/更新 ui-profile")
     print(f"[run_ui] 开始执行 UI 测试（逐 feature 隔离模式）")
     print(f"[run_ui] 浏览器: chromium | 前端地址: {base_url or '(未配置)'}")
     print(f"[run_ui] 测试目录: {test_path}")
