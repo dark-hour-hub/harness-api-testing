@@ -57,7 +57,19 @@ def test_duplicate_keys(tmp_path):
         "  a:\n    strategies:\n      - { type: text, value: b }\n",
         encoding="utf-8",
     )
-    assert any("重复" in e for e in validate(p))
+    errors = validate(p)
+    assert len(errors) == 1 and errors[0].startswith("元素 key 重复")
+
+
+def test_nested_duplicate_keys(tmp_path):
+    p = tmp_path / "elements.yaml"
+    p.write_text(
+        "elements:\n  a:\n    strategies:\n      - { type: text, value: a }\n"
+        "  b:\n    x: 1\n    x: 2\n",
+        encoding="utf-8",
+    )
+    errors = validate(p)
+    assert len(errors) == 1 and errors[0].startswith("元素 key 重复")
 
 
 def test_missing_file(tmp_path):

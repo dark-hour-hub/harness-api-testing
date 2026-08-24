@@ -12,15 +12,19 @@ from yaml.constructor import ConstructorError
 KNOWN_TYPES = {"data-testid", "placeholder", "label", "role", "combobox", "css", "text"}
 
 
+class _DuplicateKeyError(ConstructorError):
+    """标记 YAML 映射重复 key，区别于其它构造错误（如未知 tag）。"""
+
+
 def _construct_mapping_no_duplicate(loader, node, deep=False):
     mapping = {}
     for key_node, value_node in node.value:
         key = loader.construct_object(key_node, deep=deep)
         if key in mapping:
-            raise ConstructorError(
+            raise _DuplicateKeyError(
                 "while constructing a mapping",
                 node.start_mark,
-                f"元素 key 重复: {key}",
+                str(key),
                 key_node.start_mark,
             )
         mapping[key] = loader.construct_object(value_node, deep=deep)
@@ -46,15 +50,13 @@ def validate(path: Path) -> list:
     try:
         with open(path, "r", encoding="utf-8") as f:
             data = yaml.load(f, Loader=_NoDuplicateSafeLoader) or {}
+    except _DuplicateKeyError as e:
+        return [f"元素 key 重复: {e.problem}"]
     except yaml.YAMLError as e:
         return [f"YAML 解析失败: {e}"]
 
     elements = data.get("elements") or {}
-    seen = set()
     for key, entry in elements.items():
-        if key in seen:
-            errors.append(f"元素 key 重复: {key}")
-        seen.add(key)
         if not key or not str(key).strip():
             errors.append("存在空 key")
         strategies = (entry or {}).get("strategies") or []
@@ -72,6 +74,9 @@ def validate(path: Path) -> list:
 if __name__ == "__main__":
     import sys
     target = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent / "ui-profile" / "elements.yaml"
+    if not target.exists():
+        print(f"[validate_elements] 目标不存在: {target}")
+        sys.exit(1)
     errs = validate(target)
     if errs:
         print(f"[validate_elements] 校验失败: {target}")
