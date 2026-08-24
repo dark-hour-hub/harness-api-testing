@@ -231,37 +231,50 @@ def _fill_input(page, name, value):
 
 
 def _click_button(page, text):
-    """点击第一个 enabled 的按钮（跳过 disabled）；元素地图优先"""
+    """点击第一个 enabled 的按钮（跳过 disabled）；元素地图优先；失败确定性重试"""
     _assert_not_seed(text)
-    if PROFILE is not None:
-        el = PROFILE["map"].lookup(text)
-        if el is not None:
-            loc, idx = resolve_element(page, el, _action_timeout())
-            if loc is not None:
-                _record_hit(text, idx)
-                for candidate in loc.all():
-                    try:
-                        if candidate.is_enabled():
-                            candidate.click()
-                            _wait_busy_gone(page)
-                            return
-                    except Exception:
-                        continue
-                raise AssertionError(f"未找到可点击的按钮「{text}」")
-    loc = page.get_by_role("button", name=text)
-    for candidate in loc.all():
+    attempts = _retry_count() + 1
+    last_err = None
+    for _ in range(attempts):
         try:
-            if candidate.is_enabled():
-                candidate.click()
-                _wait_busy_gone(page)
-                return
-        except Exception:
-            continue
-    try:
-        loc.first.click()
-        _wait_busy_gone(page)
-    except Exception:
-        raise AssertionError(f"未找到可点击的按钮「{text}」") from None
+            if PROFILE is not None:
+                el = PROFILE["map"].lookup(text)
+                if el is not None:
+                    loc, idx = resolve_element(page, el, _action_timeout())
+                    if loc is not None:
+                        _record_hit(text, idx)
+                        for candidate in loc.all():
+                            try:
+                                if candidate.is_enabled():
+                                    candidate.click()
+                                    _wait_busy_gone(page)
+                                    _api_sync(page, text)
+                                    return
+                            except Exception:
+                                continue
+                        raise AssertionError(f"未找到可点击的按钮「{text}」")
+            loc = page.get_by_role("button", name=text)
+            for candidate in loc.all():
+                try:
+                    if candidate.is_enabled():
+                        candidate.click()
+                        _wait_busy_gone(page)
+                        _api_sync(page, text)
+                        return
+                except Exception:
+                    continue
+            loc.first.click()
+            _wait_busy_gone(page)
+            _api_sync(page, text)
+            return
+        except AssertionError:
+            raise
+        except Exception as e:
+            last_err = e
+            page.wait_for_timeout(500)
+    if last_err is not None:
+        raise last_err
+    raise AssertionError(f"未找到可点击的按钮「{text}」")
 
 
 def _wait_busy_gone(page):
@@ -277,6 +290,35 @@ def _wait_busy_gone(page):
             page.locator(sel).first.wait_for(state="detached", timeout=timeout)
         except Exception:
             pass
+
+
+def _api_sync(page, step_text):
+    """操作后等待对应后端请求返回（business.yaml api_sync_rules）
+
+    语义：匹配到规则 → 等 method+path 响应到达（不强制 200，负向用例 4xx 也算到达）；
+    无匹配规则 → 静默跳过。
+    """
+    if PROFILE is None:
+        return
+    rule = PROFILE["business"].get("api_sync_rules", {}).get(step_text)
+    if not rule:
+        return
+    timeout = PROFILE["business"].get("timeouts", {}).get("api_sync", 15000)
+    method = rule.get("method", "GET")
+    path = rule.get("path", "")
+    try:
+        page.wait_for_response(
+            lambda r: r.request.method == method and path in r.url,
+            timeout=timeout,
+        )
+    except Exception:
+        pass
+
+
+def _retry_count() -> int:
+    if PROFILE is None:
+        return 1
+    return int(PROFILE["business"].get("retry", 1))
 
 
 # ═══════════════════════════════════════════════════════════════
