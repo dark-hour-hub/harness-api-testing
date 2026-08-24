@@ -44,6 +44,12 @@ tests/baseline/_workflow/04-ui-scenarios/
    - 提示/结果 → el-message 文案、表格单元格文本
 3. **写 Gherkin**，每个业务流程一个 `Scenario`，用通用步骤 DSL（见 gherkin-guide）
 4. **生成 `_manifest.yaml`** 清单
+5. **输出元素候选清单**：凡步骤文案未在 `ui-profile/elements.yaml` 中收录的，统一汇总输出（设计报告末尾）：
+
+   | 文案 | 建议定位策略 | 来源源码位置 |
+   |------|-------------|-------------|
+
+   输出格式：`文本 → { type: xxx, ... }`，供 `ui-element-map` skill 或人工确认后补入元素地图。这是"场景与地图同步"的闭环环节。
 
 ## 通用步骤 DSL（见 references/gherkin-guide.md）
 
