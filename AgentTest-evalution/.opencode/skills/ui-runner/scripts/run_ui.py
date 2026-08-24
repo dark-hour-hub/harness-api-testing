@@ -16,8 +16,10 @@ import re
 import shutil
 import subprocess
 import sys
+import threading
 import time
 import xml.etree.ElementTree as ET
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from html import escape as html_escape
 from pathlib import Path
@@ -78,7 +80,7 @@ def discover_test_files(test_dir: str) -> list:
 
 
 def run_pytest_file(test_file: str, junit_output: str, base_url: str, screenshot_dir: str,
-                    headed: bool = False, keyword: str = None) -> tuple:
+                    headed: bool = False, keyword: str = None, tags: str = None) -> tuple:
     python = find_python()
     cmd = [python, "-m", "pytest", test_file, "-v", "--tb=short", "--browser", "chromium"]
     if base_url:
@@ -87,6 +89,8 @@ def run_pytest_file(test_file: str, junit_output: str, base_url: str, screenshot
         cmd.append("--headed")
     if keyword:
         cmd.extend(["-k", keyword])
+    if tags:
+        cmd.extend(["-m", tags])
     cmd.append(f"--junitxml={junit_output}")
 
     env = os.environ.copy()
@@ -472,6 +476,8 @@ def main():
     parser.add_argument("--output", default=None)
     parser.add_argument("--headed", action="store_true", help="有头模式（调试用）")
     parser.add_argument("-k", "--keyword", default=None)
+    parser.add_argument("--parallel", type=int, default=2, help="并行执行的 feature 进程数（默认 2）")
+    parser.add_argument("--tags", default=None, help="pytest -m 表达式（如 smoke）")
     args = parser.parse_args()
 
     mode_config = MODE_PATHS[args.mode]
@@ -502,31 +508,40 @@ def main():
     total_start = time.time()
     all_results = []
     crashed = []
+    lock = threading.Lock()
+    progress = {"done": 0}
 
-    for i, test_file in enumerate(test_files):
+    def _run_one(test_file):
         file_name = os.path.basename(test_file)
         junit_xml = os.path.join(cache_dir, f"results_{file_name}.xml")
         exit_code, elapsed, stdout, stderr = run_pytest_file(
-            test_file, junit_xml, base_url, screenshot_dir, args.headed, args.keyword
+            test_file, junit_xml, base_url, screenshot_dir,
+            args.headed, args.keyword, args.tags,
         )
-        if os.path.exists(junit_xml):
-            module_name = os.path.splitext(file_name)[0]
-            if module_name.startswith("test_"):
-                module_name = module_name[5:]
-            data = parse_junit_xml(junit_xml, module_name)
-            s = data["summary"]
-            if s["tests"] > 0:
-                all_results.append(data)
-                status = "PASS" if s["failures"] == 0 and s["errors"] == 0 else "FAIL"
-                print(f"  [{i+1}/{len(test_files)}] {file_name:<35} {status:>6}  "
-                      f"{s['tests']:>2} scenarios | {s['failures']:>2} failed | {elapsed}s")
-            else:
-                print(f"  [{i+1}/{len(test_files)}] {file_name:<35} {'EMPTY':>6}  (无匹配场景)")
-        else:
-            print(f"  [{i+1}/{len(test_files)}] {file_name:<35} {'ERROR':>6}  未生成报告 (exit={exit_code})")
+        with lock:
+            progress["done"] += 1
+            if os.path.exists(junit_xml):
+                module_name = os.path.splitext(file_name)[0]
+                if module_name.startswith("test_"):
+                    module_name = module_name[5:]
+                data = parse_junit_xml(junit_xml, module_name)
+                s = data["summary"]
+                if s["tests"] > 0:
+                    all_results.append(data)
+                    status = "PASS" if s["failures"] == 0 and s["errors"] == 0 else "FAIL"
+                    print(f"  [{progress['done']}/{len(test_files)}] {file_name:<35} {status:>6}  "
+                          f"{s['tests']:>2} scenarios | {s['failures']:>2} failed | {elapsed}s")
+                    return
+                print(f"  [{progress['done']}/{len(test_files)}] {file_name:<35} {'EMPTY':>6}  (无匹配场景)")
+                return
+            print(f"  [{progress['done']}/{len(test_files)}] {file_name:<35} {'ERROR':>6}  未生成报告 (exit={exit_code})")
             for line in (stderr or "").strip().split("\n")[-6:]:
                 print(f"         {line}")
             crashed.append(file_name)
+
+    workers = max(1, args.parallel)
+    with ThreadPoolExecutor(max_workers=workers) as ex:
+        list(ex.map(_run_one, test_files))
 
     total_elapsed = round(time.time() - total_start, 2)
     if not all_results:

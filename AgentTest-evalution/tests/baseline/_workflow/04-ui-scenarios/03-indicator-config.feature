@@ -5,6 +5,7 @@
 Feature: 指标配置
   指标目录按维度展示并支持用例管理；未就绪功能给出后端暂未提供提示
 
+  @smoke
   Scenario: indicator page elements
     Given 打开首页
     When 点击链接 "指标配置"
