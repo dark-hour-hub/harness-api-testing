@@ -243,29 +243,10 @@ def _click_button(page, text):
                     loc, idx = resolve_element(page, el, _action_timeout())
                     if loc is not None:
                         _record_hit(text, idx)
-                        for candidate in loc.all():
-                            try:
-                                if candidate.is_enabled():
-                                    candidate.click()
-                                    _wait_busy_gone(page)
-                                    _api_sync(page, text)
-                                    return
-                            except Exception:
-                                continue
-                        raise AssertionError(f"未找到可点击的按钮「{text}」")
-            loc = page.get_by_role("button", name=text)
-            for candidate in loc.all():
-                try:
-                    if candidate.is_enabled():
-                        candidate.click()
-                        _wait_busy_gone(page)
-                        _api_sync(page, text)
+                        _click_enabled_with_sync(page, loc, text)
                         return
-                except Exception:
-                    continue
-            loc.first.click()
-            _wait_busy_gone(page)
-            _api_sync(page, text)
+            loc = page.get_by_role("button", name=text)
+            _click_enabled_with_sync(page, loc, text)
             return
         except AssertionError:
             raise
@@ -292,27 +273,59 @@ def _wait_busy_gone(page):
             pass
 
 
-def _api_sync(page, step_text):
-    """操作后等待对应后端请求返回（business.yaml api_sync_rules）
-
-    语义：匹配到规则 → 等 method+path 响应到达（不强制 200，负向用例 4xx 也算到达）；
-    无匹配规则 → 静默跳过。
-    """
+def _api_rule(step_text):
+    """查 api_sync_rules，返回 (method, path)；无规则返回 None"""
     if PROFILE is None:
-        return
+        return None
     rule = PROFILE["business"].get("api_sync_rules", {}).get(step_text)
     if not rule:
+        return None
+    return rule.get("method", "GET"), rule.get("path", "")
+
+
+def _api_timeout() -> int:
+    if PROFILE is None:
+        return 15000
+    return int(PROFILE["business"].get("timeouts", {}).get("api_sync", 15000))
+
+
+def _click_enabled_with_sync(page, loc, text):
+    """点击第一个 enabled 候选；有 api 规则时先注册 expect_response 再点击（防漏快响应）。
+
+    同步失败 fail-open（不重试、不抛错），避免已派发点击的重复提交。
+    """
+    rule = _api_rule(text)
+    if rule is None:
+        for candidate in loc.all():
+            try:
+                if candidate.is_enabled():
+                    candidate.click()
+                    _wait_busy_gone(page)
+                    return
+            except Exception:
+                continue
+        loc.first.click(timeout=_action_timeout())
+        _wait_busy_gone(page)
         return
-    timeout = PROFILE["business"].get("timeouts", {}).get("api_sync", 15000)
-    method = rule.get("method", "GET")
-    path = rule.get("path", "")
+    method, path = rule
     try:
-        page.wait_for_response(
+        with page.expect_response(
             lambda r: r.request.method == method and path in r.url,
-            timeout=timeout,
-        )
+            timeout=_api_timeout(),
+        ) as info:
+            for candidate in loc.all():
+                try:
+                    if candidate.is_enabled():
+                        candidate.click()
+                        break
+                except Exception:
+                    continue
+            else:
+                loc.first.click(timeout=_action_timeout())
+        info.value
     except Exception:
         pass
+    _wait_busy_gone(page)
 
 
 def _retry_count() -> int:
