@@ -119,3 +119,24 @@ def test_resolve_skips_unknown_strategy_type():
     element_def_with_unknown_type = {"strategies": [{"type": "unknown-type", "value": "x"}, ELEMENT_DEF["strategies"][1]]}
     loc, idx = resolve_element(page, element_def_with_unknown_type, timeout_ms=500)
     assert loc is not None and idx == 1
+
+
+def test_resolve_role_flat_format():
+    page = FakePage({"role:button:保存": True})
+    flat = {"strategies": [{"type": "role", "role": "button", "name": "保存"}]}
+    loc, idx = resolve_element(page, flat, timeout_ms=500)
+    assert loc is not None and idx == 0
+
+
+def test_resolve_combobox_flat_format():
+    page = FakePage({"role:combobox:风险等级": True})
+    flat = {"strategies": [{"type": "combobox", "name": "风险等级"}]}
+    loc, idx = resolve_element(page, flat, timeout_ms=500)
+    assert loc is not None and idx == 0
+
+
+def test_resolve_combobox_nested_format():
+    page = FakePage({"role:combobox:风险等级": True})
+    nested = {"strategies": [{"type": "combobox", "value": "风险等级"}]}
+    loc, idx = resolve_element(page, nested, timeout_ms=500)
+    assert loc is not None and idx == 0
