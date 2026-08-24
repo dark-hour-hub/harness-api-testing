@@ -1,5 +1,7 @@
 -- 智能体评测平台 UI 测试清理模板（FK 逆序，只删运行期数据）
 -- 判定约定：测试自建数据 code 前缀 AGT_UI_ / TC_UI_ / SCHEME_UI_ / TASK_UI_ / IND_UI_
+UPDATE evaluation_task_case SET current_result_id = NULL
+WHERE task_id IN (SELECT id FROM evaluation_task WHERE task_no LIKE 'TASK_UI_%');
 DELETE FROM evaluation_report WHERE task_id IN (SELECT id FROM evaluation_task WHERE task_no LIKE 'TASK_UI_%');
 DELETE FROM manual_review WHERE task_id IN (SELECT id FROM evaluation_task WHERE task_no LIKE 'TASK_UI_%');
 DELETE FROM dimension_result WHERE task_id IN (SELECT id FROM evaluation_task WHERE task_no LIKE 'TASK_UI_%');
