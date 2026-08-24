@@ -423,7 +423,7 @@ def click_in_row(page, row_text, btn):
 
 @when(parsers.parse('在对话框 "{title}" 中点击 "{btn}"'))
 def click_in_dialog(page, title, btn):
-    dialog = page.get_by_role("dialog").filter(has_text=title).first
+    dialog = page.get_by_role("dialog").or_(page.get_by_role("alertdialog")).filter(has_text=title).first
     dialog.get_by_role("button", name=btn).first.click(timeout=5000)
     _wait_busy_gone(page)
 
@@ -436,7 +436,7 @@ def upload_file(page, field, path):
             loc, idx = resolve_element(page, el, _action_timeout())
             if loc is not None:
                 _record_hit(field, idx)
-                file_input = loc.first.locator("xpath=ancestor-or-self::*[@type='file']")
+                file_input = loc.first.locator("xpath=.//input[@type='file']")
                 if file_input.count() == 0:
                     file_input = page.locator('input[type="file"]').first
                 file_input.set_input_files(str(_project_root() / path))
