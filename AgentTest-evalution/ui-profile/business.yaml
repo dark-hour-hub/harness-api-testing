@@ -4,7 +4,7 @@ timeouts:
   busy: 15000
   assertion: 10000
   api_sync: 15000
-protected_seeds: ["BANK_AGENT", "AGT_SEED_*"]
+protected_seeds: ["CHAT", "BANK_AGENT", "AGT_SEED_*"]
 api_sync_rules:
   保存:
     method: POST
