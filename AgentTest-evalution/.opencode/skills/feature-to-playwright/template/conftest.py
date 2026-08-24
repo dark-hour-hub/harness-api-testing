@@ -39,10 +39,26 @@ def _locate_profile_dir() -> str:
 
 
 PROFILE_DIR = _locate_profile_dir()
-PROFILE = None
+
 try:
     from ui_profile import load_profile, resolve_element, expand_vars, seed_protected
-    PROFILE = load_profile(Path(PROFILE_DIR))
+except Exception:
+    def load_profile(*_a, **_k):
+        return None
+
+    def resolve_element(*_a, **_k):
+        return None, -1
+
+    def expand_vars(v):
+        return v
+
+    def seed_protected(v, s):
+        return False
+
+PROFILE = None
+try:
+    if load_profile is not None:
+        PROFILE = load_profile(Path(PROFILE_DIR))
 except Exception:
     PROFILE = None
     import warnings
