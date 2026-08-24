@@ -25,11 +25,15 @@ description: 从前端源码自动生成 ui-profile/elements.yaml 草稿（元�
 
 | 源码特征 | 元素地图条目 |
 |---------|-------------|
-| `<el-button>文本</el-button>` / `<button>文本</button>` | `文本` → `{ type: role, role: button, name: "文本" }` |
-| `data-testid="xxx"` 的输入/下拉 | 对应文案 → `{ type: data-testid, value: xxx }` |
-| `<el-input placeholder="xx" />` | `xx` → `{ type: placeholder, value: "xx" }` |
+| `<button>文本</button>` / `<a-button>文本</a-button>` | `文本` → `{ type: role, role: button, name: "文本" }` |
+| `data-testid="xxx"` 的输入/下拉 | 见下方"data-testid 条目 key 推导" |
+| `<input placeholder="xx" />` / `<el-input placeholder="xx" />` | `xx` → `{ type: placeholder, value: "xx" }` |
 | `<input aria-label="xx" />` | `xx` → `{ type: label, value: "xx" }` |
-| `<el-select placeholder="xx">` | `xx` → `{ type: combobox, name: "xx" }` |
+| 原生 `<select>`（无 aria-label） | `data-testid` 优先；不写 combobox name 策略（企业经验库第 12 条：必失效） |
+
+> 表格为示例模式，实际以前端源码 Grep 结果为准（如 Ant Design Vue 的 a-button、原生 button 均按可见文本提取）。
+
+**data-testid 条目 key 推导**：key = 控件旁可见标签文本（el-form label/表头/placeholder），场景文案即 key 优先；源码无法确定可见标签时，在草稿中标注"key 待人工确认"，禁止凭结构猜测。
 
 ### Step 2 — 与场景文本对齐
 
@@ -39,12 +43,14 @@ description: 从前端源码自动生成 ui-profile/elements.yaml 草稿（元�
 
 - 保留现有 entries（不去重丢失）
 - 新条目按「场景使用优先」排序
-- 策略优先级：`data-testid > label > placeholder > role > text`；已知必失效的策略（如 EP 原生 select 的 combobox name 匹配）**不写**（参考企业经验库）
+- 策略优先级：`data-testid > label > placeholder > role > text`；已知必失效的策略（如原生 select 的 combobox name 匹配）**不写**（参考企业经验库：`AgentTest-evalution/experience-library/PROJECT-KNOWN-ISSUES.md` 项目级 / `experience-library/ENTERPRISE-KNOWN-ISSUES.md` 企业级）
 
 ### Step 4 — 校验 + 人工确认
 
-1. 运行 `python scripts/validate_elements.py`，必须通过
-2. 输出变更清单（新增/修改条目），请用户确认后写入 `ui-profile/elements.yaml`
+1. 生成草稿到 `ui-profile/elements.yaml.draft`（**不直接写 elements.yaml**）
+2. 校验草稿：`python scripts/validate_elements.py ui-profile/elements.yaml.draft`（校验器支持参数指定路径），必须通过
+3. 输出变更清单（新增/修改条目），请用户确认
+4. 确认后：草稿内容写入 `ui-profile/elements.yaml`，再跑一次校验复验
 
 ## 铁律
 
