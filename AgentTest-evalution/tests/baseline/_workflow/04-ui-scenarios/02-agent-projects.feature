@@ -18,6 +18,7 @@ Feature: 评测项目
     And 应看到按钮 "编辑"
     And 应看到按钮 "删除"
 
+  @smoke
   Scenario: filter agents by code
     Given 打开首页
     When 点击链接 "评测项目"
@@ -26,7 +27,6 @@ Feature: 评测项目
     Then 应看到按钮 "新增智能体"
     And 应看到按钮 "筛选"
 
-  @smoke
   Scenario: create agent
     Given 打开首页
     When 点击链接 "评测项目"
