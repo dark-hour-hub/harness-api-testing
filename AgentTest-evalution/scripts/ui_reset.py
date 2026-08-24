@@ -67,7 +67,10 @@ def main():
         return
 
     if not args.yes:
-        answer = input("确认执行以上清理？（yes/no）: ")
+        try:
+            answer = input("确认执行以上清理？（yes/no）: ")
+        except EOFError:
+            answer = ""
         if not parse_confirmation(answer):
             print("[ui_reset] 已取消")
             return
