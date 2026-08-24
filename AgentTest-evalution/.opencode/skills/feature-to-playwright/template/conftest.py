@@ -41,7 +41,7 @@ def _locate_profile_dir() -> str:
 PROFILE_DIR = _locate_profile_dir()
 PROFILE = None
 try:
-    from ui_profile import load_profile, resolve_element
+    from ui_profile import load_profile, resolve_element, expand_vars, seed_protected
     PROFILE = load_profile(Path(PROFILE_DIR))
 except Exception:
     PROFILE = None
@@ -60,6 +60,15 @@ def _action_timeout() -> int:
     if PROFILE is None:
         return 5000
     return PROFILE["business"].get("timeouts", {}).get("action", 5000)
+
+
+def _assert_not_seed(text: str) -> None:
+    """操作目标命中种子保护清单 → 直接报错拦截（企业经验库第 11 条硬约束化）"""
+    if PROFILE is None:
+        return
+    seeds = PROFILE["business"].get("protected_seeds", [])
+    if seed_protected(text, seeds):
+        raise AssertionError(f"禁止操作种子数据（protected_seeds 命中）: {text}")
 
 
 def _load_frontend_url() -> str:
@@ -207,6 +216,7 @@ def _fill_input(page, name, value):
 
 def _click_button(page, text):
     """点击第一个 enabled 的按钮（跳过 disabled）；元素地图优先"""
+    _assert_not_seed(text)
     if PROFILE is not None:
         el = PROFILE["map"].lookup(text)
         if el is not None:
@@ -288,7 +298,7 @@ def click_link(page, text):
 @given(parsers.parse('在 "{field}" 输入框中输入 "{value}"'))
 @when(parsers.parse('在 "{field}" 输入框中输入 "{value}"'))
 def fill_field(page, field, value):
-    _fill_input(page, field, value)
+    _fill_input(page, field, expand_vars(value))
 
 
 @when(parsers.parse('等待 {seconds:d} 秒'))
