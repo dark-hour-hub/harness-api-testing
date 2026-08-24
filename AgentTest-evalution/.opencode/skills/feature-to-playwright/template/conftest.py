@@ -27,6 +27,39 @@ def _project_root() -> Path:
     return Path(__file__).resolve().parents[4]
 
 
+def _locate_profile_dir() -> str:
+    """profile 目录决议：环境变量 > 项目 ui-profile/ > ui-profile-template/"""
+    env_dir = os.environ.get("UI_PROFILE_DIR", "").strip()
+    if env_dir:
+        return env_dir
+    project_dir = _project_root() / "ui-profile"
+    if project_dir.exists():
+        return str(project_dir)
+    return str(_project_root() / "ui-profile-template")
+
+
+PROFILE_DIR = _locate_profile_dir()
+PROFILE = None
+try:
+    from ui_profile import load_profile, resolve_element
+    PROFILE = load_profile(Path(PROFILE_DIR))
+except Exception:
+    PROFILE = None
+
+_HIT_LOG: dict = {}
+
+
+def _record_hit(name: str, strategy_index: int) -> None:
+    """记录元素命中的策略级别（供报告输出命中率）"""
+    _HIT_LOG[name] = strategy_index
+
+
+def _action_timeout() -> int:
+    if PROFILE is None:
+        return 5000
+    return PROFILE["business"].get("timeouts", {}).get("action", 5000)
+
+
 def _load_frontend_url() -> str:
     """从环境变量或 config.yaml 读取当前环境的前端 URL"""
     env_url = os.environ.get("UI_BASE_URL", "").strip()
@@ -130,6 +163,9 @@ def pytest_runtest_makereport(item, call):
         if bdd_steps:
             item.user_properties.append(
                 ("bdd_steps", json.dumps(bdd_steps, ensure_ascii=False)))
+        if _HIT_LOG:
+            item.user_properties.append(
+                ("element_hits", json.dumps(_HIT_LOG, ensure_ascii=False)))
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -138,7 +174,15 @@ def pytest_runtest_makereport(item, call):
 
 
 def _fill_input(page, name, value):
-    """按 placeholder → label → role 回退定位输入框并填充（自动等待元素出现）"""
+    """元素地图优先 → 回退 placeholder → label → role 直搜"""
+    if PROFILE is not None:
+        el = PROFILE["map"].lookup(name)
+        if el is not None:
+            loc, idx = resolve_element(page, el, _action_timeout())
+            if loc is not None:
+                _record_hit(name, idx)
+                loc.first.fill(str(value), timeout=3000)
+                return
     locators = (
         page.get_by_placeholder(name),
         page.get_by_label(name),
@@ -155,7 +199,21 @@ def _fill_input(page, name, value):
 
 
 def _click_button(page, text):
-    """点击第一个 enabled 的按钮（跳过 disabled）"""
+    """点击第一个 enabled 的按钮（跳过 disabled）；元素地图优先"""
+    if PROFILE is not None:
+        el = PROFILE["map"].lookup(text)
+        if el is not None:
+            loc, idx = resolve_element(page, el, _action_timeout())
+            if loc is not None:
+                _record_hit(text, idx)
+                for candidate in loc.all():
+                    try:
+                        if candidate.is_enabled():
+                            candidate.click()
+                            return
+                    except Exception:
+                        continue
+                raise AssertionError(f"未找到可点击的按钮「{text}」")
     loc = page.get_by_role("button", name=text)
     for candidate in loc.all():
         try:
@@ -274,6 +332,14 @@ def see_button(page, text):
 
 @when(parsers.parse('选择下拉框 "{name}" 的选项 "{option}"'))
 def select_dropdown_option(page, name, option):
+    if PROFILE is not None:
+        el = PROFILE["map"].lookup(name)
+        if el is not None:
+            loc, idx = resolve_element(page, el, _action_timeout())
+            if loc is not None:
+                _record_hit(name, idx)
+                loc.first.select_option(label=option, timeout=5000)
+                return
     testid = {
         "风险等级": "agent-risk-tier",
         "适配器类型": "agent-adapter-type",
