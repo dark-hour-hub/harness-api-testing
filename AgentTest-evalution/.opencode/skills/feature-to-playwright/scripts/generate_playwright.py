@@ -97,6 +97,9 @@ def main():
     if UI_PROFILE_MODULE_SRC.exists():
         shutil.copy(UI_PROFILE_MODULE_SRC, output_dir / "ui_profile.py")
         print("[generate_playwright] [OK] ui_profile.py 已复制")
+    else:
+        print(f"[generate_playwright] 错误: ui_profile 模块不存在: {UI_PROFILE_MODULE_SRC}")
+        sys.exit(1)
 
     print(f"[generate_playwright] feature 目录: {feature_dir}")
     print(f"[generate_playwright] 输出目录: {output_dir}")
