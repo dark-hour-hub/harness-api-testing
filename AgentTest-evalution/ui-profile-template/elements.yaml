@@ -1,0 +1,17 @@
+# ui-profile 元素地图 —— 项目绑定层的核心配置
+# 约定：
+#   - key = 场景步骤中使用的业务文案（文案即 key）
+#   - strategies 按序尝试，命中即止；前端文案/结构改动只需更新此文件
+#   - 未在 map 中定义的文案，DSL 回退到文本直搜（兼容老场景）
+#   - 由 ui-element-map skill 自动生成草稿，人工确认后入库（阶段 2）
+elements:
+  # 示例条目（新项目绑定时删除注释，按项目实际填写）：
+  # agentCodeInput:
+  #   strategies:
+  #     - { type: data-testid, value: agent-code-input }
+  #     - { type: placeholder, value: "例如：BANK_AGENT" }
+  #     - { type: role, role: textbox, name: "智能体编码" }
+  # saveButton:
+  #   strategies:
+  #     - { type: role, role: button, name: "保存" }
+  #     - { type: text, value: "保存" }

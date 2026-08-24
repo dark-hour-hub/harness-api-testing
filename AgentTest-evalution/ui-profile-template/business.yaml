@@ -1,0 +1,10 @@
+# business.yaml —— 项目业务配置（非定位类）
+# 以下字段按阶段启用：
+busy_indicators: [".el-loading-mask", ".loading"]
+timeouts:
+  action: 5000
+  busy: 15000
+  assertion: 10000
+  api_sync: 15000
+# protected_seeds: []      # 种子保护清单（阶段 3 启用）
+# api_sync_rules: {}       # UI 操作 → 等待的后端请求（阶段 4 启用）
