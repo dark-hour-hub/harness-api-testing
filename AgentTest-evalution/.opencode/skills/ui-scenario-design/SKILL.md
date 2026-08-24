@@ -44,12 +44,12 @@ tests/baseline/_workflow/04-ui-scenarios/
    - 提示/结果 → el-message 文案、表格单元格文本
 3. **写 Gherkin**，每个业务流程一个 `Scenario`，用通用步骤 DSL（见 gherkin-guide）
 4. **生成 `_manifest.yaml`** 清单
-5. **输出元素候选清单**：凡步骤文案未在 `ui-profile/elements.yaml` 中收录的，统一汇总输出（设计报告末尾）：
+5. **输出元素候选清单**：场景设计过程中，凡**交互定位步骤**（点击按钮/菜单/链接、输入框、下拉框、上传、日期）的文案未在 `ui-profile/elements.yaml` 中精确匹配（key 一致）的，统一汇总写入 `04-ui-scenarios/_element-candidates.yaml`，并在设计汇报末尾附摘要表：
 
    | 文案 | 建议定位策略 | 来源源码位置 |
    |------|-------------|-------------|
 
-   输出格式：`文本 → { type: xxx, ... }`，供 `ui-element-map` skill 或人工确认后补入元素地图。这是"场景与地图同步"的闭环环节。
+   输出格式：`文本 → { type: xxx, ... }`（策略类型与 ui-element-map 一致）。文本断言步骤（应看到提示/页面应包含/表格应包含）不属于可定位元素，不进入候选清单。候选清单供 ui-element-map 或人工确认后补入元素地图——与 ui-element-map 的"场景文案即 key"对齐口径一致。
 
 ## 通用步骤 DSL（见 references/gherkin-guide.md）
 

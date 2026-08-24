@@ -37,6 +37,8 @@ description: 从前端源码自动生成 ui-profile/elements.yaml 草稿（元�
 
 ### Step 2 — 与场景文本对齐
 
+优先输入：若存在 `04-ui-scenarios/_element-candidates.yaml`（ui-scenario-design 产出），以其为准核对补全，避免重复扫描推导。
+
 读 `tests/baseline/_workflow/04-ui-scenarios/*.feature`，提取场景步骤中的文案（按钮/输入框/下拉框），**凡场景用到但地图缺失的文案必须补条目**——场景文案即 key。
 
 ### Step 3 — 生成草稿
