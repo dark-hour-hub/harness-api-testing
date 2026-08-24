@@ -140,7 +140,9 @@ def expand_vars(value, base_time=None):
 
 
 def seed_protected(value, protected_seeds):
-    """值命中种子保护清单（支持 fnmatch 通配）→ True"""
-    if not protected_seeds or not isinstance(value, str):
+    """值命中种子保护清单（fnmatchcase 严格大小写 + 通配）→ True"""
+    if not protected_seeds or not isinstance(protected_seeds, (list, tuple)):
         return False
-    return any(fnmatch.fnmatch(value, p) or value == p for p in protected_seeds)
+    if not isinstance(value, str):
+        return False
+    return any(fnmatch.fnmatchcase(value, p) or value == p for p in protected_seeds)

@@ -58,3 +58,31 @@ def test_seed_protected_wildcard():
 def test_seed_protected_not_matched():
     assert not seed_protected("AGT_UI_20260824", ["BANK_AGENT", "AGT_SEED_*"])
     assert not seed_protected("x", [])
+
+
+def test_seed_protected_case_sensitive():
+    assert not seed_protected("bank_agent", ["BANK_AGENT"])
+    assert not seed_protected("agt_seed_001", ["AGT_SEED_*"])
+
+
+def test_seed_protected_rejects_bare_string():
+    assert not seed_protected("AGT_SEED_001", "AGT_SEED_*")
+
+
+def test_date_no_suffix_variants():
+    v = expand_vars("${date:+1}", base_time=datetime(2026, 8, 24))
+    assert v == "2026-08-25"
+    v = expand_vars("${date:-2}", base_time=datetime(2026, 8, 24))
+    assert v == "2026-08-22"
+
+
+def test_date_invalid_arg_returns_today():
+    v = expand_vars("${date:5d}", base_time=datetime(2026, 8, 24))
+    assert v == "2026-08-24"
+
+
+def test_multiple_placeholders():
+    from datetime import timezone, timedelta
+    tz8 = timezone(timedelta(hours=8))
+    v = expand_vars("AGT_${rand:4}_${ts}", base_time=datetime(2026, 8, 24, 10, 30, 0, tzinfo=tz8))
+    assert v.startswith("AGT_") and len(v) == 4 + 4 + 1 + 13 and v[4:8].isalnum() and v[9:].isdigit()
