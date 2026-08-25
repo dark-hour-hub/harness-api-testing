@@ -45,3 +45,94 @@ def structural_errors(asserts: dict) -> list:
         if "schema_ref" not in entry:
             errors.append(f"映射 {rid}: 缺少必填键 schema_ref（建议形如 schema.sql#表名）")
     return errors
+
+
+_CREATE_TABLE_RE = re.compile(
+    r"CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?`?(\w+)`?\s*\((.*?)\)\s*(?:ENGINE|DEFAULT|;|$)",
+    re.IGNORECASE | re.DOTALL,
+)
+
+_SKIP_COL_LINES = ("PRIMARY", "UNIQUE", "KEY", "INDEX", "CONSTRAINT", "FOREIGN", "CHECK")
+
+
+def parse_schema_columns(sql_text: str) -> dict:
+    """解析 CREATE TABLE 语句 → {表名: set(列名)}（纯文本，无 DB 依赖）"""
+    tables = {}
+    for m in _CREATE_TABLE_RE.finditer(sql_text):
+        name = m.group(1)
+        cols = set()
+        for line in m.group(2).splitlines():
+            line = line.strip().rstrip(",")
+            if not line or line.startswith(_SKIP_COL_LINES):
+                continue
+            col = re.match(r"`?(\w+)`?\s", line)
+            if col:
+                cols.add(col.group(1))
+        tables[name] = cols
+    return tables
+
+
+def compile_assert(entry: dict, schema_columns: dict) -> dict:
+    """把单条映射编译为运行期结构；表/列不存在或 where 为空 → ValueError。
+
+    where 值来源：{ field, value: 固定值 } 或 { field, from: var, ref: $x }
+    assert_fields 值来源：{ field, equals: 固定值 } 或 { field, from: var, ref: $x }
+    """
+    rid = entry["id"]
+    table = entry["table"]
+    if table not in schema_columns:
+        raise ValueError(f"映射 {rid}: 表 {table} 不在 schema.sql 中")
+    cols = schema_columns[table]
+
+    where = entry.get("where") or []
+    if not where:
+        raise ValueError(f"映射 {rid}: where 条件为空（禁止全表断言）")
+    conds, params = [], []
+    for i, w in enumerate(where):
+        field = w["field"]
+        if field not in cols:
+            raise ValueError(f"映射 {rid}: 列 {table}.{field} 不在 schema.sql 中")
+        key = f"p{i}"
+        conds.append(f"{field} = %({key})s")
+        params.append({
+            "key": key,
+            "mode": "var" if w.get("from") == "var" else "literal",
+            "ref": w.get("ref"),
+            "value": w.get("value"),
+        })
+
+    assert_cols, assert_items = [], []
+    for a in entry.get("assert_fields") or []:
+        field = a["field"]
+        if field not in cols:
+            raise ValueError(f"映射 {rid}: 列 {table}.{field} 不在 schema.sql 中")
+        assert_cols.append(field)
+        assert_items.append({
+            "field": field,
+            "mode": "var" if a.get("from") == "var" else "literal",
+            "ref": a.get("ref"),
+            "value": a.get("equals"),
+        })
+
+    sql = f"SELECT {', '.join(assert_cols) or '1'} FROM {table} WHERE {' AND '.join(conds)}"
+    return {
+        "id": rid,
+        "table": table,
+        "expect_records": int(entry.get("expect_records", 1)),
+        "sql": sql,
+        "params": params,
+        "asserts": assert_items,
+        "schema_ref": entry.get("schema_ref", f"schema.sql#{table}"),
+    }
+
+
+def build_module_source(compiled_map: dict) -> str:
+    """生成 db_asserts.py 模块源码文本（含 DB_ASSERT_MAP 常量）"""
+    header = (
+        "# -*- coding: utf-8 -*-\n"
+        "# 由 feature-to-playwright skill 自动生成，请勿手动修改\n"
+        "# DB 断言编译产物：来自 00-requirements/db-asserts.yaml + 后端 schema.sql 校验\n"
+        "DB_ASSERT_MAP = {\n"
+    )
+    body = "".join(f"    {k!r}: {v!r},\n" for k, v in sorted(compiled_map.items()))
+    return header + body + "}\n"
