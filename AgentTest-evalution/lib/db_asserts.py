@@ -136,3 +136,52 @@ def build_module_source(compiled_map: dict) -> str:
     )
     body = "".join(f"    {k!r}: {v!r},\n" for k, v in sorted(compiled_map.items()))
     return header + body + "}\n"
+
+
+_DECL_RE = re.compile(r'令 \$(\w+) = "([^"]*)"')
+_REF_RE = re.compile(r'且数据已保存到 "([^"]+)"')
+_VAR_USE_RE = re.compile(r"(?<!\$)\$([A-Za-z_]\w*)")
+
+
+def extract_declarations(feature_text: str) -> list:
+    """提取场景变量声明（保持出现顺序）→ [(var, value), ...]"""
+    return [(m.group(1), m.group(2)) for m in _DECL_RE.finditer(feature_text)]
+
+
+def extract_assert_refs(feature_text: str) -> list:
+    """提取 DB 断言映射引用 → [map_id, ...]"""
+    return [m.group(1) for m in _REF_RE.finditer(feature_text)]
+
+
+def _line_no(text: str, pos: int) -> int:
+    return text[:pos].count("\n") + 1
+
+
+def validate_feature(feature_text: str, asserts: dict, schema_columns: dict) -> list:
+    """feature 引用完整性校验 → 错误清单（空 = 通过）。
+
+    校验项：映射 id 存在、表/列在 schema 中存在（经 compile_assert）、
+    场景变量已声明、先声明后使用。${...} 动态值与 $.answer 之类不参与。
+    """
+    errors = []
+    declared_pos = {}
+    for var, _value in extract_declarations(feature_text):
+        pos = feature_text.find(f"令 ${var} =")
+        declared_pos[var] = pos if pos != -1 else 0
+
+    for m in _VAR_USE_RE.finditer(feature_text):
+        var = m.group(1)
+        if var not in declared_pos:
+            errors.append(f"未声明的场景变量: ${var}（行 {_line_no(feature_text, m.start())}）")
+        elif m.start() < declared_pos[var]:
+            errors.append(f"场景变量 ${var} 先使用后声明（行 {_line_no(feature_text, m.start())}）")
+
+    for rid in extract_assert_refs(feature_text):
+        if rid not in asserts:
+            errors.append(f"db-asserts.yaml 中不存在映射 id: {rid}")
+            continue
+        try:
+            compile_assert(asserts[rid], schema_columns)
+        except ValueError as e:
+            errors.append(str(e))
+    return errors

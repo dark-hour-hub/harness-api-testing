@@ -62,7 +62,65 @@ def test_structural_errors_missing_required_keys(tmp_path):
 from db_asserts import (  # noqa: E402
     load_db_asserts, structural_errors,
     parse_schema_columns, compile_assert, build_module_source,
+    extract_declarations, extract_assert_refs, validate_feature,
 )
+
+FEATURE_SAMPLE = """\
+Scenario: create agent
+  Given 打开首页
+  When 点击按钮 "新增智能体"
+  And 令 $code = "AGT_UI_${ts}"
+  And 令 $name = "UI测试智能体_${ts}"
+  And 在 "智能体编码" 输入框中输入 "$code"
+  And 点击按钮 "保存"
+  Then 应看到提示 "智能体已新增"
+  And 且数据已保存到 "AGENT_CREATE_001"
+"""
+
+
+def test_extract_declarations():
+    decls = extract_declarations(FEATURE_SAMPLE)
+    assert decls == [("code", "AGT_UI_${ts}"), ("name", "UI测试智能体_${ts}")]
+
+
+def test_extract_assert_refs():
+    assert extract_assert_refs(FEATURE_SAMPLE) == ["AGENT_CREATE_001"]
+
+
+def test_validate_feature_ok(tmp_path):
+    p = tmp_path / "db-asserts.yaml"
+    p.write_text(VALID_YAML, encoding="utf-8")
+    asserts = load_db_asserts(p)
+    cols = parse_schema_columns(SCHEMA_SAMPLE)
+    assert validate_feature(FEATURE_SAMPLE, asserts, cols) == []
+
+
+def test_validate_feature_unknown_id():
+    assert validate_feature(FEATURE_SAMPLE, {}, parse_schema_columns(SCHEMA_SAMPLE)) != []
+
+
+def test_validate_feature_undeclared_var(tmp_path):
+    p = tmp_path / "db-asserts.yaml"
+    p.write_text(VALID_YAML, encoding="utf-8")
+    asserts = load_db_asserts(p)
+    feature = FEATURE_SAMPLE.replace('输入 "$code"', '输入 "$ghost"')
+    assert any("未声明的场景变量" in e for e in
+               validate_feature(feature, asserts, parse_schema_columns(SCHEMA_SAMPLE)))
+
+
+def test_validate_feature_use_before_declare():
+    feature = (
+        'Scenario: x\n'
+        '  When 在 "智能体编码" 输入框中输入 "$code"\n'
+        '  And 令 $code = "AGT"\n'
+    )
+    errors = validate_feature(feature, {}, parse_schema_columns(SCHEMA_SAMPLE))
+    assert any("先使用后声明" in e for e in errors)
+
+
+def test_validate_feature_ignores_dollar_json_path():
+    feature = 'When 在 "$.answer" 输入框中输入 "$.answer"\n'
+    assert validate_feature(feature, {}, parse_schema_columns(SCHEMA_SAMPLE)) == []
 
 SCHEMA_SAMPLE = """\
 CREATE TABLE agent_config (
