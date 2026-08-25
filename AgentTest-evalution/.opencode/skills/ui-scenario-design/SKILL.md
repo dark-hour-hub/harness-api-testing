@@ -35,6 +35,8 @@ tests/baseline/_workflow/04-ui-scenarios/
 └── _manifest.yaml          # 场景清单（模块 → feature 文件 + scenario 列表）
 ```
 
+- `tests/baseline/_workflow/00-requirements/db-asserts.yaml`（可选，AI 从需求文档「数据变更映射」表翻译 + 测试工程师确认；场景关键写操作引用其 id；无映射时省略）
+
 ## 设计流程
 
 1. **读业务需求**（从 `tests/baseline/_workflow/00-requirements/ui-requirements.md` 读取，缺失则向用户索要），拆解出可独立验证的业务流程（登录、新增、查询、借阅、删除……）
@@ -50,6 +52,7 @@ tests/baseline/_workflow/04-ui-scenarios/
    |------|-------------|-------------|
 
    输出格式：`文本 → { type: xxx, ... }`（策略类型与 ui-element-map 一致）。文本断言步骤（应看到提示/页面应包含/表格应包含）不属于可定位元素，不进入候选清单。候选清单供 ui-element-map 或人工确认后补入元素地图——与 ui-element-map 的"场景文案即 key"对齐口径一致。
+6. **翻译数据映射**：需求文档若有「数据变更映射」表，AI 对照后端 `db/schema.sql` 校验表/列存在性后产出 `00-requirements/db-asserts.yaml` 草稿，输出「业务命名 vs 物理命名」差异表；对不上时**不静默猜测**，由人工裁决后确认入库
 
 ## 通用步骤 DSL（见 references/gherkin-guide.md）
 

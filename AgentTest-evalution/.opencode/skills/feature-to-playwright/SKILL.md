@@ -93,6 +93,13 @@ python -m pytest ${OUTPUT_DIR} --collect-only -q
 
 通用库覆盖不了的特殊交互（拖拽、上传、自定义组件），在 `OUTPUT_DIR` 下新建 `steps/{module}_steps.py` 定义专属步骤，并在对应 `test_{module}.py` 中 `import`。
 
+## DB 断言生成（防假成功）
+
+- 输入：`00-requirements/db-asserts.yaml`（缺失/为空则跳过，不影响现有场景）
+- 生成期静态校验（任一失败 → 中止）：映射 id 必须存在；表/列必须存在于后端 `db/schema.sql`；场景变量必须先声明后使用
+- 产物：`${OUTPUT_DIR}/db_asserts.py`（编译后的 DB_ASSERT_MAP，含 SQL 常量），运行期由 `且数据已保存到 "<id>"` 步骤查库断言
+- 禁止在场景/脚本中手写物理表名与 SQL（统一走生成器编译）
+
 ## 禁止项
 
 - 禁止在生成的脚本中硬编码 base_url（必须从 config.yaml 读）
