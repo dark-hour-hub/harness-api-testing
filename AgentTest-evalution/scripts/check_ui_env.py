@@ -111,7 +111,7 @@ def main():
         "browsers": {},
     }
 
-    for dep in ("playwright", "pytest", "pytest-bdd", "pytest-playwright"):
+    for dep in ("playwright", "pytest", "pytest-bdd", "pytest-playwright", "pymysql"):
         installed, status = check_package(python, dep)
         results["dependencies"][dep] = {"installed": installed, "status": status}
 
@@ -127,6 +127,7 @@ def main():
         "message": "UI 测试环境就绪" if ready else "UI 测试环境未就绪，请安装缺失依赖/浏览器驱动",
         "fix_hint": [
             f"{python} -m pip install pytest-bdd",
+            f"{python} -m pip install pymysql",
             f"{python} -m playwright install chromium",
         ],
     }

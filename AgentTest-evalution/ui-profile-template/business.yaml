@@ -12,3 +12,10 @@ timeouts:
 #     method: POST
 #     path: /api/xxx
 # retry: 1                            # 定位类失败确定性重试次数（阶段 4）
+# db:                                  # DB 断言连接配置（阶段启用）
+#   host: localhost
+#   port: 3306
+#   user: root
+#   password: ""
+#   database: <测试库名>
+#   charset: utf8mb4

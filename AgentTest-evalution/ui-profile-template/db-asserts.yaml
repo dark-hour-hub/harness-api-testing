@@ -1,0 +1,18 @@
+# db-asserts.yaml —— 操作→表→字段映射（AI 从需求文档 5 节模板翻译 + 人工确认）
+# 约定：
+#   - id：场景中 `且数据已保存到 "<id>"` 引用；生成器校验引用完整性
+#   - table / where.field / assert_fields.field 必须存在于后端 schema.sql
+#   - where 值来源：{ field, value: 固定值 } 或 { field, from: var, ref: $x }
+#   - assert_fields 值来源：{ field, equals: 固定值 } 或 { field, from: var, ref: $x }
+#   - where 禁止为空（防止全表断言）
+db_asserts:
+  # - id: BOOK_CREATE_001
+  #   ui_action: 保存新增图书表单
+  #   table: books
+  #   expect_records: 1
+  #   where:
+  #     - { field: isbn, from: var, ref: $isbn }
+  #   assert_fields:
+  #     - { field: stock, equals: 0 }
+  #   sync: { api: "POST /api/books", status: 200 }
+  #   schema_ref: schema.sql#books

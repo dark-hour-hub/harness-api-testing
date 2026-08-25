@@ -10,3 +10,10 @@ api_sync_rules:
     method: POST
     path: /api/agents
 retry: 1
+db:
+  host: localhost
+  port: 3306
+  user: root
+  password: root
+  database: agent_evaluation
+  charset: utf8mb4
