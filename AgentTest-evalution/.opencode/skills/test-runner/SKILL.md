@@ -1,4 +1,4 @@
----
+﻿---
 name: test-runner
 description: 执行 generated/api-test/ 下的 pytest 测试脚本并生成 HTML 报告。触发方式：/test-runner、运行API测试、执行接口测试、生成测试报告、pytest api test、run api tests and generate report、跑接口测试、执行pytest测试。每次用户提到运行测试、执行测试脚本、生成测试报告时使用此 skill。
 ---
@@ -118,4 +118,4 @@ HTML 报告含摘要卡片、失败分类、通过率饼图、耗时分布图、
 
   由用户决定；用户同意后，分析、归类、确认、回写等流程交给 `post-run-analysis` skill 执行，本 skill 不再参与。
 
-- 前置检查（可选增强）：执行前可先读 `D:\AI-Test\AIHarness\experience-library\ENTERPRISE-KNOWN-ISSUES.md` 对照已知的企业级坑（如残留清理、编码、断言取真实值），避免重复踩坑。
+- 前置检查（可选增强）：执行前可先读 `experience-library/ENTERPRISE-KNOWN-ISSUES.md`（仓库根）对照已知的企业级坑（如残留清理、编码、断言取真实值），避免重复踩坑。

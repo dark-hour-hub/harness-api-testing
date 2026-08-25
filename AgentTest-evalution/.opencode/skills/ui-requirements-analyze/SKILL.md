@@ -1,4 +1,4 @@
----
+﻿---
 name: ui-requirements-analyze
 description: 从 ui-requirements.md（5 节模板）解析全部价值信息，对照前端源码与后端 schema.sql，产出项目绑定四件套草稿（elements.yaml 元素地图 / business.yaml 业务配置 / db-asserts.yaml DB 断言映射 / api_sync_rules 接口规则），供人工确认后驱动完整 UI 测试链路。触发：/ui-requirements-analyze、解析需求、项目绑定、生成元素地图、生成DB断言映射、需求转配置、绑定新项目、requirements to profile。
 ---
@@ -29,6 +29,8 @@ ui-profile/
 tests/{mode}/_workflow/00-requirements/
 └── db-asserts.yaml      # DB 断言映射：需求第 3 节翻译 + schema 校验
 ```
+
+> **职责边界**：本 skill 负责**新项目首次绑定**（四件套一次性产出）；`elements.yaml` 的**增量维护**（前端改版补条目、场景新增文案）由 `ui-element-map` skill 负责，二者不重复执行。
 
 ## 分析流程
 
@@ -83,7 +85,7 @@ db_asserts:
 - **反向断言**：需求中「校验失败不落库」的操作（如必填校验拦截）→ `expect_records: 0`
 - 删除语义按需求第 5 节：物理删除 → 0 条；软删除/停用 → 断言状态字段
 - where 条件禁止为空；唯一键字段优先做 where（业务命名 → 物理列在差异表确认）
-- 校验/编译复用 `lib/db_asserts.py`（load/structural_errors/compile/validate）
+- 校验/编译复用 `lib/db_asserts.py`（`load_db_asserts` / `structural_errors` / `compile_assert` / `validate_feature`）
 
 ### 4. 读后端接口 → api_sync_rules 草稿
 

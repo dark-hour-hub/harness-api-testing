@@ -1,4 +1,4 @@
----
+﻿---
 name: post-run-analysis
 description: 测试报告产出后，询问用户是否分析本次失败的用例；若需要则分析失败根因，甄别非被测项目（测试数据、夹具、脚本、skill、工具链、环境）的 bug，总结为经验并回写项目级/企业级经验库。触发：分析失败用例、本次失败原因、沉淀经验、回写经验库、总结失败、why failed、复盘本次测试、经验入库。在 test-runner / ui-runner / perf-runner 产出报告后，若存在失败/不达标用例，使用本 skill 主动询问。
 ---
@@ -15,12 +15,12 @@ description: 测试报告产出后，询问用户是否分析本次失败的用�
 
 ## 两级经验库
 
-| 层级 | 位置 | 面向 |
+| 层级 | 位置（以仓库根为锚） | 面向 |
 |------|------|------|
-| 企业级 | `D:\\AI-Test\\AIHarness\\experience-library\\ENTERPRISE-KNOWN-ISSUES.md` | 所有项目执行前必须吸取（工具链/框架/脚本/环境/方法论） |
-| 项目级 | `D:\\AI-Test\\AIHarness\\harness-testing\\experience-library\\PROJECT-KNOWN-ISSUES.md` | 本项目后续测试避免（被测系统行为事实、ID、配方、基准资源） |
+| 企业级 | `experience-library/ENTERPRISE-KNOWN-ISSUES.md` | 所有项目执行前必须吸取（工具链/框架/脚本/环境/方法论） |
+| 项目级 | `AgentTest-evalution/experience-library/PROJECT-KNOWN-ISSUES.md` | 本项目后续测试避免（被测系统行为事实、ID、配方、基准资源） |
 
-> 仓库 ≠ 项目：经验库常量路径若有多个测试项目存在，按 `<harnessRoot>/experience-library` 与 `<projectRoot>/experience-library` 约定。
+> 仓库 ≠ 项目：经验库位置以「仓库根」为锚做相对解析（禁止写死绝对路径）；若仓库内存在多个测试项目，按 `<仓库根>/experience-library`（企业级）与 `<项目目录>/experience-library`（项目级）约定。
 
 ## 工作流程
 

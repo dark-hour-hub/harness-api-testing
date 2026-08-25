@@ -1,4 +1,4 @@
-# 文档→YAML 字段映射
+﻿# 文档→YAML 字段映射
 
 如何从各类文档中提取信息并映射到 YAML 字段。
 
@@ -97,11 +97,13 @@ manifest 的 `modules[].routes[]` 提供每个接口的基本元数据：
 
 | response_structure | 断言要点 |
 |-------------------|---------|
-| `single` (R\<T\>) | `data_exists` 断言 T 的字段 |
-| `page` (TableDataInfo\<T\>) | `data_exists` 断言 `rows`，可选断言 `total` |
-| `list` (R\<List\<T\>\>) | `data_exists` 断言数组字段 |
-| `null` (R\<Void\>) | 不填 `data_exists`（data 为 null） |
+| `single` (包装类\<T\>) | `data_exists` 断言 T 的字段 |
+| `page` (分页类\<T\>，如 TableDataInfo/PageResult) | `data_exists` 断言 `rows`，可选断言 `total` |
+| `list` (包装类\<List\<T\>\>) | `data_exists` 断言数组字段 |
+| `null` (包装类\<Void\>) | 不填 `data_exists`（data 为 null） |
 | `void` (无响应体/文件下载) | `response_type: html` 或不填 |
+
+> 包装类/分页类字段名以 manifest 的 `response_wrapper` 记录为准。
 
 ---
 

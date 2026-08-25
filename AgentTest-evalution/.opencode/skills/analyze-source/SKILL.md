@@ -1,4 +1,4 @@
----
+﻿---
 name: analyze-source
 description: 分析源码结构，识别 Controller、API 接口、Vue 页面，支持技术栈检测和微服务分析
 allowed-tools: Read, Glob, Grep, Bash
@@ -74,34 +74,30 @@ triggers:
 | React | `package.json` + `.jsx` 文件 |
 | Element Plus | `el-input`, `el-button` |
 
-### 4. 拦截器/安全框架分析
+### 5. 认证与安全分析（粗判，深析由 framework-analyzer 承接）
 
-请求在到达 Controller 之前会经过 Filter/拦截器/安全框架，这一步分析它们读取的请求头。
+请求到达 Controller 前会经过 Filter/拦截器/安全框架。**本 skill 只做粗判**（供 `apis.json` 的 `requires_auth` 字段标注）；深度分析（必填请求头、Token 来源、拦截/白名单路径、认证流程）由 `framework-analyzer` skill（test 命令阶段 03）承接，产出 `framework-analysis.md` 与 `auth-analysis.md`，本 skill 不重复产出。
 
-#### 4.1 检测安全框架
+粗判方法：
 
-| 框架 | 检测方式 | 需提取的参数来源 |
-|------|----------|-----------------|
-| Shiro | `ShiroFilterFactoryBean`，pom 中有 `shiro-core` | `token`、`username` 等 header |
-| Spring Security | `SecurityFilterChain`，pom 中有 `spring-security-core` | `Authorization` |
-| 自定义 Filter | `javax.servlet.Filter` + `@Component` | `getHeader()` 调用 |
-| HandlerInterceptor | `implements HandlerInterceptor` + `addInterceptors()` | `preHandle` 中的 header |
-| Gateway Filter | `GlobalFilter` (WebFlux) | `X-Request-Id`、`X-Tenant-Id` |
+#### 5.1 检测安全框架
 
-#### 4.2 提取必填请求头
+| 框架 | 检测方式 |
+|------|---------|
+| Shiro | `ShiroFilterFactoryBean`，pom 中有 `shiro-core` |
+| Spring Security | `SecurityFilterChain`，pom 中有 `spring-security-core` |
+| Sa-Token | `SaTokenConfig` / `StpLogic` / `@SaCheckLogin` |
+| 自定义 Filter | `javax.servlet.Filter` + `@Component` |
+| HandlerInterceptor | `implements HandlerInterceptor` + `addInterceptors()` |
+| 无认证 | 以上特征均无 |
 
-对每个 Filter/Interceptor：
+#### 5.2 标注 requires_auth
 
-1. 找到 `preHandle` / `doFilter` 方法
-2. 提取所有 `request.getHeader("xxx")` 调用
-3. 识别哪些 header 是认证相关（必填）、哪些是可选的
-4. 排除静态资源路径（`/static/*`、`/public/*`）
+对每个 API 标注 `requires_auth`：
+- 命中免认证注解（如 `@SaIgnore` / `@PermitAll` / `@Anonymous`，以源码实际为准）→ `false`
+- 否则 → `true`（检测到无认证框架时全部 `false`）
 
-#### 4.3 条件必填
-
-某些 header 可能只对特定路径生效，如 `/admin/*` 需额外 `X-Admin-Token`，记录路径前缀匹配规则。
-
-### 5. 分析后端源码
+### 6. 分析后端源码
 
 #### 5.1 提取 Controller API
 
@@ -215,13 +211,11 @@ codegraph_search query="<HTTP方法关键词> <路径关键词>" kind="route"
 
 **禁止**仅凭 Controller return 语句推断反向用例的 code/message。
 
-### 6. 分析前端源码
+### 7. 分析前端源码
 
 找出 `.vue` 页面，提取路径、组件名、元素选择器。
 
-### 7. 认证机制识别
-
-识别登录流程和认证方式（JWT / Session / OAuth2 等），并将第 4 步提取的 header 信息归入认证机制输出。
+> 认证机制识别（登录流程、认证方式、Token 方案）已并入第 5 节粗判，深度分析由 `framework-analyzer` 承接，此处不再重复。
 
 ---
 

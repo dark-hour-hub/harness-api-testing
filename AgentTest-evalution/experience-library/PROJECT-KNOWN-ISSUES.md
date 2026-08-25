@@ -1,4 +1,4 @@
-# 项目级测试经验库（Project Known-Issues）
+﻿# 项目级测试经验库（Project Known-Issues）
 
 > **项目**：agent-evaluation-platform（智能体评测平台，`harness-testing/baseline`）
 > **用途**：本项目后续所有测试（API/UI/Perf）必须避免的**项目特有**坑。
@@ -69,7 +69,7 @@
 ### 9. 基准资源（压测运行期依赖，勿删）
 - `PERF_SCHEME_BASE`（PUBLISHED，任务创建用，当前 id=17）
 - `PERF_SCHEME_DRAFT_BASE`（DRAFT，validate 场景用，当前 id=48049；id 会变，用脚本按 code 查）
-- 重建脚本：`C:\Users\17201\AppData\Local\Temp\opencode\perf_setup.py`（幂等：存在则复用）。
+- 重建脚本：本机临时目录 `perf_setup.py`（示例路径 `C:\Users\17201\AppData\Local\Temp\opencode\perf_setup.py`，幂等：存在则复用；**按实际机器环境替换路径**）。
 
 ### 10. 压测数据污染
 - 写场景会分钟级写入数十万行（agent/testcase/scheme/task）→ 列表类基线失真（PERF_TESTCASE_001 从 p95 327ms → 46s）。

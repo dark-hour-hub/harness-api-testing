@@ -1,4 +1,5 @@
-# db-asserts.yaml —— 操作→表→字段映射（AI 从需求文档 5 节模板翻译 + 人工确认）
+﻿# db-asserts-example.yaml —— DB 断言映射格式示例（由 ui-requirements-analyze 引用）
+# 实际产物：tests/{mode}/_workflow/00-requirements/db-asserts.yaml（唯一产出方 = ui-requirements-analyze，人工确认后入库）
 # 约定：
 #   - id：场景中 `且数据已保存到 "<id>"` 引用；生成器校验引用完整性
 #   - table / where.field / assert_fields.field 必须存在于后端 schema.sql

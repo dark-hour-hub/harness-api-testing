@@ -1,4 +1,4 @@
----
+﻿---
 name: api-doc-module
 description: 为单个模块生成 API 接口文档。读取 _manifest.yaml 获取模块路由清单，用 CodeGraph 读 Controller/Service 源码，按模板逐接口生成完整文档到 modules/{模块}.md。触发：api-doc 全流程第三步、/api-doc-module、生成模块接口文档。
 ---
@@ -57,7 +57,7 @@ tests/baseline/_workflow/03-api-docs/modules/
 
 1. **全局上下文**（精简内联）：
    - `base_url`、`auth_header`、`token_prefix`
-   - `response_wrapper`（R 的 code/msg/data 字段名、TableDataInfo 的 code/msg/rows/total 字段名）
+   - `response_wrapper`（响应包装类如 R/ApiResponse 的 code/msg/data 字段名、分页类如 TableDataInfo/PageResult 的 code/msg/rows/total 字段名，**以 manifest 中记录的源码实际类名为准**）
    - `public_headers` / `auth_headers`
    - `permission_model`
 

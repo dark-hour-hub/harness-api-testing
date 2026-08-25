@@ -1,4 +1,4 @@
-# _manifest.yaml 格式定义
+﻿# _manifest.yaml 格式定义
 
 结构化清单文件，下游 Skill 的输入合约。
 
@@ -17,11 +17,11 @@ system:
   encryption: "{无}"
 
 response_wrapper:
-  class: R
-  code_field: code       # 从 R.java 源码确认
-  msg_field: msg         # 从 R.java 源码确认
-  success_code: 200      # R.ok() 的默认 code
-  page_class: TableDataInfo
+  class: {包装类名，如 R / ApiResponse / Result，以源码为准}
+  code_field: code       # 从包装类源码确认
+  msg_field: msg         # 从包装类源码确认（可能为 message）
+  success_code: 200      # 包装类 ok() 的默认 code
+  page_class: {分页类名，如 TableDataInfo / PageResult，以源码为准}
   page_rows_field: rows
   page_total_field: total
 

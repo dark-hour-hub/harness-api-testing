@@ -1,4 +1,4 @@
----
+﻿---
 name: framework-analyzer
 description: 从 config.yaml 读取后端项目路径，解析 pom.xml 识别技术框架，深度分析认证机制（Shiro/Spring Security/自定义拦截器/WebConfig），提取必填请求头和字段，输出框架分析报告到 02-analysis-plan。触发：/framework-analyzer、分析框架、分析pom、分析认证机制、分析项目用了什么框架、分析技术栈。
 ---
@@ -55,7 +55,7 @@ description: 从 config.yaml 读取后端项目路径，解析 pom.xml 识别技
 - **Token 来源**：Header（`Authorization: Bearer xxx`）/ Cookie（`JSESSIONID`）/ 请求参数
 - **登录接口**：`/login`、`/auth/login` 等 → 请求方法、请求体字段、必填项
 - **拦截路径**：`addInterceptors()` / `addPathPatterns()` → 被拦截的 URL 模式
-- **白名单路径**：`excludePathPatterns()` / `excludePathPatterns()` → 免认证 URL
+- **白名单路径**：`excludePathPatterns()` → 免认证 URL
 
 **注意**：若 Grep 未搜索到任何认证特征 → 项目无认证机制，报告中标注 `type: none`。
 

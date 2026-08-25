@@ -1,4 +1,4 @@
----
+﻿---
 name: perf-runner
 description: 执行 JMeter .jmx 压测脚本并生成性能测试 HTML 报告。触发：/perf-runner、运行性能测试、执行压测、生成性能报告、run jmeter、跑压测、执行性能测试。每次用户提到运行压测、执行性能测试、生成性能报告时使用此 skill。
 ---
@@ -81,7 +81,7 @@ python .opencode/skills/perf-runner/scripts/run_perf.py --jmx-dir <dir> --output
 
   由用户决定；用户同意后，分析、归类、确认、回写等流程交给 `post-run-analysis` skill 执行，本 skill 不再参与。
 
-- 前置检查（可选增强）：执行前可先读 `D:\AI-Test\AIHarness\experience-library\ENTERPRISE-KNOWN-ISSUES.md` 对照已知的企业级坑（如 JMeter 唯一编码用 `__RandomString`、Windows 子进程编码、先读后写防污染、端口耗尽）。
+- 前置检查（可选增强）：执行前可先读 `experience-library/ENTERPRISE-KNOWN-ISSUES.md`（仓库根）对照已知的企业级坑（如 JMeter 唯一编码用 `__RandomString`、Windows 子进程编码、先读后写防污染、端口耗尽）。
 
 ## 铁律
 

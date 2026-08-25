@@ -1,4 +1,4 @@
----
+﻿---
 name: ui-runner
 description: 执行 generated/ui-test/ 下的 pytest-bdd UI 测试脚本（chromium 无头浏览器），成功/失败自动截图，生成含截图的 HTML 报告。触发：/ui-runner、运行UI测试、执行界面测试、生成UI测试报告、run ui test、跑UI测试、执行playwright测试。
 ---
@@ -98,4 +98,4 @@ HTML 报告含摘要卡片（场景总数/通过/失败/错误/通过率/耗时�
 
   由用户决定；用户同意后，分析、归类、确认、回写等流程交给 `post-run-analysis` skill 执行，本 skill 不再参与。
 
-- 前置检查（可选增强）：执行前可先读 `D:\AI-Test\AIHarness\experience-library\ENTERPRISE-KNOWN-ISSUES.md` 对照已知的企业级坑（如 pytest-bdd 步骤注册机制、UI 定位规范、文案取真实值）。
+- 前置检查（可选增强）：执行前可先读 `experience-library/ENTERPRISE-KNOWN-ISSUES.md`（仓库根）对照已知的企业级坑（如 pytest-bdd 步骤注册机制、UI 定位规范、文案取真实值）。

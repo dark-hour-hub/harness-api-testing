@@ -1,7 +1,7 @@
 {
   "tools": {
     "python": {
-      "configured_path": "C:/Users/17201/AppData/Local/Python/bin",
+      "configured_path": "C:/Users/17201/AppData/Local/Programs/Python/Python312",
       "exists": true,
       "status": "exists"
     },
@@ -26,10 +26,14 @@
       "status": "installed"
     }
   },
+  "codegraph": {
+    "installed": true,
+    "status": "D:\\NodeJS\\node-v24.13.0-win-x64\\codegraph"
+  },
   "summary": {
-    "passed": 5,
+    "passed": 6,
     "failed": 0,
-    "total": 5,
-    "message": "检查完成：通过 5 项，失败 0 项"
+    "total": 6,
+    "message": "检查完成：通过 6 项，失败 0 项"
   }
 }

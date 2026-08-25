@@ -1,4 +1,4 @@
----
+﻿---
 name: yaml-to-pytest
 description: 从 YAML 测试用例文件生成 pytest 脚本到 generated/api-test/。触发：/yaml-to-pytest、YAML转pytest、生成pytest脚本、生成接口测试脚本、yaml to pytest、generate pytest tests。读取所有 YAML 测试用例，每个 YAML 生成一个 test_{module}.py 脚本，同时生成 conftest.py。
 ---
@@ -90,7 +90,7 @@ python .opencode/skills/yaml-to-pytest/scripts/generate_pytest.py \
 
 ## 变量引用解析
 
-严格遵循 [variable-reference.md](..\api-doc-to-testcases\references\variable-reference.md)：
+严格遵循 [variable-reference.md](../api-doc-to-testcases/references/variable-reference.md)：
 
 | 引用格式 | 解析来源 |
 |---------|---------|

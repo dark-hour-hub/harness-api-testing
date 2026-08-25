@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """检查config.yaml中tools配置的环境变量和测试依赖是否安装"""
 
 import json
@@ -120,6 +120,10 @@ def main():
             "status": status,
         }
 
+    # 检查 CodeGraph CLI（analyze-source / api-doc-* 系列 skill 强依赖，缺失时 02 阶段会中断）
+    cg_ok, cg_status = check_command_available("codegraph")
+    results["codegraph"] = {"installed": cg_ok, "status": cg_status}
+
     # 统计检查结果
     passed_count = 0
     failed_count = 0
@@ -135,6 +139,11 @@ def main():
             passed_count += 1
         else:
             failed_count += 1
+
+    if results["codegraph"]["installed"]:
+        passed_count += 1
+    else:
+        failed_count += 1
 
     results["summary"] = {
         "passed": passed_count,

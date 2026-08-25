@@ -1,4 +1,4 @@
----
+﻿---
 name: ui-element-map
 description: 从前端源码自动生成 ui-profile/elements.yaml 草稿（元素地图）。扫描 .vue 页面/组件的按钮文本、placeholder、data-testid、下拉框文案，输出结构化候选清单，人工确认后写入元素地图并校验。触发：/ui-element-map、生成元素地图、扫描前端元素、elements map。
 ---
@@ -6,6 +6,8 @@ description: 从前端源码自动生成 ui-profile/elements.yaml 草稿（元�
 # 元素地图生成器（前端源码 → elements.yaml 草稿）
 
 从 `config.yaml` 的 `source.frontend[].path` 指向的前端工程，扫描真实定位信息，生成 `ui-profile/elements.yaml` 草稿。
+
+> **职责边界**：本 skill 负责 `elements.yaml` 的**增量维护**（前端改版/场景新增文案时补条目）；**新项目首次绑定**由 `ui-requirements-analyze` skill 一次性产出四件套（elements/business/db-asserts/api_sync_rules），二者不重复执行。
 
 ## 输入
 

@@ -1,4 +1,4 @@
----
+﻿---
 name: api-doc-discover
 description: API 接口发现与模块分组。从后端源码扫描所有路由，按 URL 前缀分组为模块，输出结构化清单 _manifest.yaml 和主文档骨架。触发：api-doc 全流程的第一步、/api-doc-discover、发现API接口。
 ---
@@ -14,6 +14,7 @@ description: API 接口发现与模块分组。从后端源码扫描所有路由
 1. `config.yaml` — source.backend[].path（源码路径）、environments.${current_environment}.backend[]（base_url、测试账号）
 2. `tests/baseline/_workflow/02-analysis-plan/auth-analysis.md` — 认证机制，白名单、请求头
 3. `tests/baseline/_workflow/02-analysis-plan/framework-analysis.md` — 框架、技术栈
+4. `tests/baseline/_workflow/02-analysis-plan/apis.json` — analyze-source 产出的路由清单（method/path/requires_auth）
 
 ## 输出产物
 
@@ -32,17 +33,19 @@ _manifest.yaml 详细格式定义见 [references/_manifest-format.md](references
 
 ### Step 1 — 读取输入 + 确认响应包装
 
-并行读 3 个前置文件。然后用 `codegraph_explore` 一次性确认 R 类和 TableDataInfo 的字段名：
+并行读 3 个前置文件。然后用 `codegraph_explore` 一次性确认响应包装类与分页类的字段名。**类名以源码实际为准**（常见命名如 `R` / `ApiResponse` / `Result`，分页类如 `TableDataInfo` / `PageResult`，禁止默认假定某一套）：
 
 ```
-codegraph_explore query="R TableDataInfo"
+codegraph_explore query="R TableDataInfo"   # 若源码中无此类则按实际类名搜索，如 "ApiResponse PageResult"
 ```
 
 从源码中提取：`code` 字段名、`msg`/`message` 字段名、`rows`/`total` 字段名、`R.ok()` 的默认 code 值。
 
 ### Step 2 — 全量路由发现
 
-用 `codegraph_search kind="route"` 搜索全部 HTTP 方法路由：
+**优先复用 `apis.json`**（analyze-source 已全量枚举并 codegraph 验证过 method/path）：读取其路由清单作为候选集，用 `codegraph_search kind="route"` 抽查校验（HTTP 方法 + 完整路径），不符/缺失的以 codegraph 为准并回补。
+
+若 `apis.json` 缺失或路由数明显不全，再执行全量扫描：
 
 ```
 GET limit=200 | POST limit=200 | PUT limit=200 | DELETE limit=200 | PATCH limit=200
@@ -71,7 +74,7 @@ GET limit=200 | POST limit=200 | PUT limit=200 | DELETE limit=200 | PATCH limit=
 | HTTP 方法 | 方法上的 `@XxxMapping` 注解（不以方法名推断） |
 | 完整路径 | 类级 `@RequestMapping` + 方法级 `@XxxMapping` |
 | 接口说明 | 方法注释 / Swagger 注解 / 方法名语义 |
-| 认证方式 | `@SaIgnore` 类/方法级 → 无需认证；否则需要认证 |
+| 认证方式 | 免认证注解（如 Sa-Token `@SaIgnore` / Spring Security `@PermitAll` / Shiro `@Anonymous`，以源码实际为准）→ 无需认证；否则需要认证（详见 `framework-analyzer` 的 `references/auth-detection.md` 特征表） |
 | 权限要求 | `@SaCheckPermission("xxx")` / `@SaCheckRole("xxx")` → 权限标识；无则 `null` |
 | 请求体 DTO | `@RequestBody` 参数的全限定类型名 |
 | 路径参数 | `@PathVariable` 参数名和类型 |
