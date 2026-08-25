@@ -16,6 +16,15 @@ import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent.parent
+sys.path.insert(0, str(PROJECT_ROOT / "lib"))
+
+import yaml
+
+from db_asserts import (  # noqa: E402
+    load_db_asserts, structural_errors, parse_schema_columns,
+    compile_assert, validate_feature, build_module_source,
+)
+
 SKILL_DIR = Path(__file__).resolve().parent.parent
 CONFTEST_SRC = SKILL_DIR / "template" / "conftest.py"
 UI_PROFILE_MODULE_SRC = PROJECT_ROOT / "lib" / "ui_profile.py"
@@ -24,10 +33,12 @@ MODE_PATHS = {
     "baseline": {
         "feature_dir": PROJECT_ROOT / "tests" / "baseline" / "_workflow" / "04-ui-scenarios",
         "output_dir": PROJECT_ROOT / "tests" / "baseline" / "generated" / "ui-test",
+        "db_asserts": PROJECT_ROOT / "tests" / "baseline" / "_workflow" / "00-requirements" / "db-asserts.yaml",
     },
     "diff": {
         "feature_dir": PROJECT_ROOT / "tests" / "diff" / "_workflow" / "02-ui-scenarios",
         "output_dir": PROJECT_ROOT / "tests" / "diff" / "generated" / "ui-test",
+        "db_asserts": PROJECT_ROOT / "tests" / "diff" / "_workflow" / "00-requirements" / "db-asserts.yaml",
     },
 }
 
@@ -37,6 +48,42 @@ def slug_module(name: str) -> str:
     stem = Path(name).stem
     stem = stem.split("-", 1)[-1] if "-" in stem else stem
     return stem
+
+
+def resolve_schema_path(config: dict):
+    """从 config.yaml source.backend[].path 定位后端 db/schema.sql；找不到返回 None"""
+    for be in config.get("source", {}).get("backend", []):
+        root = Path(be.get("path", ""))
+        cand = root / "db" / "schema.sql"
+        if cand.exists():
+            return cand
+        for cand in root.rglob("schema.sql"):
+            return cand
+    return None
+
+
+def validate_and_compile(db_asserts_path, schema_path, features):
+    """生成期静态校验 + 编译。返回 (compiled_map, errors)：
+    - db-asserts.yaml 缺失/空 → ({}, [])（跳过 DB 断言）
+    - 有映射但 schema 缺失 → errors
+    - 表/列/id/变量问题 → errors（含行号）
+    """
+    asserts = load_db_asserts(db_asserts_path)
+    if not asserts:
+        return {}, []
+    if schema_path is None:
+        return {}, ["db-asserts.yaml 存在但未找到后端 db/schema.sql（检查 config.yaml source.backend[].path）"]
+    schema_columns = parse_schema_columns(schema_path.read_text(encoding="utf-8"))
+    errors = list(structural_errors(asserts))
+    for feature in features:
+        errors.extend(validate_feature(feature.read_text(encoding="utf-8"), asserts, schema_columns))
+    compiled = {}
+    for rid, entry in asserts.items():
+        try:
+            compiled[rid] = compile_assert(entry, schema_columns)
+        except ValueError as e:
+            errors.append(str(e))
+    return compiled, errors
 
 
 def generate_test_file(feature_file: Path, feature_dir: Path, output_dir: Path) -> str:
@@ -62,6 +109,7 @@ def main():
                         help="模式: baseline=全量, diff=增量 (默认: baseline)")
     parser.add_argument("--feature-dir", default=None, help="feature 文件目录（优先级高于 --mode）")
     parser.add_argument("--output-dir", default=None, help="输出目录（优先级高于 --mode）")
+    parser.add_argument("--db-asserts", default=None, help="db-asserts.yaml 路径（默认按 mode 决议）")
     args = parser.parse_args()
 
     mode_config = MODE_PATHS[args.mode]
@@ -78,6 +126,28 @@ def main():
         sys.exit(1)
 
     output_dir.mkdir(parents=True, exist_ok=True)
+
+    # —— DB 断言：生成期静态校验 + 编译产物 ——
+    db_asserts_path = Path(args.db_asserts) if args.db_asserts else mode_config["db_asserts"]
+    config = {}
+    config_path = PROJECT_ROOT / "config.yaml"
+    if config_path.exists():
+        try:
+            config = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+        except Exception:
+            config = {}
+    compiled_map, errors = validate_and_compile(db_asserts_path, resolve_schema_path(config), features)
+    if errors:
+        print("[generate_playwright] DB 断言校验失败：")
+        for e in errors:
+            print(f"  [ERROR] {e}")
+        sys.exit(1)
+    if compiled_map:
+        (output_dir / "db_asserts.py").write_text(
+            build_module_source(compiled_map), encoding="utf-8")
+        print(f"[generate_playwright] [OK] db_asserts.py 已生成（{len(compiled_map)} 条映射）")
+    else:
+        print("[generate_playwright] 未找到 db-asserts.yaml，跳过 DB 断言")
 
     # 清空旧的 test_*.py（保留用户补充的 steps）
     for old in output_dir.glob("test_*.py"):
