@@ -146,3 +146,52 @@ def seed_protected(value, protected_seeds):
     if not isinstance(value, str):
         return False
     return any(fnmatch.fnmatchcase(value, p) or value == p for p in protected_seeds)
+
+
+_VAR_REF_RE = re.compile(r"(?<!\$)\$([A-Za-z_]\w*)")
+
+
+def resolve_vars(value, vars):
+    """场景变量引用展开：$name → vars[name]（${...} 动态值占位符与 $.answer 不动）"""
+    if not isinstance(value, str) or not vars:
+        return value
+    return _VAR_REF_RE.sub(lambda m: str(vars.get(m.group(1), m.group(0))), value)
+
+
+def run_db_assert(conn, compiled, scenario_vars):
+    """执行编译后的 DB 断言（conn 鸭子类型：cursor()/execute/fetchall）。
+
+    compiled 结构由 generate_playwright.py 从 db-asserts.yaml 编译产出
+    （见 lib/db_asserts.py::compile_assert）。失败抛 AssertionError 含追溯信息。
+    """
+    params = {}
+    for p in compiled.get("params", []):
+        if p["mode"] == "var":
+            if p["ref"].lstrip("$") not in scenario_vars:
+                raise AssertionError(f"场景变量未定义: {p['ref']}")
+            params[p["key"]] = scenario_vars[p["ref"].lstrip("$")]
+        else:
+            params[p["key"]] = p["value"]
+    cur = conn.cursor()
+    cur.execute(compiled["sql"], params)
+    rows = cur.fetchall()
+    expected = compiled["expect_records"]
+    if len(rows) != expected:
+        raise AssertionError(
+            f"DB 断言失败[{compiled['schema_ref']}]: {compiled['table']} "
+            f"期望 {expected} 条记录，实际 {len(rows)} 条（sql: {compiled['sql']}, params: {params}）")
+    for a in compiled.get("asserts", []):
+        want = a["value"]
+        if a["mode"] == "var":
+            if a["ref"].lstrip("$") not in scenario_vars:
+                raise AssertionError(f"场景变量未定义: {a['ref']}")
+            want = scenario_vars[a["ref"].lstrip("$")]
+        row = rows[0]
+        if isinstance(row, dict):
+            actual = row.get(a["field"])
+        else:
+            actual = row[compiled["asserts"].index(a)]
+        if str(actual) != str(want):
+            raise AssertionError(
+                f"DB 断言失败[{compiled['schema_ref']}]: 字段 {a['field']} "
+                f"期望 {want!r}，实际 {actual!r}")
