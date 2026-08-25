@@ -1,0 +1,14 @@
+# 来源: ui-requirements.md「数据变更映射」→ agent_config（schema.sql#agent_config）
+# 确认: 业务命名「智能体配置表」= 物理表 agent_config；「编码/名称」= agent_code/agent_name
+db_asserts:
+  - id: AGENT_CREATE_001
+    ui_action: 保存新增智能体表单
+    table: agent_config
+    expect_records: 1
+    where:
+      - { field: agent_code, from: var, ref: $code }
+    assert_fields:
+      - { field: agent_name, from: var, ref: $name }
+      - { field: enabled, equals: 1 }
+    sync: { api: "POST /api/agents", status: 200 }
+    schema_ref: schema.sql#agent_config

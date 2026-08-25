@@ -354,7 +354,7 @@ def _retry_count() -> int:
 
 
 def _scenario_vars(request) -> dict:
-    if request.node.stash.get("_scenario_vars") is None:
+    if request.node.stash.get("_scenario_vars", None) is None:
         request.node.stash["_scenario_vars"] = {}
     return request.node.stash["_scenario_vars"]
 
@@ -547,8 +547,8 @@ def fill_date(page, request, field, value):
     _fill_input(page, field, expand_vars(resolve_vars(value, _scenario_vars(request))))
 
 
-@given(parsers.re(r'令 \$(\w+) = "([^"]*)"'))
-@when(parsers.re(r'令 \$(\w+) = "([^"]*)"'))
+@given(parsers.re(r'令 \$(?P<var>\w+) = "(?P<value>[^"]*)"'))
+@when(parsers.re(r'令 \$(?P<var>\w+) = "(?P<value>[^"]*)"'))
 def declare_scenario_var(request, var, value):
     _scenario_vars(request)[var] = expand_vars(value)
 

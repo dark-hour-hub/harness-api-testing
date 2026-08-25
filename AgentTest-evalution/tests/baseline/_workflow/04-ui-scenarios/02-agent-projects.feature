@@ -31,8 +31,10 @@ Feature: 评测项目
     Given 打开首页
     When 点击链接 "评测项目"
     When 点击按钮 "新增智能体"
-    And 在 "智能体编码" 输入框中输入 "AGT_UI_${ts}"
-    And 在 "请输入智能体名称" 输入框中输入 "UI测试智能体_${ts}"
+    And 令 $code = "AGT_UI_${ts}"
+    And 令 $name = "UI测试智能体_${ts}"
+    And 在 "智能体编码" 输入框中输入 "$code"
+    And 在 "请输入智能体名称" 输入框中输入 "$name"
     And 在 "例如：CUSTOMER_SERVICE" 输入框中输入 "TEST"
     And 选择下拉框 "风险等级" 的选项 "较低风险等级 D（D）"
     And 在 "请输入所属部门" 输入框中输入 "测试部"
@@ -46,6 +48,7 @@ Feature: 评测项目
     And 点击按钮 "保存"
     Then 应看到提示 "智能体已新增"
     And 页面应包含 "UI测试智能体"
+    And 且数据已保存到 "AGENT_CREATE_001"
 
   Scenario: create agent missing required fields
     Given 打开首页

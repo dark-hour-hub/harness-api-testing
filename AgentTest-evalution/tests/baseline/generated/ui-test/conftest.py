@@ -41,7 +41,10 @@ def _locate_profile_dir() -> str:
 PROFILE_DIR = _locate_profile_dir()
 
 try:
-    from ui_profile import load_profile, resolve_element, expand_vars, seed_protected
+    from ui_profile import (
+        load_profile, resolve_element, expand_vars, seed_protected,
+        resolve_vars, run_db_assert,
+    )
 except Exception:
     def load_profile(*_a, **_k):
         return None
@@ -54,6 +57,12 @@ except Exception:
 
     def seed_protected(v, s):
         return False
+
+    def resolve_vars(v, s):
+        return v
+
+    def run_db_assert(*_a, **_k):
+        raise AssertionError("ui_profile.py 缺少 run_db_assert（请重新生成测试目录）")
 
 PROFILE = None
 try:
@@ -340,6 +349,35 @@ def _retry_count() -> int:
 
 
 # ═══════════════════════════════════════════════════════════════
+# 场景变量 + DB 断言（db-asserts）
+# ═══════════════════════════════════════════════════════════════
+
+
+def _scenario_vars(request) -> dict:
+    if request.node.stash.get("_scenario_vars", None) is None:
+        request.node.stash["_scenario_vars"] = {}
+    return request.node.stash["_scenario_vars"]
+
+
+def _db_conn():
+    if PROFILE is None:
+        raise AssertionError("未配置 ui-profile/business.yaml 的 db 段，无法执行 DB 断言")
+    db = PROFILE["business"].get("db") or {}
+    if not db.get("database"):
+        raise AssertionError("ui-profile/business.yaml 缺少 db.database 配置，无法执行 DB 断言")
+    import pymysql
+    return pymysql.connect(
+        host=db.get("host", "localhost"),
+        port=int(db.get("port", 3306)),
+        user=db.get("user", "root"),
+        password=db.get("password", ""),
+        database=db["database"],
+        charset=db.get("charset", "utf8mb4"),
+        cursorclass=pymysql.cursors.DictCursor,
+    )
+
+
+# ═══════════════════════════════════════════════════════════════
 # Given 步骤
 # ═══════════════════════════════════════════════════════════════
 
@@ -394,8 +432,8 @@ def click_link(page, text):
 
 @given(parsers.parse('在 "{field}" 输入框中输入 "{value}"'))
 @when(parsers.parse('在 "{field}" 输入框中输入 "{value}"'))
-def fill_field(page, field, value):
-    _fill_input(page, field, expand_vars(value))
+def fill_field(page, request, field, value):
+    _fill_input(page, field, expand_vars(resolve_vars(value, _scenario_vars(request))))
 
 
 @when(parsers.parse('等待 {seconds:d} 秒'))
@@ -505,8 +543,31 @@ def upload_file(page, field, path):
 
 
 @when(parsers.parse('在 "{field}" 选择日期 "{value}"'))
-def fill_date(page, field, value):
-    _fill_input(page, field, expand_vars(value))
+def fill_date(page, request, field, value):
+    _fill_input(page, field, expand_vars(resolve_vars(value, _scenario_vars(request))))
+
+
+@given(parsers.re(r'令 \$(?P<var>\w+) = "(?P<value>[^"]*)"'))
+@when(parsers.re(r'令 \$(?P<var>\w+) = "(?P<value>[^"]*)"'))
+def declare_scenario_var(request, var, value):
+    _scenario_vars(request)[var] = expand_vars(value)
+
+
+@then(parsers.parse('且数据已保存到 "{map_id}"'))
+def db_assert_saved(request, map_id):
+    try:
+        from db_asserts import DB_ASSERT_MAP
+    except ImportError:
+        raise AssertionError(
+            "未找到生成的 db_asserts.py（请重新运行 generate_playwright.py）") from None
+    compiled = DB_ASSERT_MAP.get(map_id)
+    if compiled is None:
+        raise AssertionError(f"db_asserts.py 中不存在映射 id: {map_id}")
+    conn = _db_conn()
+    try:
+        run_db_assert(conn, compiled, _scenario_vars(request))
+    finally:
+        conn.close()
 
 
 @when("点击新增用例并等待表单打开")
