@@ -201,6 +201,15 @@ def run_db_assert(conn, compiled, scenario_vars):
                 actual = row.get(a["field"])
             else:
                 actual = row[compiled["asserts"].index(a)]
+            if a["mode"] == "not_null":
+                ok = actual is not None
+                detail["field_checks"].append(
+                    {"field": a["field"], "expected": "非空", "actual": actual, "ok": ok})
+                if not ok:
+                    raise AssertionError(
+                        f"DB 断言失败[{compiled['schema_ref']}]: 字段 {a['field']} "
+                        f"期望非空，实际为 NULL")
+                continue
             ok = str(actual) == str(want)
             detail["field_checks"].append(
                 {"field": a["field"], "expected": want, "actual": actual, "ok": ok})

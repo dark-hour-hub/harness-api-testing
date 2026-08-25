@@ -107,12 +107,15 @@ def compile_assert(entry: dict, schema_columns: dict) -> dict:
         if field not in cols:
             raise ValueError(f"映射 {rid}: 列 {table}.{field} 不在 schema.sql 中")
         assert_cols.append(field)
-        assert_items.append({
-            "field": field,
-            "mode": "var" if a.get("from") == "var" else "literal",
-            "ref": a.get("ref"),
-            "value": a.get("equals"),
-        })
+        if a.get("not_null"):
+            assert_items.append({"field": field, "mode": "not_null", "ref": None, "value": None})
+        else:
+            assert_items.append({
+                "field": field,
+                "mode": "var" if a.get("from") == "var" else "literal",
+                "ref": a.get("ref"),
+                "value": a.get("equals"),
+            })
 
     sql = f"SELECT {', '.join(assert_cols) or '1'} FROM {table} WHERE {' AND '.join(conds)}"
     return {

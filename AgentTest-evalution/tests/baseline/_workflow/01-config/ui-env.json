@@ -23,6 +23,10 @@
     "pytest-playwright": {
       "installed": true,
       "status": "installed (0.8.0)"
+    },
+    "pymysql": {
+      "installed": true,
+      "status": "installed (1.2.0)"
     }
   },
   "browsers": {
@@ -38,6 +42,7 @@
     "message": "UI 测试环境就绪",
     "fix_hint": [
       "C:\\Users\\17201\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m pip install pytest-bdd",
+      "C:\\Users\\17201\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m pip install pymysql",
       "C:\\Users\\17201\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m playwright install chromium"
     ]
   }

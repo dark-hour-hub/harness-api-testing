@@ -77,3 +77,27 @@ elements:
   删除:
     strategies:
       - { type: role, role: button, name: "删除" }
+  用例编码:
+    strategies:
+      - { type: data-testid, value: test-case-code }
+  用例名称:
+    strategies:
+      - { type: data-testid, value: test-case-name }
+  用例类型:
+    strategies:
+      - { type: data-testid, value: test-case-type }
+  用例权重:
+    strategies:
+      - { type: data-testid, value: test-case-weight }
+  通过分数:
+    strategies:
+      - { type: data-testid, value: test-case-pass-score }
+  版本:
+    strategies:
+      - { type: data-testid, value: test-case-version }
+  判定期望:
+    strategies:
+      - { type: data-testid, value: rule-expected-0 }
+  问题内容:
+    strategies:
+      - { type: data-testid, value: test-case-question }

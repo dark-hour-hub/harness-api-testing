@@ -7,7 +7,8 @@ timeouts:
 protected_seeds: ["CHAT", "BANK_AGENT", "AGT_SEED_*"]
 api_sync_rules:
   保存:
-    path: /api/agents
+    - { path: /api/agents }
+    - { path: /api/test-cases }
   确认删除:
     method: DELETE
     path: /api/agents

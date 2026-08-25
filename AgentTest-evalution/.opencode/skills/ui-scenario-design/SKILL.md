@@ -20,7 +20,8 @@ description: 业务需求驱动的 UI 测试场景设计。把业务需求/业�
 
 | 来源 | 说明 |
 |------|------|
-| 业务需求文档 | `tests/baseline/_workflow/00-requirements/ui-requirements.md`（优先读取；不存在时使用用户直接提供的业务需求/流程文本） |
+| 业务需求文档 | `tests/baseline/_workflow/00-requirements/ui-requirements.md`（**5 节模板**，优先读取；缺失时使用用户直接提供的业务需求/流程文本） |
+| 需求分析产物 | `ui-profile/elements.yaml`（元素地图，由 `ui-requirements-analyze` 产出+人工确认）、`00-requirements/db-asserts.yaml`（DB 断言映射）——**新项目必须先后端到端跑 `ui-requirements-analyze`** |
 | 前端页面源码 | `config.yaml` 的 `source.frontend[].path` 指向的前端工程 |
 | 前端地址 | `config.yaml` 的 `environments.<env>.frontend[].url` |
 | 账号 | `config.yaml` 的 `environments.<env>.backend[].accounts`（登录角色/账号） |

@@ -1,6 +1,6 @@
-# 来源: ui-requirements.md「数据变更映射」→ agent_config（schema.sql#agent_config）
-# 确认: 业务命名「智能体配置表」= 物理表 agent_config；「编码/名称」= agent_code/agent_name
-# 删除语义: 无任务引用 → 物理删除（记录消失）；有引用 → enabled=0（disableOrDelete，AgentConfigService:92）
+# 由 ui-requirements-analyze skill 从 ui-requirements.md 第 3 节「数据变更映射」翻译
+# 来源: ui-requirements.md（2026-08-25 版）+ 后端 db/schema.sql 校验
+# 确认状态: AI 草稿，测试工程师已确认（业务命名→物理命名差异表见 skill 输出）
 db_asserts:
   - id: AGENT_CREATE_001
     ui_action: 保存新增智能体表单
@@ -26,7 +26,7 @@ db_asserts:
     schema_ref: schema.sql#agent_config
 
   - id: AGENT_DELETE_001
-    ui_action: 删除智能体确认
+    ui_action: 删除智能体确认（无任务引用 → 物理删除）
     table: agent_config
     expect_records: 0
     where:
@@ -36,7 +36,7 @@ db_asserts:
     schema_ref: schema.sql#agent_config
 
   - id: AGENT_CREATE_VALIDATION_001
-    ui_action: 保存新增智能体表单（必填校验失败）
+    ui_action: 保存新增智能体表单（必填校验失败 → 不落库）
     table: agent_config
     expect_records: 0
     where:
@@ -44,3 +44,26 @@ db_asserts:
     assert_fields: []
     sync: { api: "POST /api/agents", status: 400 }
     schema_ref: schema.sql#agent_config
+
+  - id: TEST_CASE_CREATE_001
+    ui_action: 保存新增测试用例表单
+    table: test_case
+    expect_records: 1
+    where:
+      - { field: case_code, from: var, ref: $code }
+    assert_fields:
+      - { field: case_name, from: var, ref: $name }
+      - { field: enabled, equals: 1 }
+    sync: { api: "POST /api/test-cases", status: 200 }
+    schema_ref: schema.sql#test_case
+
+  - id: TEST_CASE_DELETE_001
+    ui_action: 删除测试用例（软删除 → deleted_at 非空）
+    table: test_case
+    expect_records: 1
+    where:
+      - { field: case_code, from: var, ref: $code }
+    assert_fields:
+      - { field: deleted_at, not_null: true }
+    sync: { api: "DELETE /api/test-cases/{id}", status: 200 }
+    schema_ref: schema.sql#test_case

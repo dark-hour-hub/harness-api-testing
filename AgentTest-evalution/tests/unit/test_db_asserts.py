@@ -212,6 +212,16 @@ def test_compile_assert_literal_where(tmp_path):
     assert compiled["params"][0] == {"key": "p0", "mode": "literal", "ref": None, "value": "D"}
 
 
+def test_compile_assert_not_null_field():
+    compiled = compile_assert(
+        {"id": "TC_DEL_001", "table": "test_case", "where": [{"field": "case_code", "value": "X"}],
+         "assert_fields": [{"field": "deleted_at", "not_null": True}],
+         "expect_records": 1, "schema_ref": "schema.sql#test_case"},
+        {"test_case": {"case_code", "deleted_at"}},
+    )
+    assert compiled["asserts"][0] == {"field": "deleted_at", "mode": "not_null", "ref": None, "value": None}
+
+
 def test_build_module_source_roundtrip():
     compiled = {
         "AGENT_CREATE_001": {

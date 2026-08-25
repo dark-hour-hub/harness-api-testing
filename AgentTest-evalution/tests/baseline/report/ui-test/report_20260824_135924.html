@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UI 测试报告</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg-card: #1e293b;
+    --bg-card-hover: #273449;
+    --border: #334155;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-green: #10b981;
+    --accent-red: #ef4444;
+    --accent-yellow: #f59e0b;
+    --accent-purple: #a78bfa;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg); color: var(--text); padding: 28px 32px; line-height: 1.6;
+  }
+  .report-header { margin-bottom: 24px; }
+  .report-header h1 { font-size: 1.6rem; font-weight: 700; }
+  .report-header .sub { color: var(--text-muted); font-size: .85rem; margin-top: 4px; }
+  .summary-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 24px; }
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 14px; text-align: center; transition: transform .15s;
+  }
+  .card:hover { transform: translateY(-2px); background: var(--bg-card-hover); }
+  .card-icon { font-size: 1.3rem; }
+  .card-value { font-size: 1.8rem; font-weight: 700; margin: 4px 0; }
+  .card-label { color: var(--text-muted); font-size: .8rem; }
+  .module-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+  .module-section.section-passed { border-left: 4px solid var(--accent-green); }
+  .module-section.section-failed { border-left: 4px solid var(--accent-red); }
+  .section-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; }
+  .section-header:hover { background: var(--bg-card-hover); }
+  .section-icon { font-size: 1.1rem; }
+  .section-title { font-weight: 600; }
+  .section-badge { margin-left: auto; }
+  .section-stats { color: var(--text-muted); font-size: .8rem; }
+  .section-arrow { color: var(--text-muted); transition: transform .2s; }
+  .section-header.collapsed .section-arrow { transform: rotate(-90deg); }
+  .section-body { padding: 0; }
+  .section-body.hidden { display: none; }
+  .detail-table { width: 100%; border-collapse: collapse; }
+  .detail-table th {
+    text-align: left; padding: 10px 18px; font-size: .78rem; color: var(--text-muted);
+    border-bottom: 1px solid var(--border); background: rgba(0,0,0,.15);
+  }
+  .detail-table td { padding: 12px 18px; border-bottom: 1px solid rgba(51,65,85,.5); font-size: .88rem; }
+  .case-row { cursor: pointer; }
+  .case-row:hover { background: var(--bg-card-hover); }
+  .col-status { width: 90px; }
+  .col-action { width: 100px; color: var(--text-muted); font-size: .8rem; text-align: right; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: .76rem; font-weight: 600; }
+  .badge-passed { background: rgba(16,185,129,.15); color: var(--accent-green); }
+  .badge-failed { background: rgba(239,68,68,.15); color: var(--accent-red); }
+  .badge-error { background: rgba(245,158,11,.15); color: var(--accent-yellow); }
+  .badge-skipped { background: rgba(148,163,184,.15); color: var(--text-muted); }
+  .detail-row td { background: rgba(0,0,0,.2); padding: 16px 18px; }
+  .case-detail { display: flex; flex-direction: column; gap: 12px; }
+  .col-name { max-width: 620px; }
+  .case-title { font-weight: 600; line-height: 1.45; white-space: normal; }
+  .case-sub { font-size: .72rem; color: var(--text-muted); margin-top: 2px; font-family: "SFMono-Regular", Consolas, monospace; }
+  .d-section { border-bottom: 1px dashed rgba(51,65,85,.6); padding-bottom: 10px; }
+  .d-section:last-child { border-bottom: none; padding-bottom: 0; }
+  .d-title {
+    font-size: .76rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+    color: var(--accent-blue); margin-bottom: 8px;
+  }
+  .d-desc { color: var(--text-muted); font-size: .85rem; line-height: 1.6; }
+  .bdd-steps { display: flex; flex-direction: column; gap: 6px; }
+  .bdd-step {
+    display: flex; align-items: flex-start; gap: 10px; padding: 7px 10px;
+    background: rgba(0,0,0,.22); border: 1px solid rgba(51,65,85,.55); border-radius: 8px;
+    font-size: .85rem; line-height: 1.5;
+  }
+  .step-icon { flex-shrink: 0; font-weight: 700; font-size: .8rem; }
+  .step-icon.step-passed { color: var(--accent-green); }
+  .step-icon.step-failed { color: var(--accent-red); }
+  .step-icon.step-unknown { color: var(--text-muted); }
+  .step-kw {
+    flex-shrink: 0; font-weight: 700; font-size: .76rem; padding: 1px 8px;
+    border-radius: 5px; background: rgba(96,165,250,.15); color: var(--accent-blue);
+    min-width: 48px; text-align: center;
+  }
+  .bdd-step.step-given .step-kw { background: rgba(148,163,184,.15); color: var(--text-muted); }
+  .bdd-step.step-when .step-kw { background: rgba(96,165,250,.15); color: var(--accent-blue); }
+  .bdd-step.step-then .step-kw { background: rgba(16,185,129,.15); color: var(--accent-green); }
+  .step-text { color: var(--text); word-break: break-all; }
+  .lbl {
+    display: inline-block; min-width: 70px; color: var(--text-muted); font-size: .78rem;
+    font-weight: 600; margin-bottom: 6px;
+  }
+  .fail-reason { display: flex; align-items: flex-start; gap: 10px; }
+  .fail-reason .val {
+    color: var(--accent-red); font-size: .9rem; font-weight: 600; line-height: 1.5;
+    word-break: break-all;
+  }
+  .shot-box { display: flex; flex-direction: column; }
+  .shot-box img {
+    max-width: 100%; max-height: 420px; border: 1px solid var(--border); border-radius: 6px;
+    display: block; object-fit: contain;
+  }
+  .trace-box summary {
+    cursor: pointer; color: var(--text-muted); font-size: .78rem; user-select: none;
+    padding: 4px 0;
+  }
+  .trace-box summary:hover { color: var(--text); }
+  .trace-box pre {
+    background: rgba(0,0,0,.3); border: 1px solid var(--border); border-radius: 6px;
+    padding: 12px; font-size: .78rem; overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+    font-family: "SFMono-Regular", Consolas, "Courier New", monospace; margin-top: 8px;
+  }
+  .no-results { text-align: center; color: var(--text-muted); padding: 40px 0; }
+  @media (max-width: 900px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+</style>
+</head>
+<body>
+  <div class="report-header">
+    <h1>UI 测试报告</h1>
+    <div class="sub">生成时间: 2026-08-24 05:59:24 UTC</div>
+  </div>
+
+  
+    <div class="summary-grid">
+        <div class="card total"><div class="card-icon">&#9733;</div><div class="card-value">15</div><div class="card-label">场景总数</div></div>
+        <div class="card passed"><div class="card-icon">&#10003;</div><div class="card-value">15</div><div class="card-label">通过</div></div>
+        <div class="card failed"><div class="card-icon">&#10007;</div><div class="card-value">0</div><div class="card-label">失败</div></div>
+        <div class="card errors"><div class="card-icon">&#9888;</div><div class="card-value">0</div><div class="card-label">错误</div></div>
+        <div class="card skipped"><div class="card-icon">&#8212;</div><div class="card-value">0</div><div class="card-label">跳过</div></div>
+        <div class="card rate" style="background:#ecfdf5; border-color:#10b981;"><div class="card-value" style="color:#10b981;">100.0%</div><div class="card-label">通过率</div></div>
+        <div class="card time"><div class="card-icon">&#9202;</div><div class="card-value">68.01s</div><div class="card-label">总耗时</div></div>
+    </div>
+
+  
+        <div class="module-section section-passed" data-module="agent-projects">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-icon">&#10003;</span>
+                <span class="section-title">agent-projects</span>
+                <span class="section-badge"><span class="badge badge-passed">100.0%</span></span>
+                <span class="section-stats">5 scenarios | 24.07s
+                    
+                    
+                </span>
+                <span class="section-arrow">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <table class="detail-table">
+                    <thead><tr><th class="col-status">状态</th><th class="col-name">场景名称</th><th class="col-action">详情</th></tr></thead>
+                    <tbody>
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="list and view agent cards">
+                    <div class="case-title">list and view agent cards</div>
+                    <div class="case-sub">test_list_and_view_agent_cards[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">02-agent-projects.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;评测项目&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">等待 1 秒</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">页面应包含 &quot;评测对象&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">应看到按钮 &quot;新增智能体&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">应看到按钮 &quot;选择评测&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">应看到按钮 &quot;详情&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">应看到按钮 &quot;编辑&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">应看到按钮 &quot;删除&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_list_and_view_agent_cards_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="filter agents by code">
+                    <div class="case-title">filter agents by code</div>
+                    <div class="case-sub">test_filter_agents_by_code[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">02-agent-projects.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;评测项目&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">在 &quot;智能体编码&quot; 输入框中输入 &quot;AGT&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">点击按钮 &quot;筛选&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">应看到按钮 &quot;新增智能体&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">应看到按钮 &quot;筛选&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_filter_agents_by_code_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="create agent">
+                    <div class="case-title">create agent</div>
+                    <div class="case-sub">test_create_agent[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">02-agent-projects.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;评测项目&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击按钮 &quot;新增智能体&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">在 &quot;例如：BANK_AGENT&quot; 输入框中输入 &quot;AGT_UI_DEMO&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">在 &quot;请输入智能体名称&quot; 输入框中输入 &quot;UI测试智能体&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">在 &quot;例如：CUSTOMER_SERVICE&quot; 输入框中输入 &quot;TEST&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">选择下拉框 &quot;风险等级&quot; 的选项 &quot;较低风险等级 D（D）&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">在 &quot;请输入所属部门&quot; 输入框中输入 &quot;测试部&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">在 &quot;例如：1.0.0&quot; 输入框中输入 &quot;1.0.0&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">在 &quot;例如：CHAT&quot; 输入框中输入 &quot;CHAT&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">选择下拉框 &quot;适配器类型&quot; 的选项 &quot;通用 HTTP JSON（GENERIC_HTTP_JSON）&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">选择下拉框 &quot;HTTP 方法&quot; 的选项 &quot;POST&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">在 &quot;https://host/path&quot; 输入框中输入 &quot;http://localhost:8080/mock&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">在 &quot;100 - 120000&quot; 输入框中输入 &quot;60000&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">在 &quot;$.answer&quot; 输入框中输入 &quot;$.answer&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">点击按钮 &quot;保存&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">应看到提示 &quot;智能体已新增&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">页面应包含 &quot;AGT_UI_DEMO&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_create_agent_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="edit agent">
+                    <div class="case-title">edit agent</div>
+                    <div class="case-sub">test_edit_agent[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">02-agent-projects.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;评测项目&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">在智能体卡片 &quot;AGT_UI_DEMO&quot; 中点击 &quot;编辑&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">在 &quot;请输入智能体名称&quot; 输入框中输入 &quot;UI测试智能体-更新&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">点击按钮 &quot;保存&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">应看到提示 &quot;智能体已更新&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_edit_agent_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="delete agent">
+                    <div class="case-title">delete agent</div>
+                    <div class="case-sub">test_delete_agent[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">02-agent-projects.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;评测项目&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">在智能体卡片 &quot;AGT_UI_DEMO&quot; 中点击 &quot;删除&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">等待 1 秒</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">点击按钮 &quot;确认删除&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">应看到提示 &quot;智能体删除请求已处理&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_delete_agent_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="module-section section-passed" data-module="evaluation-execution">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-icon">&#10003;</span>
+                <span class="section-title">evaluation-execution</span>
+                <span class="section-badge"><span class="badge badge-passed">100.0%</span></span>
+                <span class="section-stats">2 scenarios | 5.83s
+                    
+                    
+                </span>
+                <span class="section-arrow">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <table class="detail-table">
+                    <thead><tr><th class="col-status">状态</th><th class="col-name">场景名称</th><th class="col-action">详情</th></tr></thead>
+                    <tbody>
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="execution empty state">
+                    <div class="case-title">execution empty state</div>
+                    <div class="case-sub">test_execution_empty_state[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">04-evaluation-execution.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;评测执行&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">页面应包含 &quot;当前未选择评测任务&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">页面应包含 &quot;任务状态记录&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">应看到按钮 &quot;请从指标配置页启动&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_execution_empty_state_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="reset shows unavailable message">
+                    <div class="case-title">reset shows unavailable message</div>
+                    <div class="case-sub">test_reset_shows_unavailable_message[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">04-evaluation-execution.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;评测执行&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击按钮 &quot;重置&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">应看到提示 &quot;当前后端暂未提供此操作&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_reset_shows_unavailable_message_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="module-section section-passed" data-module="indicator-config">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-icon">&#10003;</span>
+                <span class="section-title">indicator-config</span>
+                <span class="section-badge"><span class="badge badge-passed">100.0%</span></span>
+                <span class="section-stats">3 scenarios | 12.27s
+                    
+                    
+                </span>
+                <span class="section-arrow">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <table class="detail-table">
+                    <thead><tr><th class="col-status">状态</th><th class="col-name">场景名称</th><th class="col-action">详情</th></tr></thead>
+                    <tbody>
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="indicator page elements">
+                    <div class="case-title">indicator page elements</div>
+                    <div class="case-sub">test_indicator_page_elements[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">03-indicator-config.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;指标配置&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">等待 1 秒</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">页面应包含 &quot;指标大类&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">页面应包含 &quot;评测用例&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">应看到按钮 &quot;全选&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">应看到按钮 &quot;全不选&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">应看到按钮 &quot;保存为方案&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">应看到按钮 &quot;开始评测&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_indicator_page_elements_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="ai expand shows unavailable message">
+                    <div class="case-title">ai expand shows unavailable message</div>
+                    <div class="case-sub">test_ai_expand_shows_unavailable_message[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">03-indicator-config.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;指标配置&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击按钮 &quot;AI扩充&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">应看到提示 &quot;当前后端暂未提供AI扩充接口。&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_ai_expand_shows_unavailable_message_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="add test case opens form with preselected indicator">
+                    <div class="case-title">add test case opens form with preselected indicator</div>
+                    <div class="case-sub">test_add_test_case_opens_form_with_preselected_indicator[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;指标配置&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击新增用例并等待表单打开</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">应看到提示 &quot;新增评测用例&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_add_test_case_opens_form_with_preselected_indicator_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="module-section section-passed" data-module="overview">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-icon">&#10003;</span>
+                <span class="section-title">overview</span>
+                <span class="section-badge"><span class="badge badge-passed">100.0%</span></span>
+                <span class="section-stats">2 scenarios | 5.65s
+                    
+                    
+                </span>
+                <span class="section-arrow">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <table class="detail-table">
+                    <thead><tr><th class="col-status">状态</th><th class="col-name">场景名称</th><th class="col-action">详情</th></tr></thead>
+                    <tbody>
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="overview navigation elements">
+                    <div class="case-title">overview navigation elements</div>
+                    <div class="case-sub">test_overview_navigation_elements[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">01-overview.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">页面应包含 &quot;浙商银行智能体评测平台&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">页面应包含 &quot;总览&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">页面应包含 &quot;评测项目&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">页面应包含 &quot;指标配置&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">页面应包含 &quot;评测执行&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">页面应包含 &quot;结果看板&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">页面应包含 &quot;快捷入口&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_overview_navigation_elements_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="navigate to agent projects via quick action">
+                    <div class="case-title">navigate to agent projects via quick action</div>
+                    <div class="case-sub">test_navigate_to_agent_projects_via_quick_action[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">01-overview.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;管理智能体&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">页面应包含 &quot;评测对象&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">应看到按钮 &quot;新增智能体&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_navigate_to_agent_projects_via_quick_action_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="module-section section-passed" data-module="result-board">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span class="section-icon">&#10003;</span>
+                <span class="section-title">result-board</span>
+                <span class="section-badge"><span class="badge badge-passed">100.0%</span></span>
+                <span class="section-stats">3 scenarios | 11.62s
+                    
+                    
+                </span>
+                <span class="section-arrow">&#9660;</span>
+            </div>
+            <div class="section-body">
+                <table class="detail-table">
+                    <thead><tr><th class="col-status">状态</th><th class="col-name">场景名称</th><th class="col-action">详情</th></tr></thead>
+                    <tbody>
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="result board empty state">
+                    <div class="case-title">result board empty state</div>
+                    <div class="case-sub">test_result_board_empty_state[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">05-result-board.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;结果看板&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">页面应包含 &quot;请先选择智能体查看评测报告&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">页面应包含 &quot;结果内容只展示真实任务和后端持久化报告，不生成默认分数或模拟报告。&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_result_board_empty_state_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="result filters visible">
+                    <div class="case-title">result filters visible</div>
+                    <div class="case-sub">test_result_filters_visible[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">05-result-board.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;结果看板&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">页面应包含 &quot;请选择智能体&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">And</span><span class="step-text">页面应包含 &quot;请选择评测任务&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_result_filters_visible_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr>
+
+            <tr class="case-row status-passed" onclick="toggleDetail(this)">
+                <td class="col-status"><span class="badge badge-passed">通过</span></td>
+                <td class="col-name" title="navigate back to overview">
+                    <div class="case-title">navigate back to overview</div>
+                    <div class="case-sub">test_navigate_back_to_overview[chromium]</div>
+                </td>
+                <td class="col-action">&#9660; 详情</td>
+            </tr>
+            <tr class="detail-row" style="display:none;"><td colspan="3"><div class="case-detail"><div class="d-section"><div class="d-title">来源 Feature</div><div class="d-desc">05-result-board.feature</div></div><div class="d-section"><div class="d-title">场景步骤与预期</div><div class="bdd-steps"><div class="bdd-step step-given"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Given</span><span class="step-text">打开首页</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;结果看板&quot;</span></div><div class="bdd-step step-when"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">When</span><span class="step-text">点击链接 &quot;返回首页&quot;</span></div><div class="bdd-step step-then"><span class="step-icon step-passed">&#10003;</span><span class="step-kw">Then</span><span class="step-text">页面应包含 &quot;快捷入口&quot;</span></div></div></div><div class="shot-box"><span class="lbl">场景截图</span><img src="screenshots/test_navigate_back_to_overview_chromium_.png" onerror="this.style.display='none'" loading="lazy" /></div></div></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+<script>
+  function toggleSection(header) {
+    const body = header.nextElementSibling;
+    if (body) {
+      body.classList.toggle('hidden');
+      header.classList.toggle('collapsed');
+    }
+  }
+  function toggleDetail(row) {
+    const next = row.nextElementSibling;
+    if (next && next.classList.contains('detail-row')) {
+      next.style.display = next.style.display === 'none' ? '' : 'none';
+    }
+  }
+</script>
+</body>
+</html>

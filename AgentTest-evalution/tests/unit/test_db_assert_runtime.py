@@ -99,6 +99,17 @@ def test_run_db_assert_missing_var():
         run_db_assert(conn, COMPILED, {"name": "Y"})
 
 
+def test_run_db_assert_not_null():
+    compiled = dict(COMPILED, assert_meta=True)
+    compiled["asserts"] = [{"field": "deleted_at", "mode": "not_null", "ref": None, "value": None}]
+    compiled["sql"] = "SELECT deleted_at FROM agent_config WHERE agent_code = %(p0)s"
+    conn = FakeConn([{"deleted_at": None}])
+    with pytest.raises(AssertionError, match="字段 deleted_at"):
+        run_db_assert(conn, compiled, {"code": "X"})
+    conn2 = FakeConn([{"deleted_at": "2026-08-25 10:00:00"}])
+    run_db_assert(conn2, compiled, {"code": "X"})
+
+
 def test_run_db_assert_tuple_rows():
     conn = FakeConn([("Y", 1)])
     run_db_assert(conn, COMPILED, {"code": "X", "name": "Y"})

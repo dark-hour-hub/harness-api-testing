@@ -291,14 +291,16 @@ def _wait_busy_gone(page):
             pass
 
 
-def _api_rule(step_text):
-    """查 api_sync_rules，返回 (method, path)；method 为空 = 任意方法；无规则返回 None"""
+def _api_rules(step_text):
+    """查 api_sync_rules，返回规则列表 [(method, path), ...]；method 空 = 任意方法；无规则返回 []"""
     if PROFILE is None:
-        return None
+        return []
     rule = PROFILE["business"].get("api_sync_rules", {}).get(step_text)
     if not rule:
-        return None
-    return rule.get("method", ""), rule.get("path", "")
+        return []
+    if isinstance(rule, list):
+        return [(r.get("method", ""), r.get("path", "")) for r in rule if r.get("path")]
+    return [(rule.get("method", ""), rule.get("path", ""))]
 
 
 def _api_timeout() -> int:
@@ -325,10 +327,11 @@ def _record_api_sync(action, method, path, received, status=None):
 def _click_enabled_with_sync(page, loc, text):
     """点击第一个 enabled 候选；有 api 规则时先注册 expect_response 再点击（防漏快响应）。
 
+    规则为列表 [(method, path), ...]，任一匹配即命中（不同模块同文案按钮对应不同接口）。
     同步失败 fail-open（不重试、不抛错），避免已派发点击的重复提交；结果记入报告。
     """
-    rule = _api_rule(text)
-    if rule is None:
+    rules = _api_rules(text)
+    if not rules:
         for candidate in loc.all():
             try:
                 if candidate.is_enabled():
@@ -340,14 +343,16 @@ def _click_enabled_with_sync(page, loc, text):
         loc.first.click(timeout=_action_timeout())
         _wait_busy_gone(page)
         return
-    method, path = rule
     clicked = False
     received, status = False, None
+    matched = None
     try:
-        with page.expect_response(
-            lambda r: (not method or r.request.method == method) and path in r.url,
-            timeout=_api_timeout(),
-        ) as info:
+        def _match(r):
+            return any(
+                (not m or r.request.method == m) and p in r.url
+                for m, p in rules
+            )
+        with page.expect_response(_match, timeout=_api_timeout()) as info:
             for candidate in loc.all():
                 try:
                     if candidate.is_enabled():
@@ -361,8 +366,13 @@ def _click_enabled_with_sync(page, loc, text):
                 clicked = True
         resp = info.value
         received, status = True, resp.status
+        for m, p in rules:
+            if (not m or resp.request.method == m) and p in resp.url:
+                matched = (m, p)
+                break
     except Exception:
         pass
+    method, path = matched or (rules[0][0], rules[0][1])
     _record_api_sync(text, method, path, received, status)
     if not clicked:
         raise AssertionError(f"未找到可点击的按钮「{text}」")
