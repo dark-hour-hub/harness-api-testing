@@ -5,14 +5,14 @@
 Feature: 结果看板
   结果看板展示持久化评测结果；未选择智能体/任务时为空态提示
 
-  Scenario: result board empty state
+  Scenario: result board empty state（结果看板空态）
     Given 打开首页
     When 点击链接 "结果看板"
     And 等待 1 秒
     Then 页面应包含 "请先选择智能体查看评测报告"
     And 页面应包含 "结果内容只展示真实任务和后端持久化报告，不生成默认分数或模拟报告。"
 
-  Scenario: result filters visible
+  Scenario: result filters visible（结果筛选可见）
     Given 打开首页
     When 点击链接 "结果看板"
     And 等待 1 秒

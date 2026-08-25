@@ -6,7 +6,7 @@ Feature: 指标配置
   指标目录按维度展示并支持用例管理；未就绪功能给出后端暂未提供提示
 
   @smoke
-  Scenario: indicator page elements
+  Scenario: indicator page elements（指标页元素）
     Given 打开首页
     When 点击链接 "指标配置"
     And 等待 1 秒
@@ -17,13 +17,13 @@ Feature: 指标配置
     And 应看到按钮 "保存为方案"
     And 应看到按钮 "开始评测"
 
-  Scenario: indicator dimension default weight shown
+  Scenario: indicator dimension default weight shown（维度默认权重展示）
     Given 打开首页
     When 点击链接 "指标配置"
     And 等待 1 秒
     Then 页面应包含 "风险默认权重"
 
-  Scenario: ai expand shows unavailable message
+  Scenario: ai expand shows unavailable message（AI 展开不可用提示）
     Given 打开首页
     When 点击链接 "指标配置"
     When 点击按钮 "AI扩充"

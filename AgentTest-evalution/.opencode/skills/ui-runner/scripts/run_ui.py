@@ -146,12 +146,15 @@ def _ui_case_scenario_name(case_name: str) -> str:
 
 
 def enrich_ui_cases(cases: list, scenarios: dict) -> None:
-    """把 feature 场景名与步骤文本挂到每个 case"""
+    """把 feature 场景名与步骤文本挂到每个 case（场景名支持「英文（中文）」双语）"""
     for case in cases:
         sc_name = _ui_case_scenario_name(case["name"])
-        sc = scenarios.get(sc_name) or {}
-        case["scenario_name"] = sc_name
-        case["scenario"] = sc
+        matched = next(
+            (k for k in scenarios if k == sc_name or k.startswith(sc_name + "（")),
+            sc_name,
+        )
+        case["scenario_name"] = matched
+        case["scenario"] = scenarios.get(matched) or {}
 
 
 def _step_status_map(case: dict) -> dict:
@@ -203,6 +206,8 @@ def parse_junit_xml(xml_path: str, module_name: str = "") -> dict:
                 "trace": "",
                 "screenshot": "",
                 "element_hits": {},
+                "db_asserts": [],
+                "api_syncs": [],
             }
             # 读取 screenshot property（由 conftest 自动截图 hook 写入）
             props = tc.find("properties")
@@ -221,6 +226,16 @@ def parse_junit_xml(xml_path: str, module_name: str = "") -> dict:
                             case["element_hits"] = json.loads(prop.attrib.get("value", "{}"))
                         except Exception:
                             case["element_hits"] = {}
+                    elif prop.attrib.get("name") == "db_asserts":
+                        try:
+                            case["db_asserts"] = json.loads(prop.attrib.get("value", "[]"))
+                        except Exception:
+                            case["db_asserts"] = []
+                    elif prop.attrib.get("name") == "api_syncs":
+                        try:
+                            case["api_syncs"] = json.loads(prop.attrib.get("value", "[]"))
+                        except Exception:
+                            case["api_syncs"] = []
             failure = tc.find("failure")
             error = tc.find("error")
             skipped = tc.find("skipped")
@@ -359,6 +374,63 @@ def _build_steps_panel(case: dict) -> str:
            f'<div class="bdd-steps">{"".join(parts)}</div></div>'
 
 
+def _build_db_assert_panel(case: dict) -> str:
+    """DB 落库断言详情：SQL/参数/记录数/字段校验结果"""
+    asserts = case.get("db_asserts") or []
+    if not asserts:
+        return ""
+    parts = []
+    for rec in asserts:
+        rec_ok = rec.get("actual_records") == rec.get("expect_records")
+        mark = "&#10003;" if rec_ok else "&#10007;"
+        color = "#10b981" if rec_ok else "#ef4444"
+        rows = []
+        for fc in rec.get("field_checks") or []:
+            f_ok = fc.get("ok")
+            f_mark = "&#10003;" if f_ok else "&#10007;"
+            f_color = "#10b981" if f_ok else "#ef4444"
+            rows.append(
+                f"<tr><td>{html_escape(str(fc['field']))}</td>"
+                f"<td>{html_escape(str(fc['expected']))}</td>"
+                f"<td>{html_escape(str(fc['actual']))}</td>"
+                f"<td style='color:{f_color}'>{f_mark}</td></tr>")
+        params_txt = ", ".join(f"{k}={v}" for k, v in (rec.get("params") or {}).items())
+        parts.append(
+            f'<div class="db-assert">'
+            f'<div class="db-title">映射 {html_escape(str(rec.get("map_id")))} '
+            f'<span style="color:{color}">{mark}</span>'
+            f'<span class="db-meta">表 {html_escape(str(rec.get("table")))} | '
+            f'期望 {rec.get("expect_records")} 条 / 实际 {rec.get("actual_records")} 条 | '
+            f'参数 {html_escape(params_txt)}</span></div>'
+            f'<div class="db-sql">SQL: {html_escape(str(rec.get("sql")))}</div>'
+            f'{"<table class=\"detail-table\"><thead><tr><th>字段</th><th>期望值</th><th>实际值</th><th>结果</th></tr></thead><tbody>" + "".join(rows) + "</tbody></table>" if rows else ""}'
+            f'</div>')
+    return (f'<div class="d-section"><div class="d-title">DB 落库断言详情</div>'
+            f'{"".join(parts)}</div>')
+
+
+def _build_api_sync_panel(case: dict) -> str:
+    """API 返回校验详情：操作 → 方法/路径/是否收到/状态码"""
+    syncs = case.get("api_syncs") or []
+    if not syncs:
+        return ""
+    rows = []
+    for s in syncs:
+        ok = s.get("received")
+        mark = "&#10003;" if ok else "&#10007;"
+        color = "#10b981" if ok else "#ef4444"
+        status_txt = str(s.get("status")) if s.get("received") else "未收到响应"
+        rows.append(
+            f"<tr><td>{html_escape(str(s.get('action')))}</td>"
+            f"<td>{html_escape(str(s.get('method')))}</td>"
+            f"<td>{html_escape(str(s.get('path')))}</td>"
+            f"<td>{html_escape(status_txt)}</td>"
+            f"<td style='color:{color}'>{mark}</td></tr>")
+    return (f'<div class="d-section"><div class="d-title">API 返回校验（api_sync_rules 同步结果）</div>'
+            f'<table class="detail-table"><thead><tr><th>操作</th><th>方法</th><th>路径</th>'
+            f'<th>状态</th><th>结果</th></tr></thead><tbody>{"".join(rows)}</tbody></table></div>')
+
+
 def build_case_rows(cases: list) -> str:
     status_cn = {"passed": "通过", "failed": "失败", "error": "错误", "skipped": "跳过"}
     rows = []
@@ -379,6 +451,12 @@ def build_case_rows(cases: list) -> str:
                          f'<div class="d-desc">{html_escape(sc["feature"])}</div></div>')
         if steps_panel:
             parts.append(steps_panel)
+        db_panel = _build_db_assert_panel(case)
+        if db_panel:
+            parts.append(db_panel)
+        api_panel = _build_api_sync_panel(case)
+        if api_panel:
+            parts.append(api_panel)
         if reason:
             parts.append(
                 f'<div class="fail-reason"><span class="lbl">失败原因</span>'

@@ -176,22 +176,36 @@ def run_db_assert(conn, compiled, scenario_vars):
     cur.execute(compiled["sql"], params)
     rows = cur.fetchall()
     expected = compiled["expect_records"]
+    detail = {
+        "map_id": compiled["id"],
+        "table": compiled["table"],
+        "sql": compiled["sql"],
+        "params": params,
+        "expect_records": expected,
+        "actual_records": len(rows),
+        "field_checks": [],
+    }
     if len(rows) != expected:
         raise AssertionError(
             f"DB 断言失败[{compiled['schema_ref']}]: {compiled['table']} "
             f"期望 {expected} 条记录，实际 {len(rows)} 条（sql: {compiled['sql']}, params: {params}）")
-    for a in compiled.get("asserts", []):
-        want = a["value"]
-        if a["mode"] == "var":
-            if a["ref"].lstrip("$") not in scenario_vars:
-                raise AssertionError(f"场景变量未定义: {a['ref']}")
-            want = scenario_vars[a["ref"].lstrip("$")]
-        row = rows[0]
-        if isinstance(row, dict):
-            actual = row.get(a["field"])
-        else:
-            actual = row[compiled["asserts"].index(a)]
-        if str(actual) != str(want):
-            raise AssertionError(
-                f"DB 断言失败[{compiled['schema_ref']}]: 字段 {a['field']} "
-                f"期望 {want!r}，实际 {actual!r}")
+    if rows:
+        for a in compiled.get("asserts", []):
+            want = a["value"]
+            if a["mode"] == "var":
+                if a["ref"].lstrip("$") not in scenario_vars:
+                    raise AssertionError(f"场景变量未定义: {a['ref']}")
+                want = scenario_vars[a["ref"].lstrip("$")]
+            row = rows[0]
+            if isinstance(row, dict):
+                actual = row.get(a["field"])
+            else:
+                actual = row[compiled["asserts"].index(a)]
+            ok = str(actual) == str(want)
+            detail["field_checks"].append(
+                {"field": a["field"], "expected": want, "actual": actual, "ok": ok})
+            if not ok:
+                raise AssertionError(
+                    f"DB 断言失败[{compiled['schema_ref']}]: 字段 {a['field']} "
+                    f"期望 {want!r}，实际 {actual!r}")
+    return detail

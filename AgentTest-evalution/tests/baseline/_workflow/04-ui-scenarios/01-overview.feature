@@ -5,7 +5,7 @@
 Feature: 总览
   总览页展示平台导航、统计卡与快捷入口，支持一键跳转各业务页面
 
-  Scenario: overview navigation elements
+  Scenario: overview navigation elements（总览导航元素）
     Given 打开首页
     Then 页面应包含 "浙商银行智能体评测平台"
     And 页面应包含 "总览"
@@ -16,7 +16,7 @@ Feature: 总览
     And 页面应包含 "快捷入口"
     And 页面应包含 "已配置智能体"
 
-  Scenario: navigate to agent projects via quick action
+  Scenario: navigate to agent projects via quick action（快捷入口进入评测项目）
     Given 打开首页
     When 点击链接 "管理智能体"
     Then 页面应包含 "评测对象"

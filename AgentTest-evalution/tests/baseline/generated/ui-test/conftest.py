@@ -165,6 +165,7 @@ def _record_bdd_step(request, step, status):
 @pytest.hookimpl(tryfirst=True)
 def pytest_bdd_before_scenario(request, feature, scenario):
     _HIT_LOG.clear()
+    _record_api_sync.node = request.node
 
 
 @pytest.hookimpl(tryfirst=True)
@@ -207,6 +208,14 @@ def pytest_runtest_makereport(item, call):
         if _HIT_LOG:
             item.user_properties.append(
                 ("element_hits", json.dumps(_HIT_LOG, ensure_ascii=False)))
+        db_asserts = item.stash.get("_db_asserts", None)
+        if db_asserts:
+            item.user_properties.append(
+                ("db_asserts", json.dumps(db_asserts, ensure_ascii=False)))
+        api_syncs = item.stash.get("_api_syncs", None)
+        if api_syncs:
+            item.user_properties.append(
+                ("api_syncs", json.dumps(api_syncs, ensure_ascii=False)))
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -283,13 +292,13 @@ def _wait_busy_gone(page):
 
 
 def _api_rule(step_text):
-    """查 api_sync_rules，返回 (method, path)；无规则返回 None"""
+    """查 api_sync_rules，返回 (method, path)；method 为空 = 任意方法；无规则返回 None"""
     if PROFILE is None:
         return None
     rule = PROFILE["business"].get("api_sync_rules", {}).get(step_text)
     if not rule:
         return None
-    return rule.get("method", "GET"), rule.get("path", "")
+    return rule.get("method", ""), rule.get("path", "")
 
 
 def _api_timeout() -> int:
@@ -298,10 +307,25 @@ def _api_timeout() -> int:
     return int(PROFILE["business"].get("timeouts", {}).get("api_sync", 15000))
 
 
+def _record_api_sync(action, method, path, received, status=None):
+    """记录 API 同步结果到当前测试节点（供报告展示 API 返回校验）"""
+    node = getattr(_record_api_sync, "node", None)
+    if node is None:
+        return
+    recs = node.stash.get("_api_syncs", None)
+    if recs is None:
+        recs = []
+        node.stash["_api_syncs"] = recs
+    recs.append({
+        "action": action, "method": method or "ANY", "path": path,
+        "received": bool(received), "status": status,
+    })
+
+
 def _click_enabled_with_sync(page, loc, text):
     """点击第一个 enabled 候选；有 api 规则时先注册 expect_response 再点击（防漏快响应）。
 
-    同步失败 fail-open（不重试、不抛错），避免已派发点击的重复提交。
+    同步失败 fail-open（不重试、不抛错），避免已派发点击的重复提交；结果记入报告。
     """
     rule = _api_rule(text)
     if rule is None:
@@ -318,9 +342,10 @@ def _click_enabled_with_sync(page, loc, text):
         return
     method, path = rule
     clicked = False
+    received, status = False, None
     try:
         with page.expect_response(
-            lambda r: r.request.method == method and path in r.url,
+            lambda r: (not method or r.request.method == method) and path in r.url,
             timeout=_api_timeout(),
         ) as info:
             for candidate in loc.all():
@@ -334,9 +359,11 @@ def _click_enabled_with_sync(page, loc, text):
             if not clicked:
                 loc.first.click(timeout=_action_timeout())
                 clicked = True
-        info.value
+        resp = info.value
+        received, status = True, resp.status
     except Exception:
         pass
+    _record_api_sync(text, method, path, received, status)
     if not clicked:
         raise AssertionError(f"未找到可点击的按钮「{text}」")
     _wait_busy_gone(page)
@@ -504,7 +531,8 @@ def select_dropdown_option(page, name, option):
 
 
 @when(parsers.parse('在智能体卡片 "{code}" 中点击 "{btn}"'))
-def click_in_agent_card(page, code, btn):
+def click_in_agent_card(page, request, code, btn):
+    code = expand_vars(resolve_vars(code, _scenario_vars(request)))
     _assert_not_seed(code)
     card = page.locator(".agent-card", has_text=code).first
     card.get_by_role("button", name=btn).click(timeout=5000)
@@ -512,7 +540,8 @@ def click_in_agent_card(page, code, btn):
 
 
 @when(parsers.parse('在表格行包含 "{row_text}" 中点击 "{btn}"'))
-def click_in_row(page, row_text, btn):
+def click_in_row(page, request, row_text, btn):
+    row_text = expand_vars(resolve_vars(row_text, _scenario_vars(request)))
     _assert_not_seed(row_text)
     row = page.get_by_role("row", name=re.compile(re.escape(row_text))).first
     row.get_by_role("button", name=btn).first.click(timeout=5000)
@@ -565,9 +594,14 @@ def db_assert_saved(request, map_id):
         raise AssertionError(f"db_asserts.py 中不存在映射 id: {map_id}")
     conn = _db_conn()
     try:
-        run_db_assert(conn, compiled, _scenario_vars(request))
+        detail = run_db_assert(conn, compiled, _scenario_vars(request))
     finally:
         conn.close()
+    recs = request.node.stash.get("_db_asserts", None)
+    if recs is None:
+        recs = []
+        request.node.stash["_db_asserts"] = recs
+    recs.append(detail)
 
 
 @when("点击新增用例并等待表单打开")

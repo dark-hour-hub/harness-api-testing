@@ -1,5 +1,6 @@
 # 来源: ui-requirements.md「数据变更映射」→ agent_config（schema.sql#agent_config）
 # 确认: 业务命名「智能体配置表」= 物理表 agent_config；「编码/名称」= agent_code/agent_name
+# 删除语义: 无任务引用 → 物理删除（记录消失）；有引用 → enabled=0（disableOrDelete，AgentConfigService:92）
 db_asserts:
   - id: AGENT_CREATE_001
     ui_action: 保存新增智能体表单
@@ -11,4 +12,35 @@ db_asserts:
       - { field: agent_name, from: var, ref: $name }
       - { field: enabled, equals: 1 }
     sync: { api: "POST /api/agents", status: 200 }
+    schema_ref: schema.sql#agent_config
+
+  - id: AGENT_EDIT_001
+    ui_action: 保存编辑智能体表单
+    table: agent_config
+    expect_records: 1
+    where:
+      - { field: agent_code, from: var, ref: $code }
+    assert_fields:
+      - { field: agent_name, from: var, ref: $name2 }
+    sync: { api: "PUT /api/agents/{id}", status: 200 }
+    schema_ref: schema.sql#agent_config
+
+  - id: AGENT_DELETE_001
+    ui_action: 删除智能体确认
+    table: agent_config
+    expect_records: 0
+    where:
+      - { field: agent_code, from: var, ref: $code }
+    assert_fields: []
+    sync: { api: "DELETE /api/agents/{id}", status: 200 }
+    schema_ref: schema.sql#agent_config
+
+  - id: AGENT_CREATE_VALIDATION_001
+    ui_action: 保存新增智能体表单（必填校验失败）
+    table: agent_config
+    expect_records: 0
+    where:
+      - { field: agent_code, from: var, ref: $code }
+    assert_fields: []
+    sync: { api: "POST /api/agents", status: 400 }
     schema_ref: schema.sql#agent_config

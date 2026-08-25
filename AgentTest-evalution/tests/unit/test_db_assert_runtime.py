@@ -64,9 +64,21 @@ def test_resolve_vars_non_string():
 
 def test_run_db_assert_pass():
     conn = FakeConn([{"agent_name": "UI测试智能体_1", "enabled": 1}])
-    run_db_assert(conn, COMPILED, {"code": "AGT_UI_1", "name": "UI测试智能体_1"})
+    detail = run_db_assert(conn, COMPILED, {"code": "AGT_UI_1", "name": "UI测试智能体_1"})
     assert conn.executed[0] == COMPILED["sql"]
     assert conn.executed[1] == {"p0": "AGT_UI_1"}
+    assert detail["expect_records"] == 1 and detail["actual_records"] == 1
+    assert detail["field_checks"] == [
+        {"field": "agent_name", "expected": "UI测试智能体_1", "actual": "UI测试智能体_1", "ok": True},
+        {"field": "enabled", "expected": 1, "actual": 1, "ok": True},
+    ]
+
+
+def test_run_db_assert_zero_records_pass():
+    conn = FakeConn([])
+    compiled = dict(COMPILED, expect_records=0)
+    detail = run_db_assert(conn, compiled, {"code": "AGT_UI_1", "name": "UI测试智能体_1"})
+    assert detail["actual_records"] == 0 and detail["field_checks"] == []
 
 
 def test_run_db_assert_record_count_mismatch():
